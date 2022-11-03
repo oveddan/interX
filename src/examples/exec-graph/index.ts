@@ -17,6 +17,8 @@ import { registerSceneProfile } from '../../lib/Profiles/Scene/registerSceneProf
 import { Registry } from '../../lib/Registry.js';
 import { validateRegistry } from '../../lib/validateRegistry.js';
 import { DummyScene } from './DummyScene.js';
+import { DefaultAbstractionImplementationMap } from '../../lib/Abstractions/AbstractionImplementationMap.js';
+import { AbstractionsRegistry } from '../../lib/index.js';
 
 async function main() {
   //Logger.onVerbose.clear();
@@ -36,7 +38,7 @@ async function main() {
   program.parse(process.argv);
   const programOptions = program.opts();
 
-  const registry = new Registry();
+  const registry = new Registry<DefaultAbstractionImplementationMap>(new AbstractionsRegistry<DefaultAbstractionImplementationMap>({}));
   registerCoreProfile(registry);
   registerSceneProfile(registry);
 
@@ -81,7 +83,7 @@ async function main() {
       }
 
       Logger.verbose('creating behavior graph');
-      const graphEvaluator = new GraphEvaluator(graph);
+      const graphEvaluator = new GraphEvaluator(graph, registry);
 
       if (programOptions.trace) {
         graphEvaluator.onNodeEvaluation.addListener(traceToLogger);

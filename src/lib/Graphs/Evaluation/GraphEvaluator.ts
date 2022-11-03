@@ -1,5 +1,6 @@
 /* eslint-disable space-in-parens */
 
+import { DefaultAbstractionImplementationMap } from '../../Abstractions/AbstractionImplementationMap.js';
 import { AbstractionsRegistry } from '../../Abstractions/AbstractionsRegistry.js';
 import { EventEmitter } from '../../Events/EventEmitter.js';
 import { Link } from '../../Nodes/Link.js';
@@ -10,7 +11,7 @@ import {  Graph, Nodes } from '../Graph.js';
 import { NodeEvaluationEvent } from './NodeEvaluationEvent.js';
 import { SyncExecutionBlock } from './SyncExecutionBlock.js';
 
-export class GraphEvaluator<TAbstractions extends TAbstractionsConstraint> {
+export class GraphEvaluator<TAbstractions extends TAbstractionsConstraint = DefaultAbstractionImplementationMap> {
   // tracking the next node+input socket to execute.
   private readonly executionBlockQueue: SyncExecutionBlock<TAbstractions>[] = [];
   public readonly asyncNodes: Node<TAbstractions>[] = [];

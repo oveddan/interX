@@ -7,3 +7,6 @@ export interface DefaultAbstractionImplementationMap {
   'IScene'?: IScene,
   'ILifecycleEventEmitter'?: ILifecycleEventEmitter
 }
+
+
+export type HasILogger = Pick<DefaultAbstractionImplementationMap, "ILogger">;
