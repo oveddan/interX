@@ -1,3 +1,4 @@
+import { AbstractionsRegistry } from '../Abstractions/AbstractionsRegistry.js';
 import { CustomEvent } from '../Events/CustomEvent.js';
 import { generateUuid } from '../generateUuid.js';
 import { Metadata } from '../Metadata.js';
@@ -12,10 +13,10 @@ import { Variable } from '../Variables/Variable.js';
 // Purpose:
 //  - stores the node graph
 
-export class Graph {
+export class Graph<TAbstractionRegistry> {
   public name = '';
   // TODO: think about whether I can replace this with an immutable strategy?  Rather than having this mutable?
-  public readonly nodes: { [id: string]: Node } = {};
+  public readonly nodes: { [id: string]: Node<TAbstractionRegistry> } = {};
   // TODO: think about whether I can replace this with an immutable strategy?  Rather than having this mutable?
   public readonly variables: { [id: string]: Variable } = {};
   // TODO: think about whether I can replace this with an immutable strategy?  Rather than having this mutable?
@@ -24,7 +25,7 @@ export class Graph {
   public readonly dynamicNodeRegistry = new NodeTypeRegistry();
   public version = 0;
 
-  constructor(public readonly registry: Registry) {}
+  constructor(public readonly registry: Registry, public readonly abstractions: AbstractionsRegistry<TAbstractionRegistry>) {}
 
   updateDynamicNodeDescriptions() {
     // delete existing nodes

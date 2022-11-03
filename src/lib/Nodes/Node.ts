@@ -8,7 +8,7 @@ function findSocketByName(sockets: Socket[], name: string): Socket | undefined {
   return sockets.find((socket) => socket.name === name);
 }
 
-export class Node {
+export class Node<TAbstractionRegistry> {
   public id = '';
   public label = '';
   public metadata: Metadata = {};
@@ -19,7 +19,7 @@ export class Node {
 
   constructor(
     public readonly description: NodeDescription,
-    public readonly graph: Graph,
+    public readonly graph: Graph<TAbstractionRegistry>,
     public readonly inputSockets: Socket[],
     public readonly outputSockets: Socket[],
     public readonly evalFunc: (context: NodeEvalContext) => void

@@ -13,8 +13,8 @@ import { Node } from './Node.js';
 //  - Avoid nodes having to access globals to reference the scene or trigger loaders.
 //  - Everything should be accessible via this context.
 // Q: Should I store the promises in this structure?  Probably.
-export class NodeEvalContext {
-  public readonly graph: Graph;
+export class NodeEvalContext<TAbstractionRegistry> {
+  public readonly abstractionRegistry: TAbstractionRegistry;
   public readonly graphEvaluator: GraphEvaluator;
   public readonly onAsyncCancelled = new EventEmitter<void>();
   private readonly cachedInputValues: { [name: string]: any } = {}; // TODO: figure out if this is really needed
@@ -24,10 +24,10 @@ export class NodeEvalContext {
 
   constructor(
     public readonly syncExecutionBlock: SyncExecutionBlock,
-    public readonly node: Node
+    public readonly node: Node<TAbstractionRegistry>
   ) {
     this.graphEvaluator = syncExecutionBlock.graphEvaluator;
-    this.graph = this.graphEvaluator.graph;
+    this.abstractionRegistry = this.graphEvaluator.graph;
   }
 
   private begin() {
