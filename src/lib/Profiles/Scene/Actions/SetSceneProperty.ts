@@ -4,9 +4,10 @@ import { Node } from '../../../Nodes/Node.js';
 import { NodeDescription } from '../../../Nodes/NodeDescription.js';
 import { Socket } from '../../../Sockets/Socket.js';
 import { toCamelCase } from '../../../toCamelCase.js';
+import { IScene } from '../Abstractions/IScene.js';
 
 export class SetSceneProperty<T extends HasIScene> extends Node<T> {
-  public static GetDescriptions<T extends HasIScene>(...valueTypeNames: string[]) {
+  public static GetDescriptions<T extends HasIScene>(scene: IScene, ...valueTypeNames: string[]) {
     return valueTypeNames.map(
       (valueTypeName) =>
         new NodeDescription<T>(
@@ -14,7 +15,7 @@ export class SetSceneProperty<T extends HasIScene> extends Node<T> {
           'Action',
           `Set Scene ${toCamelCase(valueTypeName)}`,
           (description, graph) =>
-            new SetSceneProperty<T>(description, graph, valueTypeName)
+            new SetSceneProperty<T>(description, graph, valueTypeName, scene)
         )
     );
   }
@@ -22,7 +23,8 @@ export class SetSceneProperty<T extends HasIScene> extends Node<T> {
   constructor(
     description: NodeDescription<T>,
     graph: Graph<T>,
-    valueTypeName: string
+    valueTypeName: string,
+    private readonly scene: IScene
   ) {
     super(
       description,
@@ -34,7 +36,7 @@ export class SetSceneProperty<T extends HasIScene> extends Node<T> {
       ],
       [new Socket('flow', 'flow')],
       (context) => {
-        const scene = context.abstractions.get('IScene');
+        const scene = this.scene;
         const value = context.readInput('value');
         scene.setProperty(context.readInput('jsonPath'), valueTypeName, value);
       }
