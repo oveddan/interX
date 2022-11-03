@@ -5,23 +5,23 @@ import { NodeDescription } from '../../../Nodes/NodeDescription.js';
 import { Socket } from '../../../Sockets/Socket.js';
 import { toCamelCase } from '../../../toCamelCase.js';
 
-export class SetSceneProperty extends Node<HasIScene> {
-  public static GetDescriptions(...valueTypeNames: string[]) {
+export class SetSceneProperty<T extends HasIScene> extends Node<T> {
+  public static GetDescriptions<T extends HasIScene>(...valueTypeNames: string[]) {
     return valueTypeNames.map(
       (valueTypeName) =>
-        new NodeDescription(
+        new NodeDescription<T>(
           `scene/set/${valueTypeName}`,
           'Action',
           `Set Scene ${toCamelCase(valueTypeName)}`,
           (description, graph) =>
-            new SetSceneProperty(description, graph, valueTypeName)
+            new SetSceneProperty<T>(description, graph, valueTypeName)
         )
     );
   }
 
   constructor(
-    description: NodeDescription,
-    graph: Graph,
+    description: NodeDescription<T>,
+    graph: Graph<T>,
     valueTypeName: string
   ) {
     super(

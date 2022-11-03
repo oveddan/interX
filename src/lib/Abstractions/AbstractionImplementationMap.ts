@@ -10,3 +10,4 @@ export interface DefaultAbstractionImplementationMap {
 
 
 export type HasILogger = Pick<DefaultAbstractionImplementationMap, "ILogger">;
+export type HasIScene = Pick<DefaultAbstractionImplementationMap, "IScene">;

@@ -1,3 +1,4 @@
+import { HasIScene } from '../../../Abstractions/AbstractionImplementationMap.js';
 import { Graph } from '../../../Graphs/Graph.js';
 import { Node } from '../../../Nodes/Node.js';
 import { NodeDescription } from '../../../Nodes/NodeDescription.js';
@@ -5,11 +6,11 @@ import { Socket } from '../../../Sockets/Socket.js';
 import { toCamelCase } from '../../../toCamelCase.js';
 import { IScene } from '../Abstractions/IScene.js';
 
-export class GetSceneProperty extends Node {
-  public static GetDescriptions(...valueTypeNames: string[]) {
+export class GetSceneProperty<T extends HasIScene> extends Node<T> {
+  public static GetDescriptions<T extends HasIScene>(...valueTypeNames: string[]) {
     return valueTypeNames.map(
       (valueTypeName) =>
-        new NodeDescription(
+        new NodeDescription<T>(
           `scene/get/${valueTypeName}`,
           'Query',
           `Get Scene ${toCamelCase(valueTypeName)}`,
@@ -20,8 +21,8 @@ export class GetSceneProperty extends Node {
   }
 
   constructor(
-    description: NodeDescription,
-    graph: Graph,
+    description: NodeDescription<T>,
+    graph: Graph<T>,
     valueTypeName: string
   ) {
     super(
@@ -31,7 +32,7 @@ export class GetSceneProperty extends Node {
       [new Socket('flow', 'flow'), new Socket(valueTypeName, 'value')],
       (context) => {
         const sceneGraph =
-          context.graph.registry.abstractions.get('IScene');
+          context.abstractions.get('IScene');
         context.writeOutput(
           'value',
           sceneGraph.getProperty(context.readInput('jsonPath'), valueTypeName)

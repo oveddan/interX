@@ -1,3 +1,5 @@
+import { DefaultAbstractionImplementationMap } from '../../Abstractions/AbstractionImplementationMap.js';
+import { AbstractionsRegistry } from '../../Abstractions/AbstractionsRegistry.js';
 import { validateNodeRegistry } from '../../Nodes/Validation/validateNodeRegistry.js';
 import { Registry } from '../../Registry.js';
 import { validateValueRegistry } from '../../Values/Validation/validateValueRegistry.js';
@@ -5,7 +7,7 @@ import { registerCoreProfile } from '../Core/registerCoreProfile.js';
 import { registerSceneProfile } from './registerSceneProfile.js';
 
 describe('scene profile', () => {
-  const registry = new Registry();
+  const registry = new Registry(new AbstractionsRegistry<DefaultAbstractionImplementationMap>({}));
   registerCoreProfile(registry);
   registerSceneProfile(registry);
 

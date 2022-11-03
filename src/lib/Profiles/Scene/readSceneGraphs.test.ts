@@ -7,6 +7,8 @@ import * as quaternionJson from '../../../graphs/scene/logic/Quaternion.json';
 import * as vector2Json from '../../../graphs/scene/logic/Vector2.json';
 import * as vector3Json from '../../../graphs/scene/logic/Vector3.json';
 import * as vector4Json from '../../../graphs/scene/logic/Vector4.json';
+import { DefaultAbstractionImplementationMap } from '../../Abstractions/AbstractionImplementationMap';
+import { AbstractionsRegistry } from '../../Abstractions/AbstractionsRegistry';
 import { Logger } from '../../Diagnostics/Logger.js';
 import { Graph } from '../../Graphs/Graph.js';
 import { GraphJSON } from '../../Graphs/IO/GraphJSON.js';
@@ -17,7 +19,7 @@ import { Registry } from '../../Registry.js';
 import { registerCoreProfile } from '../Core/registerCoreProfile.js';
 import { registerSceneProfile } from './registerSceneProfile.js';
 
-const registry = new Registry();
+const registry = new Registry(new AbstractionsRegistry<DefaultAbstractionImplementationMap>({}));
 registerCoreProfile(registry);
 registerSceneProfile(registry);
 

@@ -31,7 +31,7 @@ export function readGraphFromJSON<TAbstractions extends TAbstractionsConstraint>
     customEvents = readCustomEventsJSON(graphJson.customEvents ?? [], registry.values);
   }
 
-  const graph = new Graph<TAbstractions>(variables, customEvents);
+  const graph = new Graph<TAbstractions>(variables, customEvents, registry.nodes);
 
   graph.name = graphJson?.name ?? graph.name;
   graph.metadata = graphJson?.metadata ?? graph.metadata;

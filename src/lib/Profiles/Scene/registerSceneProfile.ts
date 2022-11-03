@@ -1,6 +1,8 @@
 /* eslint-disable max-len */
+import { HasIScene } from '../../Abstractions/AbstractionImplementationMap.js';
 import { getNodeDescriptions } from '../../Nodes/getNodeDescriptions.js';
-import { Registry } from '../../Registry.js';
+import { NodeDescription } from '../../Nodes/NodeDescription.js';
+import { Registry, TAbstractionsConstraint } from '../../Registry.js';
 import { registerSerializersForValueType } from '../Core/registerSerializersForValueType.js';
 import { SetSceneProperty } from './Actions/SetSceneProperty.js';
 import { OnSceneNodeClick } from './Events/OnSceneNodeClick.js';
@@ -18,7 +20,7 @@ import { Vec3Value } from './Values/Vec3Value.js';
 import * as Vec4Nodes from './Values/Vec4Nodes.js';
 import { Vec4Value } from './Values/Vec4Value.js';
 
-export function registerSceneProfile(registry: Registry) {
+export function registerSceneProfile<T extends HasIScene>(registry: Registry<T>) {
   const { values, nodes } = registry;
 
   // pull in value type nodes
@@ -30,21 +32,22 @@ export function registerSceneProfile(registry: Registry) {
   values.register(QuatValue);
 
   // pull in value type nodes
-  nodes.register(...getNodeDescriptions(Vec2Nodes));
-  nodes.register(...getNodeDescriptions(Vec3Nodes));
-  nodes.register(...getNodeDescriptions(Vec4Nodes));
-  nodes.register(...getNodeDescriptions(ColorNodes));
-  nodes.register(...getNodeDescriptions(EulerNodes));
-  nodes.register(...getNodeDescriptions(QuatNodes));
+  nodes.register(...getNodeDescriptions<T>(Vec2Nodes));
+  nodes.register(...getNodeDescriptions<T>(Vec3Nodes));
+  nodes.register(...getNodeDescriptions<T>(Vec4Nodes));
+  nodes.register(...getNodeDescriptions<T>(ColorNodes));
+  nodes.register(...getNodeDescriptions<T>(EulerNodes));
+  nodes.register(...getNodeDescriptions<T>(QuatNodes));
 
   // events
 
-  nodes.register(OnSceneNodeClick.Description);
+  const onSceneNodeClickDescription = OnSceneNodeClick.Description<T>();
+  nodes.register(...[onSceneNodeClickDescription]);
 
   // actions
   const allValueTypeNames = values.getAllNames();
-  nodes.register(...SetSceneProperty.GetDescriptions(...allValueTypeNames));
-  nodes.register(...GetSceneProperty.GetDescriptions(...allValueTypeNames));
+  nodes.register(...SetSceneProperty.GetDescriptions<T>(...allValueTypeNames));
+  nodes.register(...GetSceneProperty.GetDescriptions<T>(...allValueTypeNames));
 
   const newValueTypeNames = ['vec2', 'vec3', 'vec4', 'quat', 'euler', 'color'];
 

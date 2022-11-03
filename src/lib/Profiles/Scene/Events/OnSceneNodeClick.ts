@@ -6,23 +6,27 @@ import { NodeEvalContext } from '../../../Nodes/NodeEvalContext.js';
 import { Socket } from '../../../Sockets/Socket.js';
 
 // very 3D specific.
-export class OnSceneNodeClick extends Node<HasIScene> {
-  public static Description = new NodeDescription<HasIScene>(
+export class OnSceneNodeClick<T extends HasIScene> extends Node<T> {
+  public static Description = <T extends HasIScene>() => new NodeDescription<T>(
     'scene/nodeClick',
     'Event',
     'On Node Click',
-    (description, graph) => new OnSceneNodeClick(description, graph)
+    (description, graph) => new OnSceneNodeClick<T>(description, graph)
   );
 
-  constructor(description: NodeDescription, graph: Graph) {
+  constructor(description: NodeDescription<T>, graph: Graph<T>) {
     super(
       description,
       graph,
       [],
       [new Socket('flow', 'flow'), new Socket('float', 'nodeIndex')],
-      (context: NodeEvalContext) => {
+      (context: NodeEvalContext<T>) => {
         context.writeOutput('nodeIndex', -1); // TODO: Replace with real value.
       }
     );
   }
+}
+
+export function getOnSceneNodeClickDescription<T extends HasIScene>() {
+  return 
 }
