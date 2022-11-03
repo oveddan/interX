@@ -3,22 +3,15 @@ import { Graph } from '../../../Graphs/Graph.js';
 import { Node } from '../../../Nodes/Node.js';
 import { NodeDescription } from '../../../Nodes/NodeDescription.js';
 import { NodeEvalContext } from '../../../Nodes/NodeEvalContext.js';
+import { TAbstractionsConstraint } from '../../../Registry.js';
 import { Socket } from '../../../Sockets/Socket.js';
 
-export class OnCustomEvent extends Node {
-  public static GetDescription(graph: Graph, customEventId: string) {
-    const customEvent = graph.customEvents[customEventId];
-    return new NodeDescription(
-      `customEvent/onTriggered/${customEvent.id}`,
-      'Event',
-      `On ${customEvent.name}`,
-      (description, graph) => new OnCustomEvent(description, graph, customEvent)
-    );
-  }
+export class OnCustomEvent<T extends TAbstractionsConstraint> extends Node<T> {
+
 
   constructor(
-    description: NodeDescription,
-    graph: Graph,
+    description: NodeDescription<T>,
+    graph: Graph<T>,
     public readonly customEvent: CustomEvent
   ) {
     super(
@@ -37,7 +30,7 @@ export class OnCustomEvent extends Node {
             )
         )
       ],
-      (context: NodeEvalContext) => {
+      (context: NodeEvalContext<T>) => {
         customEvent.eventEmitter.addListener((parameters) => {
           customEvent.parameters.forEach((parameterSocket) => {
             if (!(parameterSocket.name in parameters)) {
@@ -61,3 +54,13 @@ export class OnCustomEvent extends Node {
     this.interruptibleAsync = true;
   }
 }
+
+export function getCustomEventDescription<T extends TAbstractionsConstraint>(graph: Graph<T>, customEventId: string) {
+    const customEvent = graph.customEvents[customEventId];
+    return new NodeDescription<T>(
+      `customEvent/onTriggered/${customEvent.id}`,
+      'Event',
+      `On ${customEvent.name}`,
+      (description, graph) => new OnCustomEvent(description, graph, customEvent)
+    );
+  }

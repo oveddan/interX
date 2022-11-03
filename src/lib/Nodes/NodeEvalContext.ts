@@ -1,11 +1,10 @@
-import { CustomEvent } from '../Events/CustomEvent.js';
+import { AbstractionsRegistry } from '../Abstractions/AbstractionsRegistry.js';
 import { EventEmitter } from '../Events/EventEmitter.js';
 import { GraphEvaluator } from '../Graphs/Evaluation/GraphEvaluator.js';
 import { NodeEvaluationEvent } from '../Graphs/Evaluation/NodeEvaluationEvent.js';
 import { NodeEvaluationType } from '../Graphs/Evaluation/NodeEvaluationType.js';
 import { SyncExecutionBlock } from '../Graphs/Evaluation/SyncExecutionBlock.js';
-import { Graph } from '../Graphs/Graph.js';
-import { Variable } from '../Variables/Variable.js';
+import { TAbstractionsConstraint } from '../Registry.js';
 import { Link } from './Link.js';
 import { Node } from './Node.js';
 
@@ -13,9 +12,7 @@ import { Node } from './Node.js';
 //  - Avoid nodes having to access globals to reference the scene or trigger loaders.
 //  - Everything should be accessible via this context.
 // Q: Should I store the promises in this structure?  Probably.
-export class NodeEvalContext<TAbstractionRegistry> {
-  public readonly abstractionRegistry: TAbstractionRegistry;
-  public readonly graphEvaluator: GraphEvaluator;
+export class NodeEvalContext<TAbstractions extends TAbstractionsConstraint = {}> {
   public readonly onAsyncCancelled = new EventEmitter<void>();
   private readonly cachedInputValues: { [name: string]: any } = {}; // TODO: figure out if this is really needed
   private readonly cachedOutputValues: { [name: string]: any } = {}; // TODO: figure out if this is really needed
@@ -23,11 +20,11 @@ export class NodeEvalContext<TAbstractionRegistry> {
   public numCommits = 0;
 
   constructor(
-    public readonly syncExecutionBlock: SyncExecutionBlock,
-    public readonly node: Node<TAbstractionRegistry>
+    public readonly syncExecutionBlock: SyncExecutionBlock<TAbstractions>,
+    public readonly node: Node<TAbstractions>,
+    public readonly abstractions: AbstractionsRegistry<TAbstractions>,
+    public readonly graphEvaluator: GraphEvaluator<TAbstractions>
   ) {
-    this.graphEvaluator = syncExecutionBlock.graphEvaluator;
-    this.abstractionRegistry = this.graphEvaluator.graph;
   }
 
   private begin() {
@@ -140,20 +137,6 @@ export class NodeEvalContext<TAbstractionRegistry> {
       // eslint-disable-next-line no-param-reassign
       socket.value = this.cachedOutputValues[socket.name];
     });
-  }
-
-  getCustomEvent(customEventId: string): CustomEvent {
-    if (!(customEventId in this.graph.customEvents)) {
-      throw new Error(`can not find customEvent with the id ${customEventId}`);
-    }
-    return this.graph.customEvents[customEventId];
-  }
-
-  getVariable(variableId: string): Variable {
-    if (!(variableId in this.graph.variables)) {
-      throw new Error(`can not find variable with the id ${variableId}`);
-    }
-    return this.graph.variables[variableId];
   }
 
   // TODO: this may want to cache the values on the creation of the NodeEvalContext

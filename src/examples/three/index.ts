@@ -3,6 +3,8 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
+import { DefaultAbstractionImplementationMap } from '../../lib/Abstractions/AbstractionImplementationMap.js';
+import { AbstractionsRegistry } from '../../lib/Abstractions/AbstractionsRegistry.js';
 
 import { Logger } from '../../lib/Diagnostics/Logger.js';
 import { GraphEvaluator } from '../../lib/Graphs/Evaluation/GraphEvaluator.js';
@@ -40,7 +42,8 @@ function onWindowResize() {
 //
 
 async function main() {
-  const registry = new Registry();
+  const abstractions = new AbstractionsRegistry<DefaultAbstractionImplementationMap>({});
+  const registry = new Registry(abstractions);
   registerCoreProfile(registry);
   registerSceneProfile(registry);
   const graphJsonPath = `/src/graphs/scene/actions/SpinningSuzanne.json`;
@@ -127,7 +130,7 @@ async function main() {
   window.addEventListener('resize', onWindowResize);
 
   Logger.verbose('creating behavior graph');
-  const graphEvaluator = new GraphEvaluator(graph);
+  const graphEvaluator = new GraphEvaluator(graph, registry);
   //graphEvaluator.onNodeEvaluation.addListener(traceToLogger);
 
   registry.abstractions.register('ILogger', new DefaultLogger());

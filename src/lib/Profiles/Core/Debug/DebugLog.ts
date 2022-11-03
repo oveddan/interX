@@ -1,11 +1,11 @@
-import { DefaultAbstractionImplementationMap } from '../../../Abstractions/AbstractionImplementationMap.js';
+import { DefaultAbstractionImplementationMap, HasILogger } from '../../../Abstractions/AbstractionImplementationMap.js';
 import { Graph } from '../../../Graphs/Graph.js';
 import { Node } from '../../../Nodes/Node.js';
 import { NodeDescription } from '../../../Nodes/NodeDescription.js';
 import { NodeEvalContext } from '../../../Nodes/NodeEvalContext.js';
 import { Socket } from '../../../Sockets/Socket.js';
 
-export class Log extends Node<DefaultAbstractionImplementationMap> {
+export class Log extends Node<HasILogger> {
   public static Description = new NodeDescription(
     'debug/log',
     'Action',
@@ -21,7 +21,7 @@ export class Log extends Node<DefaultAbstractionImplementationMap> {
       [new Socket('flow', 'flow')],
       (context) => {
         const logger =
-          context.graph.registry.abstractions.get('ILogger');
+          context.abstractions.get('ILogger');
         logger.info(context.readInput('text'));
       }
     );

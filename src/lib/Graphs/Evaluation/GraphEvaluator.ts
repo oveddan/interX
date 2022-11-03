@@ -1,25 +1,28 @@
 /* eslint-disable space-in-parens */
 
+import { AbstractionsRegistry } from '../../Abstractions/AbstractionsRegistry.js';
 import { EventEmitter } from '../../Events/EventEmitter.js';
 import { Link } from '../../Nodes/Link.js';
 import { Node } from '../../Nodes/Node.js';
+import { Registry, TAbstractionsConstraint } from '../../Registry.js';
 import { sleep } from '../../sleep.js';
-import { Graph } from '../Graph.js';
+import {  Graph, Nodes } from '../Graph.js';
 import { NodeEvaluationEvent } from './NodeEvaluationEvent.js';
 import { SyncExecutionBlock } from './SyncExecutionBlock.js';
 
-export class GraphEvaluator {
+export class GraphEvaluator<TAbstractions extends TAbstractionsConstraint> {
   // tracking the next node+input socket to execute.
-  private readonly executionBlockQueue: SyncExecutionBlock[] = [];
-  public readonly asyncNodes: Node[] = [];
-  public readonly interruptibleAsyncNodes: Node[] = [];
-  public readonly onNodeEvaluation = new EventEmitter<NodeEvaluationEvent>();
+  private readonly executionBlockQueue: SyncExecutionBlock<TAbstractions>[] = [];
+  public readonly asyncNodes: Node<TAbstractions>[] = [];
+  public readonly interruptibleAsyncNodes: Node<TAbstractions>[] = [];
+  public readonly onNodeEvaluation = new EventEmitter<NodeEvaluationEvent<TAbstractions>>();
 
-  constructor(public readonly graph: Graph) {
-    Object.values(this.graph.nodes).forEach((node) => {
+  constructor(public readonly graph: Graph<TAbstractions>, public readonly registry: Registry<TAbstractions>) {
+    const nodes = this.graph.nodes;
+    Object.values(nodes).forEach((node) => {
       if (node.evaluateOnStartup) {
         this.executionBlockQueue.push(
-          new SyncExecutionBlock(this, new Link(node.id, ''))
+          new SyncExecutionBlock<TAbstractions>(this.registry, nodes, this, new Link(node.id, ''))
         );
       }
     });
@@ -40,11 +43,7 @@ export class GraphEvaluator {
       );
     }
     if (outputSocket.links.length === 1) {
-      const syncExecutionBlock = new SyncExecutionBlock(
-        this,
-        outputSocket.links[0],
-        syncEvaluationCompletedListener
-      );
+      const syncExecutionBlock = new SyncExecutionBlock<TAbstractions>(this.registry, this.graph.nodes, this, new Link(node.id, ''), syncEvaluationCompletedListener);
       this.executionBlockQueue.push(syncExecutionBlock);
     }
   }

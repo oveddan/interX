@@ -31,7 +31,7 @@ export class In2Out1FuncNode<In1, In2, Out1> extends Node {
         new Socket(inputValueTypes[1], inputNames[1])
       ],
       [new Socket(outputValueType, 'result')],
-      (context: NodeEvalContext) => {
+      (context) => {
         context.writeOutput(
           'result',
           this.binaryEvalFunc(

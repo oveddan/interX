@@ -4,10 +4,10 @@ import { Node } from '../Node.js';
 import { NodeDescription } from '../NodeDescription.js';
 import { NodeEvalContext } from '../NodeEvalContext.js';
 
-export class In0Out1FuncNode<Out1> extends Node {
+export class In0Out1FuncNode<Out1> extends Node<{}> {
   constructor(
     description: NodeDescription,
-    graph: Graph,
+    graph: Graph<{}>,
     outputValueType: string,
     public readonly nullaryEvalFunc: () => Out1
   ) {

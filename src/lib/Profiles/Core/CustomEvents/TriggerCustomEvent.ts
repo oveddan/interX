@@ -3,23 +3,13 @@ import { Graph } from '../../../Graphs/Graph.js';
 import { Node } from '../../../Nodes/Node.js';
 import { NodeDescription } from '../../../Nodes/NodeDescription.js';
 import { NodeEvalContext } from '../../../Nodes/NodeEvalContext.js';
+import { TAbstractionsConstraint } from '../../../Registry.js';
 import { Socket } from '../../../Sockets/Socket.js';
 
-export class TriggerCustomEvent extends Node {
-  public static GetDescription(graph: Graph, customEventId: string) {
-    const customEvent = graph.customEvents[customEventId];
-    return new NodeDescription(
-      `customEvent/trigger/${customEvent.id}`,
-      'Action',
-      `Trigger ${customEvent.name}`,
-      (description, graph) =>
-        new TriggerCustomEvent(description, graph, customEvent)
-    );
-  }
-
-  constructor(
-    description: NodeDescription,
-    graph: Graph,
+export class TriggerCustomEvent<T extends TAbstractionsConstraint> extends Node<T> {
+    constructor(
+    description: NodeDescription<T>,
+    graph: Graph<T>,
     public readonly customEvent: CustomEvent
   ) {
     super(
@@ -38,7 +28,7 @@ export class TriggerCustomEvent extends Node {
         )
       ],
       [new Socket('flow', 'flow')],
-      (context: NodeEvalContext) => {
+      (context: NodeEvalContext<T>) => {
         const parameters: { [parameterName: string]: any } = {};
         customEvent.parameters.forEach((parameterSocket) => {
           parameters[parameterSocket.name] = context.readInput(
@@ -50,3 +40,15 @@ export class TriggerCustomEvent extends Node {
     );
   }
 }
+
+export function getTriggerCustomEventDescription<T extends TAbstractionsConstraint>(graph: Graph<T>, customEventId: string) {
+    const customEvent = graph.customEvents[customEventId];
+    return new NodeDescription<T>(
+      `customEvent/trigger/${customEvent.id}`,
+      'Action',
+      `Trigger ${customEvent.name}`,
+      (description, graph) =>
+        new TriggerCustomEvent<T>(description, graph, customEvent)
+    );
+  }
+

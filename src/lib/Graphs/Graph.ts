@@ -1,31 +1,36 @@
-import { AbstractionsRegistry } from '../Abstractions/AbstractionsRegistry.js';
 import { CustomEvent } from '../Events/CustomEvent.js';
 import { generateUuid } from '../generateUuid.js';
 import { Metadata } from '../Metadata.js';
 import { Node } from '../Nodes/Node.js';
+import { NodeDescription } from '../Nodes/NodeDescription.js';
 import { NodeTypeRegistry } from '../Nodes/NodeTypeRegistry.js';
-import { OnCustomEvent } from '../Profiles/Core/CustomEvents/OnCustomEvent.js';
-import { TriggerCustomEvent } from '../Profiles/Core/CustomEvents/TriggerCustomEvent.js';
-import { VariableGet } from '../Profiles/Core/Variables/VariableGet.js';
-import { VariableSet } from '../Profiles/Core/Variables/VariableSet.js';
-import { Registry } from '../Registry.js';
+import { getCustomEventDescription, OnCustomEvent } from '../Profiles/Core/CustomEvents/OnCustomEvent.js';
+import { getTriggerCustomEventDescription, TriggerCustomEvent } from '../Profiles/Core/CustomEvents/TriggerCustomEvent.js';
+import { getVariableDescription } from '../Profiles/Core/Variables/VariableGet.js';
+import { TAbstractionsConstraint } from '../Registry.js';
 import { Variable } from '../Variables/Variable.js';
 // Purpose:
 //  - stores the node graph
 
-export class Graph<TAbstractionRegistry> {
+export type Nodes<TAbstractions extends TAbstractionsConstraint> = { [id: string]: Node<TAbstractions> };
+
+export type CustomEvents = { [id: string]: CustomEvent };
+
+export type Variables = { [id: string]: Variable }
+
+export class Graph<TAbstractions extends TAbstractionsConstraint = {}> {
   public name = '';
   // TODO: think about whether I can replace this with an immutable strategy?  Rather than having this mutable?
-  public readonly nodes: { [id: string]: Node<TAbstractionRegistry> } = {};
+  public readonly nodes: Nodes<TAbstractions> = {};
   // TODO: think about whether I can replace this with an immutable strategy?  Rather than having this mutable?
-  public readonly variables: { [id: string]: Variable } = {};
-  // TODO: think about whether I can replace this with an immutable strategy?  Rather than having this mutable?
-  public readonly customEvents: { [id: string]: CustomEvent } = {};
   public metadata: Metadata = {};
-  public readonly dynamicNodeRegistry = new NodeTypeRegistry();
+  public readonly dynamicNodeRegistry = new NodeTypeRegistry<TAbstractions>();
   public version = 0;
 
-  constructor(public readonly registry: Registry, public readonly abstractions: AbstractionsRegistry<TAbstractionRegistry>) {}
+  constructor(public readonly variables: Variables,
+    public readonly customEvents: CustomEvents = {},
+    public readonly nodesRegistry: NodeTypeRegistry<TAbstractions>
+    ) {}
 
   updateDynamicNodeDescriptions() {
     // delete existing nodes
@@ -33,27 +38,26 @@ export class Graph<TAbstractionRegistry> {
     // re-add variable nodes
     Object.keys(this.variables).forEach((variableId) => {
       this.dynamicNodeRegistry.register(
-        VariableGet.GetDescription(this, variableId),
-        VariableSet.GetDescription(this, variableId)
-      );
+        getVariableDescription<TAbstractions>(this, variableId),
+        getVariableDescription<TAbstractions>(this, variableId));
     });
     // re-add custom event nodes
     Object.keys(this.customEvents).forEach((customEventId) => {
       this.dynamicNodeRegistry.register(
-        OnCustomEvent.GetDescription(this, customEventId),
-        TriggerCustomEvent.GetDescription(this, customEventId)
+        getCustomEventDescription(this, customEventId),
+        getTriggerCustomEventDescription(this, customEventId)
       );
     });
   }
-  createNode(nodeTypeName: string, nodeId: string = generateUuid()): Node {
+  createNode(nodeTypeName: string, nodeId: string = generateUuid()): Node<TAbstractions> {
     if (nodeId in this.nodes) {
       throw new Error(
         `can not create new node of type ${nodeTypeName} with id ${nodeId} as one with that id already exists.`
       );
     }
-    let nodeDescription = undefined;
-    if (this.registry.nodes.contains(nodeTypeName)) {
-      nodeDescription = this.registry.nodes.get(nodeTypeName);
+    let nodeDescription: NodeDescription<TAbstractions>|undefined = undefined;
+    if (this.nodesRegistry.contains(nodeTypeName)) {
+      nodeDescription = this.nodesRegistry.get(nodeTypeName);
     }
     if (this.dynamicNodeRegistry.contains(nodeTypeName)) {
       nodeDescription = this.dynamicNodeRegistry.get(nodeTypeName);

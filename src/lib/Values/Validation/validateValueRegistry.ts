@@ -1,8 +1,8 @@
-import { Registry } from '../../Registry.js';
+import { Registry, TAbstractionsConstraint } from '../../Registry.js';
 
 const valueTypeNameRegex = /^\w+$/;
 
-export function validateValueRegistry(graphRegistry: Registry): string[] {
+export function validateValueRegistry<TAbstractions extends TAbstractionsConstraint>(graphRegistry: Registry<TAbstractions>): string[] {
   const errorList: string[] = [];
 
   graphRegistry.values.getAllNames().forEach((valueTypeName) => {

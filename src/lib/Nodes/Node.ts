@@ -1,5 +1,6 @@
 import { Graph } from '../Graphs/Graph.js';
 import { Metadata } from '../Metadata.js';
+import { TAbstractionsConstraint } from '../Registry.js';
 import { Socket } from '../Sockets/Socket.js';
 import { NodeDescription } from './NodeDescription.js';
 import { NodeEvalContext } from './NodeEvalContext.js';
@@ -8,7 +9,7 @@ function findSocketByName(sockets: Socket[], name: string): Socket | undefined {
   return sockets.find((socket) => socket.name === name);
 }
 
-export class Node<TAbstractionRegistry> {
+export class Node<TAbstractions extends TAbstractionsConstraint = {}> {
   public id = '';
   public label = '';
   public metadata: Metadata = {};
@@ -18,11 +19,11 @@ export class Node<TAbstractionRegistry> {
   public interruptibleAsync = false;
 
   constructor(
-    public readonly description: NodeDescription,
-    public readonly graph: Graph<TAbstractionRegistry>,
+    public readonly description: NodeDescription<TAbstractions>,
+    public readonly graph: Graph<TAbstractions>,
     public readonly inputSockets: Socket[],
     public readonly outputSockets: Socket[],
-    public readonly evalFunc: (context: NodeEvalContext) => void
+    public readonly evalFunc: (context: NodeEvalContext<TAbstractions>) => void
   ) {
     // determine if this is an eval node
     let areAnySocketsFlowType = false;

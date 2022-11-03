@@ -1,12 +1,12 @@
 import { Graph } from '../../Graphs/Graph.js';
-import { Registry } from '../../Registry.js';
+import { Registry, TAbstractionsConstraint } from '../../Registry.js';
 
 const nodeTypeNameRegex = /^\w+(\/\w+)*$/;
 const socketNameRegex = /^\w+$/;
 
-export function validateNodeRegistry(registry: Registry): string[] {
+export function validateNodeRegistry<TAbstractions extends TAbstractionsConstraint>(registry: Registry<TAbstractions>): string[] {
   const errorList: string[] = [];
-  const graph = new Graph(registry);
+  const graph = new Graph<TAbstractions>({}, {}, registry.nodes);
   registry.nodes.getAllNames().forEach((nodeTypeName) => {
     const node = graph.createNode(nodeTypeName);
 

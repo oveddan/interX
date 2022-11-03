@@ -1,20 +1,24 @@
+import { AbstractionsRegistry } from '../../Abstractions/AbstractionsRegistry.js';
 import { Assert } from '../../Diagnostics/Assert.js';
 import { Link } from '../../Nodes/Link.js';
 import { NodeEvalContext } from '../../Nodes/NodeEvalContext.js';
+import { Registry, TAbstractionsConstraint } from '../../Registry.js';
 import { Socket } from '../../Sockets/Socket.js';
-import { Graph } from '../Graph.js';
+import { ValueTypeRegistry } from '../../Values/ValueTypeRegistry.js';
+import { Nodes } from '../Graph.js';
+import { ValueJSON } from '../IO/GraphJSON.js';
 import { GraphEvaluator } from './GraphEvaluator.js';
 
-export class SyncExecutionBlock {
+export class SyncExecutionBlock<TAbstractions extends TAbstractionsConstraint> {
   private readonly syncEvaluationCompletedListenerStack: (() => void)[] = [];
-  private readonly graph: Graph;
 
   constructor(
-    public graphEvaluator: GraphEvaluator,
+    public readonly registry: Registry<TAbstractions>,
+    public readonly nodes: Nodes<TAbstractions>,
+    private readonly graphEvaluator: GraphEvaluator<TAbstractions>,
     public nextEval: Link | null,
     syncEvaluationCompletedListener: (() => void) | undefined = undefined
   ) {
-    this.graph = graphEvaluator.graph;
     if (syncEvaluationCompletedListener !== undefined) {
       this.syncEvaluationCompletedListenerStack.push(
         syncEvaluationCompletedListener
@@ -40,7 +44,7 @@ export class SyncExecutionBlock {
       // );
       // if not set, use the default value for this valueType
       if (inputSocket.value === undefined) {
-        return this.graph.registry.values
+        return this.registry.values
           .get(inputSocket.valueTypeName)
           .creator();
       }
@@ -54,7 +58,7 @@ export class SyncExecutionBlock {
 
     const upstreamLink = inputSocket.links[0];
     // if upstream node is an eval, we just return its last value.
-    const upstreamNode = this.graph.nodes[upstreamLink.nodeId];
+    const upstreamNode = this.nodes[upstreamLink.nodeId];
 
     // what is inputSocket connected to?
     const upstreamOutputSocket = upstreamNode.getOutputSocket(
@@ -78,7 +82,7 @@ export class SyncExecutionBlock {
       this.resolveInputValueFromSocket(upstreamInputSocket);
     });
 
-    const context = new NodeEvalContext(this, upstreamNode);
+    const context = new NodeEvalContext(this, upstreamNode, this.registry.abstractions, this.graphEvaluator);
     context.evalImmediate();
 
     // get the output value we wanted.
@@ -95,7 +99,7 @@ export class SyncExecutionBlock {
     syncEvaluationCompletedListener: (() => void) | undefined = undefined
   ) {
     Assert.mustBeTrue(this.nextEval === null);
-    const node = this.graph.nodes[outputFlowSocket.nodeId];
+    const node = this.nodes[outputFlowSocket.nodeId];
     const outputSocket = node.getOutputSocket(outputFlowSocket.socketName);
 
     if (outputSocket.links.length > 1) {
@@ -138,7 +142,7 @@ export class SyncExecutionBlock {
       return true;
     }
 
-    const node = this.graph.nodes[link.nodeId];
+    const node = this.nodes[link.nodeId];
 
     // first resolve all input values
     // flow socket is set to true for the one flowing in, while all others are set to false.
@@ -156,7 +160,7 @@ export class SyncExecutionBlock {
       }
     });
 
-    const context = new NodeEvalContext(this, node);
+    const context = new NodeEvalContext(this, node, this.registry.abstractions, this.graphEvaluator);
     context.evalFlow();
 
     // Auto-commit if no existing commits and no promises waiting.

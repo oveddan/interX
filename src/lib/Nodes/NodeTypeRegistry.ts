@@ -1,8 +1,9 @@
+import { TAbstractionsConstraint } from '../Registry.js';
 import { NodeDescription } from './NodeDescription.js';
 
-export class NodeTypeRegistry {
+export class NodeTypeRegistry<TAbstractions extends TAbstractionsConstraint> {
   private readonly typeNameToNodeDescriptions: {
-    [type: string]: NodeDescription;
+    [type: string]: NodeDescription<TAbstractions>;
   } = {};
 
   clear() {
@@ -10,7 +11,7 @@ export class NodeTypeRegistry {
       delete this.typeNameToNodeDescriptions[nodeTypeName];
     });
   }
-  register(...descriptions: Array<NodeDescription>) {
+  register(...descriptions: Array<NodeDescription<TAbstractions>>) {
     descriptions.forEach((description) => {
       if (description.typeName in this.typeNameToNodeDescriptions) {
         throw new Error(
@@ -24,7 +25,7 @@ export class NodeTypeRegistry {
   contains(typeName: string): boolean {
     return typeName in this.typeNameToNodeDescriptions;
   }
-  get(typeName: string): NodeDescription {
+  get(typeName: string): NodeDescription<TAbstractions> {
     if (!(typeName in this.typeNameToNodeDescriptions)) {
       throw new Error(`no registered node with type name ${typeName}`);
     }
@@ -35,7 +36,7 @@ export class NodeTypeRegistry {
     return Object.keys(this.typeNameToNodeDescriptions);
   }
 
-  getAllDescriptions(): NodeDescription[] {
+  getAllDescriptions(): NodeDescription<TAbstractions>[] {
     return Object.values(this.typeNameToNodeDescriptions);
   }
 }

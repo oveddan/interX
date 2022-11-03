@@ -28,7 +28,7 @@ export class In1Out1FuncNode<In1, Out1> extends Node {
       graph,
       [new Socket(inputValueTypes[0], inputNames[0])],
       [new Socket(outputValueType, 'result')],
-      (context: NodeEvalContext) => {
+      (context) => {
         context.writeOutput(
           'result',
           this.unaryEvalFunc(context.readInput(inputNames[0]))
