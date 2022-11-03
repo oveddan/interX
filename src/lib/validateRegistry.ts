@@ -1,8 +1,8 @@
 import { validateNodeRegistry } from './Nodes/Validation/validateNodeRegistry.js';
-import { Registry } from './Registry.js';
+import { Registry, TAbstractionsConstraint } from './Registry.js';
 import { validateValueRegistry } from './Values/Validation/validateValueRegistry.js';
 
-export function validateRegistry(registry: Registry): string[] {
+export function validateRegistry<T extends TAbstractionsConstraint>(registry: Registry<T>): string[] {
   const errorList: string[] = [];
   errorList.push(
     ...validateValueRegistry(registry),
