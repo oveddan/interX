@@ -1,10 +1,10 @@
-import { IHasSockets, ISocketDefinition, makeFlowNodeDefinition, TriggeredFunction } from "../schema/INodeDefinition";
+import { IFlowNode, IHasSockets, ISocketDefinition, makeFlowNodeDefinition, TriggeredFunction } from "../schema/INodeDefinition";
 
 // [new Socket('flow', 'flow'), new Socket('boolean', 'condition')],
 //       [new Socket('flow', 'true'), new Socket('flow', 'false')]
 //     );
 
-const branchSockets = {
+export const branchSockets = {
   inputSockets: {
     flow: {
       valueType: 'flow'
@@ -23,6 +23,7 @@ const branchSockets = {
   }
 } satisfies IHasSockets; 
 
+export type BranchSocketsDefinition = typeof branchSockets;
 
 const Branch = makeFlowNodeDefinition({
   socketsDefinition: branchSockets,
@@ -33,6 +34,6 @@ const Branch = makeFlowNodeDefinition({
     const value = readInput('condition');
     commit(value ? 'true' : 'false')
   }
-});
+}) satisfies IFlowNode<BranchSocketsDefinition>;
 
 export default Branch;

@@ -31,7 +31,7 @@ export type ValueTypeNameMapping<K extends SocketValueType> = {
 }[K];
 
 type OutputSockets<T extends Pick<IHasSockets, 'outputSockets'>> = T['outputSockets'];
-type InputSockets<T extends IHasSockets> = T['inputSockets'];
+type InputSockets<T extends Pick<IHasSockets, 'inputSockets'>> = T['inputSockets'];
 
 type FlowSocketDef = {
   valueType: 'flow';
@@ -49,9 +49,9 @@ export type FlowSockets<T extends Sockets> = Pick<
 export type ExtractValueType<T extends Sockets, K extends keyof T> = ValueTypeNameMapping<T[K]['valueType']>;
 
 export type OutputValueSockets<T extends IHasSockets> = ValueSockets<OutputSockets<T>>;
-export type InputValueSockets<T extends IHasSockets> = ValueSockets<InputSockets<T>>;
+export type InputValueSockets<T extends Pick<IHasSockets, 'inputSockets'>> = ValueSockets<InputSockets<T>>;
 export type InputFlowSockets<T extends IHasSockets> = FlowSockets<InputSockets<T>>;
-export type OutputFlowSockets<T extends IHasSockets> = FlowSockets<OutputSockets<T>>;
+export type OutputFlowSockets<T extends Pick<IHasSockets, 'outputSockets'>> = FlowSockets<OutputSockets<T>>;
 
 export type OutputValueType<T extends IHasSockets, J extends keyof OutputValueSockets<T>> = ExtractValueType<
   OutputValueSockets<T>,
@@ -86,6 +86,12 @@ export interface IFlowNode<T extends IHasSockets> {
   socketsDefinition: T;
   triggered: (params: TriggeredParams<T>) => void;
 }
+
+export type NodeInputValues<T extends Pick<IHasSockets, 'inputSockets'>> = {
+  [K in keyof InputValueSockets<T>]: ValueTypeNameMapping<InputValueSockets<T>[K]['valueType']>;
+};
+
+export type OutputFlowSocketNames<T extends Pick<IHasSockets, 'outputSockets'>> = keyof OutputFlowSockets<T>;
 
 export function makeFlowNodeDefinition<T extends IHasSockets>(flowNode: IFlowNode<T>): IFlowNode<T> {
   return flowNode;
