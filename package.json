@@ -57,7 +57,8 @@
   ],
   "preconstruct": {
     "packages": [
-      "editor"
+      "editor",
+      "packages/*"
     ]
   }
 }
