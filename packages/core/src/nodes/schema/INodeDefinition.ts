@@ -48,9 +48,9 @@ export type FlowSockets<T extends Sockets> = Pick<
 
 export type ExtractValueType<T extends Sockets, K extends keyof T> = ValueTypeNameMapping<T[K]['valueType']>;
 
-export type OutputValueSockets<T extends IHasSockets> = ValueSockets<OutputSockets<T>>;
+export type OutputValueSockets<T extends Pick<IHasSockets, 'outputSockets'>> = ValueSockets<OutputSockets<T>>;
 export type InputValueSockets<T extends Pick<IHasSockets, 'inputSockets'>> = ValueSockets<InputSockets<T>>;
-export type InputFlowSockets<T extends IHasSockets> = FlowSockets<InputSockets<T>>;
+export type InputFlowSockets<T extends Pick<IHasSockets, 'inputSockets'>> = FlowSockets<InputSockets<T>>;
 export type OutputFlowSockets<T extends Pick<IHasSockets, 'outputSockets'>> = FlowSockets<OutputSockets<T>>;
 
 export type OutputValueType<T extends IHasSockets, J extends keyof OutputValueSockets<T>> = ExtractValueType<
@@ -80,11 +80,15 @@ export type TriggeredParams<T extends IHasSockets> = {
   commit: commitFn<T>;
 };
 
-export type TriggeredFunction<T extends IHasSockets> = (params: TriggeredParams<T>) => void;
+export type InputFlowSocketNames<T extends Pick<IHasSockets, 'inputSockets'>> = keyof InputFlowSockets<T>;
+export type TriggeredFunction<T extends IHasSockets> = (
+  params: TriggeredParams<T>,
+  triggeringSocketName: InputFlowSocketNames<T>
+) => void;
 
 export interface IFlowNode<T extends IHasSockets> {
   socketsDefinition: T;
-  triggered: (params: TriggeredParams<T>) => void;
+  triggered: TriggeredFunction<T>;
 }
 
 export type NodeInputValues<T extends Pick<IHasSockets, 'inputSockets'>> = {
@@ -92,6 +96,7 @@ export type NodeInputValues<T extends Pick<IHasSockets, 'inputSockets'>> = {
 };
 
 export type OutputFlowSocketNames<T extends Pick<IHasSockets, 'outputSockets'>> = keyof OutputFlowSockets<T>;
+export type OutputValueSocketNames<T extends Pick<IHasSockets, 'outputSockets'>> = keyof OutputValueSockets<T>;
 
 export function makeFlowNodeDefinition<T extends IHasSockets>(flowNode: IFlowNode<T>): IFlowNode<T> {
   return flowNode;
