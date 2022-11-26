@@ -53,6 +53,14 @@ export type InputValueSockets<T extends Pick<IHasSockets, 'inputSockets'>> = Val
 export type InputFlowSockets<T extends Pick<IHasSockets, 'inputSockets'>> = FlowSockets<InputSockets<T>>;
 export type OutputFlowSockets<T extends Pick<IHasSockets, 'outputSockets'>> = FlowSockets<OutputSockets<T>>;
 
+export type InputFlowSocketNames<T extends Pick<IHasSockets, 'inputSockets'>> = keyof InputFlowSockets<T>;
+export type OutputFlowSocketNames<T extends Pick<IHasSockets, 'outputSockets'>> = keyof OutputFlowSockets<T>;
+export type OutputValueSocketNames<T extends Pick<IHasSockets, 'outputSockets'>> = keyof OutputValueSockets<T>;
+
+export type NodeInputValues<T extends Pick<IHasSockets, 'inputSockets'>> = {
+  [K in keyof InputValueSockets<T>]?: ValueTypeNameMapping<InputValueSockets<T>[K]['valueType']>;
+};
+
 export type OutputValueType<T extends IHasSockets, J extends keyof OutputValueSockets<T>> = ExtractValueType<
   OutputValueSockets<T>,
   J
@@ -63,43 +71,45 @@ export type InputValueType<T extends IHasSockets, J extends keyof InputValueSock
   J
 >;
 
-export type readInputFn<T extends IHasSockets> = <J extends keyof InputValueSockets<T>>(
+/** Node Engine Access Functions */
+
+export type readNodeInputFn<T extends IHasSockets> = <J extends keyof InputValueSockets<T>>(
   param: J
 ) => InputValueType<T, J> | undefined;
 
-export type writeOutputFn<THasSockets extends IHasSockets> = <J extends keyof OutputValueSockets<THasSockets>>(
+export type writeNodeOutputFn<THasSockets extends IHasSockets> = <J extends keyof OutputValueSockets<THasSockets>>(
   param: J,
   value: OutputValueType<THasSockets, J>
 ) => void;
 
 export type commitFn<T extends IHasSockets> = <J extends keyof OutputFlowSockets<T>>(param: J) => void;
 
+/** Flow Node Definitions */
+
+/** Arguments for the triggered function on a flow node */
 export type TriggeredParams<T extends IHasSockets, TNodeState> = {
-  writeOutput: writeOutputFn<T>;
-  readInput: readInputFn<T>;
+  /** writes to an output node */
+  writeOutput: writeNodeOutputFn<T>;
+  /** reads a value from an input node */
+  readInput: readNodeInputFn<T>;
+  /** commits a trigger to a flow node */
   commit: commitFn<T>;
+  /** The local node's state */
   readonly state: TNodeState;
+  /** The name of the flow input socket that was triggered */
+  triggeringSocketName: InputFlowSocketNames<T>;
 };
 
-export type InputFlowSocketNames<T extends Pick<IHasSockets, 'inputSockets'>> = keyof InputFlowSockets<T>;
 export type TriggeredFunction<T extends IHasSockets, TNodeState> = (
-  params: TriggeredParams<T, TNodeState>,
-  triggeringSocketName: InputFlowSocketNames<T>
+  params: TriggeredParams<T, TNodeState>
 ) => TNodeState;
 
 export interface IFlowNode<TSockets extends IHasSockets, TNodeState> {
   socketsDefinition: TSockets;
+  /** Called when an input flow node is triggered */
   triggered: TriggeredFunction<TSockets, TNodeState>;
   initialState: () => TNodeState;
 }
-
-export type NodeInputValues<T extends Pick<IHasSockets, 'inputSockets'>> = {
-  [K in keyof InputValueSockets<T>]?: ValueTypeNameMapping<InputValueSockets<T>[K]['valueType']>;
-};
-
-export type OutputFlowSocketNames<T extends Pick<IHasSockets, 'outputSockets'>> = keyof OutputFlowSockets<T>;
-export type OutputValueSocketNames<T extends Pick<IHasSockets, 'outputSockets'>> = keyof OutputValueSockets<T>;
-
 export function makeFlowNodeDefinition<TSockets extends IHasSockets, TNodeState = void>(
   flowNode: IFlowNode<TSockets, TNodeState>
 ): IFlowNode<TSockets, TNodeState> {

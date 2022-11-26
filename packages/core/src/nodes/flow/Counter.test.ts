@@ -33,20 +33,46 @@ describe('Branch', () => {
 
       expect(getOutputWrites()).to.eql(expected);
     });
-    //   it('commits the true output when value is false', () => {
-    //     const { trigger, writeInput, getOutputWrites } = buildStubEngineForFlowNode(Counter);
+    it('resets the value to 0 but doesnt write the update on reset', () => {
+      const { trigger, getOutputWrites } = buildStubEngineForFlowNode(Counter);
 
-    //     writeInput('condition', false);
-    //     trigger('flow');
+      trigger('flow');
+      trigger('flow');
+      trigger('reset');
+      trigger('flow');
 
-    //     const expected = [
-    //       {
-    //         writeType: 'flow',
-    //         socketName: 'false',
-    //       },
-    //     ];
+      const expected: RecordedOutputWrites<typeof Counter.socketsDefinition> = [
+        {
+          writeType: 'value',
+          socketName: 'count',
+          value: 1n,
+        },
+        {
+          writeType: 'flow',
+          socketName: 'flow',
+        },
+        {
+          writeType: 'value',
+          socketName: 'count',
+          value: 2n,
+        },
+        {
+          writeType: 'flow',
+          socketName: 'flow',
+        },
+        // reset triggered - goes back to 0 but value isnt emitted
+        {
+          writeType: 'value',
+          socketName: 'count',
+          value: 1n,
+        },
+        {
+          writeType: 'flow',
+          socketName: 'flow',
+        },
+      ];
 
-    //     expect(getOutputWrites()).to.eql(expected);
-    //   });
+      expect(getOutputWrites()).to.eql(expected);
+    });
   });
 });

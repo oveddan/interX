@@ -3,7 +3,7 @@ import {
   IHasSockets,
   makeFlowNodeDefinition,
   OutputValueType,
-  readInputFn,
+  readNodeInputFn,
   ValueSockets,
   ExtractValueType,
   ValueTypeNameMapping,
@@ -80,8 +80,8 @@ describe('TriggeredParams', () => {
       expectType<OutputValueType<typeof vals, 'f'>>('asdfasfd');
 
 
-      expectType<Parameters<readInputFn<typeof vals>>>(['a']);
-      expectType<Parameters<readInputFn<typeof vals>>>(['b']);
+      expectType<Parameters<readNodeInputFn<typeof vals>>>(['a']);
+      expectType<Parameters<readNodeInputFn<typeof vals>>>(['b']);
     });
   });
 });

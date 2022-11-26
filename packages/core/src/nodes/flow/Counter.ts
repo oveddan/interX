@@ -26,8 +26,9 @@ const Counter = makeFlowNodeDefinition({
   triggered: ({
     commit,
     writeOutput,
-    state
-  }, triggeringSocketName) => {
+    state,
+    triggeringSocketName
+  }) => {
     // duplicate count to not modify the state
     let count = state.count + 0n;
   

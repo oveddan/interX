@@ -48,7 +48,7 @@ export const buildStubEngineForFlowNode = <TSockets extends IHasSockets, TState>
 
   let inputValuesState: NodeInputValues<TSockets> = {};
 
-  const triggeredParams: Omit<TriggeredParams<TSockets, TState>, 'state'> = {
+  const triggeredParams: Omit<TriggeredParams<TSockets, TState>, 'state' | 'triggeringSocketName'> = {
     commit: (param) => {
       outputWrites.push({
         writeType: 'flow',
@@ -69,15 +69,13 @@ export const buildStubEngineForFlowNode = <TSockets extends IHasSockets, TState>
 
   let nodeState = flowNodeDefinition.initialState();
 
-  const trigger = (nodeName: InputFlowSocketNames<TSockets>) => {
+  const trigger = (triggeringSocketName: InputFlowSocketNames<TSockets>) => {
     // trigger node and update the state with the triggered result.
-    nodeState = flowNodeDefinition.triggered(
-      {
-        ...triggeredParams,
-        state: nodeState,
-      },
-      nodeName
-    );
+    nodeState = flowNodeDefinition.triggered({
+      ...triggeredParams,
+      state: nodeState,
+      triggeringSocketName,
+    });
   };
 
   const writeInput = <J extends keyof InputValueSockets<TSockets>>(param: J, value: InputValueType<TSockets, J>) => {
