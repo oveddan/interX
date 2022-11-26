@@ -6,8 +6,14 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 
+import { collapseTextChangeRangesAcrossMultipleVersions } from 'typescript';
 import {
+  ExtractValueType,
+  IFlowNode,
   IHasSockets,
+  InputFlowSocketNames,
+  InputValueSockets,
+  InputValueType,
   NodeInputValues,
   OutputFlowSocketNames,
   OutputFlowSockets,
@@ -33,12 +39,16 @@ type RecordedOutputWrite<T extends IHasSockets> =
 
 export type RecordedOutputWrites<T extends IHasSockets> = RecordedOutputWrite<T>[];
 
-export const buildStubbedTriggeredInvoker = <T extends IHasSockets>(mockState: NodeInputValues<T>) => {
-  const outputWrites: RecordedOutputWrites<T> = [];
+export const buildStubEngineForFlowNode = <TSockets extends IHasSockets, TState>(
+  flowNodeDefinition: IFlowNode<TSockets, TState>
+) => {
+  const outputWrites: RecordedOutputWrites<TSockets> = [];
 
-  const getCommitedNodes = () => outputWrites;
+  const getOutputWrites = () => outputWrites;
 
-  const triggeredParams: TriggeredParams<T> = {
+  let inputValuesState: NodeInputValues<TSockets> = {};
+
+  const triggeredParams: Omit<TriggeredParams<TSockets, TState>, 'state'> = {
     commit: (param) => {
       outputWrites.push({
         writeType: 'flow',
@@ -46,7 +56,7 @@ export const buildStubbedTriggeredInvoker = <T extends IHasSockets>(mockState: N
       });
     },
     readInput: (param) => {
-      return mockState[param];
+      return inputValuesState[param];
     },
     writeOutput: (param, value) => {
       outputWrites.push({
@@ -57,8 +67,26 @@ export const buildStubbedTriggeredInvoker = <T extends IHasSockets>(mockState: N
     },
   };
 
+  let nodeState = flowNodeDefinition.initialState();
+
+  const trigger = (nodeName: InputFlowSocketNames<TSockets>) => {
+    // trigger node and update the state with the triggered result.
+    nodeState = flowNodeDefinition.triggered(
+      {
+        ...triggeredParams,
+        state: nodeState,
+      },
+      nodeName
+    );
+  };
+
+  const writeInput = <J extends keyof InputValueSockets<TSockets>>(param: J, value: InputValueType<TSockets, J>) => {
+    inputValuesState[param] = value;
+  };
+
   return {
-    triggeredParams,
-    getCommitedNodes,
+    getOutputWrites,
+    trigger,
+    writeInput,
   };
 };

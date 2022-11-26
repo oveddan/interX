@@ -51,7 +51,10 @@ describe('TriggeredParams', () => {
           const a = readInput('a');
 
           writeOutput("c", a ? 1.0 : 0.0);
-        }
+        
+          return undefined;
+        },
+        initialState: () => undefined
       })
 
       expectType<ValueSockets<typeof vals.inputSockets>>({

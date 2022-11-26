@@ -65,7 +65,7 @@ export type InputValueType<T extends IHasSockets, J extends keyof InputValueSock
 
 export type readInputFn<T extends IHasSockets> = <J extends keyof InputValueSockets<T>>(
   param: J
-) => InputValueType<T, J>;
+) => InputValueType<T, J> | undefined;
 
 export type writeOutputFn<THasSockets extends IHasSockets> = <J extends keyof OutputValueSockets<THasSockets>>(
   param: J,
@@ -74,30 +74,34 @@ export type writeOutputFn<THasSockets extends IHasSockets> = <J extends keyof Ou
 
 export type commitFn<T extends IHasSockets> = <J extends keyof OutputFlowSockets<T>>(param: J) => void;
 
-export type TriggeredParams<T extends IHasSockets> = {
+export type TriggeredParams<T extends IHasSockets, TNodeState> = {
   writeOutput: writeOutputFn<T>;
   readInput: readInputFn<T>;
   commit: commitFn<T>;
+  readonly state: TNodeState;
 };
 
 export type InputFlowSocketNames<T extends Pick<IHasSockets, 'inputSockets'>> = keyof InputFlowSockets<T>;
-export type TriggeredFunction<T extends IHasSockets> = (
-  params: TriggeredParams<T>,
+export type TriggeredFunction<T extends IHasSockets, TNodeState> = (
+  params: TriggeredParams<T, TNodeState>,
   triggeringSocketName: InputFlowSocketNames<T>
-) => void;
+) => TNodeState;
 
-export interface IFlowNode<T extends IHasSockets> {
-  socketsDefinition: T;
-  triggered: TriggeredFunction<T>;
+export interface IFlowNode<TSockets extends IHasSockets, TNodeState> {
+  socketsDefinition: TSockets;
+  triggered: TriggeredFunction<TSockets, TNodeState>;
+  initialState: () => TNodeState;
 }
 
 export type NodeInputValues<T extends Pick<IHasSockets, 'inputSockets'>> = {
-  [K in keyof InputValueSockets<T>]: ValueTypeNameMapping<InputValueSockets<T>[K]['valueType']>;
+  [K in keyof InputValueSockets<T>]?: ValueTypeNameMapping<InputValueSockets<T>[K]['valueType']>;
 };
 
 export type OutputFlowSocketNames<T extends Pick<IHasSockets, 'outputSockets'>> = keyof OutputFlowSockets<T>;
 export type OutputValueSocketNames<T extends Pick<IHasSockets, 'outputSockets'>> = keyof OutputValueSockets<T>;
 
-export function makeFlowNodeDefinition<T extends IHasSockets>(flowNode: IFlowNode<T>): IFlowNode<T> {
+export function makeFlowNodeDefinition<TSockets extends IHasSockets, TNodeState = void>(
+  flowNode: IFlowNode<TSockets, TNodeState>
+): IFlowNode<TSockets, TNodeState> {
   return flowNode;
 }

@@ -1,18 +1,14 @@
 import { expect } from 'chai';
-import { buildStubbedTriggeredInvoker, RecordedOutputWrites } from '../schema/testUtils';
-import Branch, { branchSockets } from './Branch';
-
-type BranchSocketsDefinition = typeof branchSockets;
+import { buildStubEngineForFlowNode } from '../schema/testUtils';
+import Branch from './Branch';
 
 describe('Branch', () => {
   describe('trigger', () => {
     it('commits the true output when value is true', () => {
-      const mockNodeVals = {
-        condition: true,
-      };
+      const { trigger, writeInput, getOutputWrites } = buildStubEngineForFlowNode(Branch);
 
-      const { triggeredParams, getCommitedNodes } = buildStubbedTriggeredInvoker<BranchSocketsDefinition>(mockNodeVals);
-      Branch.triggered(triggeredParams, 'flow');
+      writeInput('condition', true);
+      trigger('flow');
 
       const expected = [
         {
@@ -21,15 +17,13 @@ describe('Branch', () => {
         },
       ];
 
-      expect(getCommitedNodes()).to.eql(expected);
+      expect(getOutputWrites()).to.eql(expected);
     });
     it('commits the true output when value is false', () => {
-      const mockNodeVals = {
-        condition: false,
-      };
+      const { trigger, writeInput, getOutputWrites } = buildStubEngineForFlowNode(Branch);
 
-      const { triggeredParams, getCommitedNodes } = buildStubbedTriggeredInvoker<BranchSocketsDefinition>(mockNodeVals);
-      Branch.triggered(triggeredParams, 'flow');
+      writeInput('condition', false);
+      trigger('flow');
 
       const expected = [
         {
@@ -38,7 +32,7 @@ describe('Branch', () => {
         },
       ];
 
-      expect(getCommitedNodes()).to.eql(expected);
+      expect(getOutputWrites()).to.eql(expected);
     });
   });
 });

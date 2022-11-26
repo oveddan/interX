@@ -1,7 +1,4 @@
-import { IFlowNode, IHasSockets, makeFlowNodeDefinition } from "../schema/INodeDefinition";
-
-// [new Socket('flow', 'flow'), new Socket('flow', 'reset')],
-// [new Socket('flow', 'flow'), new Socket('integer', 'count')]
+import { IHasSockets, makeFlowNodeDefinition } from "../schema/INodeDefinition";
 
 export const counterSockets = {
   inputSockets: {
@@ -24,14 +21,15 @@ export const counterSockets = {
 
 export type CounterSocketsDefinition = typeof counterSockets;
 
-let count = 0n;
-
 const Counter = makeFlowNodeDefinition({
   socketsDefinition: counterSockets,
   triggered: ({
     commit,
-    writeOutput
+    writeOutput,
+    state
   }, triggeringSocketName) => {
+    // duplicate count to not modify the state
+    let count = state.count + 0n;
   
     switch (triggeringSocketName) {
       case 'flow': {
@@ -41,13 +39,20 @@ const Counter = makeFlowNodeDefinition({
         break;
       }
       case 'reset': {
-        count++;
+        count = 0n;
         break;
       }
       default:
         throw new Error('should not get here');
     }
-  }
+  
+    return {
+      count
+    };
+  },
+  initialState: () => ({
+    count: 0n
+  })
 });
 
 export default Counter;

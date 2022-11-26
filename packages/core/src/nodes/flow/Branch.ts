@@ -23,9 +23,10 @@ export const branchSockets = {
   }
 } satisfies IHasSockets; 
 
-// export type BranchSocketsDefinition = typeof branchSockets;
+export type BranchSocketsDefinition = typeof branchSockets;
+export type BranchState = undefined;
 
-const Branch = makeFlowNodeDefinition({
+const Branch = makeFlowNodeDefinition<BranchSocketsDefinition, BranchState>({
   socketsDefinition: branchSockets,
   triggered: ({
     commit,
@@ -33,7 +34,9 @@ const Branch = makeFlowNodeDefinition({
   }) => {
     const value = readInput('condition');
     commit(value ? 'true' : 'false')
-  }
-});
+    return undefined;
+  },
+  initialState: () => undefined
+}) satisfies IFlowNode<BranchSocketsDefinition, BranchState>;
 
 export default Branch;
