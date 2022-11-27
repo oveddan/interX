@@ -219,6 +219,61 @@ export function makeIn2Out1FuncNode<
   });
 }
 
+
+// type LengthOfArray<T extends Array<any>> = T.length;
+
+
+type ValueTypeNameMappings<TValues extends [SocketValueType]
+  | [SocketValueType, SocketValueType]
+  | [SocketValueType, SocketValueType]
+  | [SocketValueType, SocketValueType, SocketValueType]> = {
+    [TValue in TValues]: 
+  } 
+
+
+export function makeInNOutNodes<
+  TIn extends SocketValueType[],
+  TOut extends SocketValueType
+>({
+  inputValueTypes,
+  outputValueType,
+  unaryEvalFunc,
+}: {
+  inputValueTypes: TIn
+  outputValueType: TOut
+  unaryEvalFunc: (...params: TIn) => ValueTypeNameMapping<TOut>;
+}) {
+  const socketsDefinition  = {
+    inputSockets: {
+      a: {
+        valueType: inputValueTypes[0],
+      },
+      b: {
+        valueType: inputValueTypes[1],
+      },
+    },
+    outputSockets: {
+      result: {
+        valueType: outputValueType,
+      },
+    },
+  } satisfies IHasSockets;
+
+  return makeImmediateNodeDefinition({
+    socketsDefinition,
+    exec: ({ readInput, writeOutput }) => {
+      const inputA = readInput('a') as OptionalValueTypeMapping<TIn1>;
+      const inputB = readInput('b') as OptionalValueTypeMapping<TIn2>;
+      if (typeof inputA !== 'undefined' && typeof inputB !== 'undefined') {
+        writeOutput('result', unaryEvalFunc(inputA, inputB));
+      }
+    },
+  });
+}
+
+
+
+
 // function recordFromEntries<K extends string, V>(entries: [K, V][]): Record<K, V> {
 //   return Object.fromEntries(entries) as Record<K, V>;
 // }
