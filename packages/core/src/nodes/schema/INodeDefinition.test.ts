@@ -7,6 +7,11 @@ import {
   ValueSockets,
   ExtractValueType,
   ValueTypeNameMapping,
+  SocketSpec,
+  SocketsFromSpec,
+  makeSocketsFromSpec,
+  ToObjectsArray,
+  UnionToIntersection,
 } from './INodeDefinition';
 import { expectType } from './testUtils';
 
@@ -22,8 +27,8 @@ describe('TriggeredParams', () => {
             valueType: 'string',
           },
           c: {
-            valueType: "flow"
-          }
+            valueType: 'flow',
+          },
         },
         outputSockets: {
           c: {
@@ -43,34 +48,30 @@ describe('TriggeredParams', () => {
 
       const flowNode = makeFlowNodeDefinition({
         socketsDefinition: vals,
-        triggered: ({
-          commit,
-          readInput,
-          writeOutput
-        }) => {
+        triggered: ({ commit, readInput, writeOutput }) => {
           const a = readInput('a');
 
-          writeOutput("c", a ? 1.0 : 0.0);
-        
+          writeOutput('c', a ? 1.0 : 0.0);
+
           return undefined;
         },
-        initialState: () => undefined
-      })
+        initialState: () => undefined,
+      });
 
       expectType<ValueSockets<typeof vals.inputSockets>>({
         a: {
-          valueType: 'boolean'
+          valueType: 'boolean',
         },
         b: {
-          valueType: 'string'
-        }
-      })
+          valueType: 'string',
+        },
+      });
 
       expectType<FlowSockets<typeof vals.inputSockets>>({
         c: {
-          valueType: 'flow'
-        }
-      })
+          valueType: 'flow',
+        },
+      });
 
       expectType<ValueTypeNameMapping<'boolean'>>(true);
       expectType<ValueTypeNameMapping<'string'>>('asdfasfd');
@@ -79,9 +80,34 @@ describe('TriggeredParams', () => {
       expectType<OutputValueType<typeof vals, 'd'>>(1n);
       expectType<OutputValueType<typeof vals, 'f'>>('asdfasfd');
 
-
       expectType<Parameters<readNodeInputFn<typeof vals>>>(['a']);
       expectType<Parameters<readNodeInputFn<typeof vals>>>(['b']);
+    });
+  });
+  describe('Function generation', () => {
+    const socketDefs = [
+      { name: 'a', valueType: 'float' },
+      { name: 'g', valueType: 'string' },
+    ] as const;
+
+    // const socketSpecs = makeSocketsFromSpec([
+    //   { name: 'a', valueType: 'float' },
+    //   { name: 'g', valueType: 'string' }
+    // ] as const);
+
+    // socketSpecs['a'];
+
+    type x = typeof socketDefs;
+
+    type y = SocketsFromSpec<x>;
+
+    expectType<x>({
+      a: {
+        valueType: 'float',
+      },
+      g: {
+        valueType: 'string',
+      },
     });
   });
 });

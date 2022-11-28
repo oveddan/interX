@@ -1,14 +1,14 @@
-import { NodeCategory } from '@behave-graph/core';
+import { FlowNode, NodeCategory, Socket } from '@behave-graph/core';
+import { UnionToIntersection } from 'type-fest';
 
 export type SocketValueType = 'flow' | 'boolean' | 'integer' | 'float' | 'string' | 'jsonPath';
 
 export interface ISocketDefinition {
+  readonly name: string;
   readonly valueType: SocketValueType;
 }
 
-export type Sockets = {
-  readonly [key: string]: ISocketDefinition;
-};
+export type Sockets = readonly ISocketDefinition[];
 
 export type IHasSockets = {
   readonly inputSockets: Sockets;
@@ -22,7 +22,6 @@ export interface INodeDefinition extends IHasSockets {
 }
 
 export type ValueTypeNameMapping<K extends SocketValueType> = {
-  
   boolean: boolean;
   integer: bigint;
   float: number;
@@ -40,10 +39,9 @@ type FlowSocketDef = {
   valueType: 'flow';
 };
 
-export type ValueSockets<T extends Sockets> = Pick<
-  T,
-  { [K in keyof T]-?: T[K] extends FlowSocketDef ? never : K }[keyof T]
->;
+export type ValueSockets<T extends Sockets> = {
+  [K in keyof T]-?: T[K] extends FlowSocketDef ? never : T[K];
+};
 export type FlowSockets<T extends Sockets> = Pick<
   T,
   { [K in keyof T]-?: T[K] extends FlowSocketDef ? K : never }[keyof T]
@@ -76,9 +74,9 @@ export type InputValueType<T extends IHasSockets, J extends keyof InputValueSock
 
 /** Node Engine Access Functions */
 
-export type readNodeInputFn<T extends IHasSockets> = <J extends keyof InputValueSockets<T>>(
-  param: J
-) => InputValueType<T, J> | undefined;
+export type readNodeInputFn<T extends IHasSockets> = <TIn extends InputValueSockets<T>[number], J extends keyof TIn>(
+  param: TIn[number][J]
+) => undefined;
 
 export type writeNodeOutputFn<THasSockets extends IHasSockets> = <J extends keyof OutputValueSockets<THasSockets>>(
   param: J,
@@ -94,7 +92,7 @@ export type ReadWriteToNodeParams<T extends IHasSockets> = {
   writeOutput: writeNodeOutputFn<T>;
   /** reads a value from an input node */
   readInput: readNodeInputFn<T>;
-}
+};
 
 /** Arguments for the triggered function on a flow node */
 export type TriggeredParams<T extends IHasSockets, TNodeState> = ReadWriteToNodeParams<T> & {
@@ -122,18 +120,14 @@ export function makeFlowNodeDefinition<TSockets extends IHasSockets, TNodeState 
   return flowNode;
 }
 
-type ImmediateExecFn<T extends IHasSockets> = (
-  params: ReadWriteToNodeParams<T>
-) => void;
+type ImmediateExecFn<T extends IHasSockets> = (params: ReadWriteToNodeParams<T>) => void;
 
 export interface IImmediateNode<T extends IHasSockets> {
   socketsDefinition: T;
   exec: ImmediateExecFn<T>;
 }
 
-export function makeImmediateNodeDefinition<T extends IHasSockets>(
-  immediateNode: IImmediateNode<T>
-) {
+export function makeImmediateNodeDefinition<T extends IHasSockets>(immediateNode: IImmediateNode<T>) {
   return immediateNode;
 }
 
@@ -178,90 +172,164 @@ function makeSockets<T extends Sockets>(sockets: T): T {
   return sockets;
 }
 
-export function makeIn2Out1FuncNode<
-  TIn1 extends SocketValueType,
-  TIn2 extends SocketValueType,
-  TOut extends SocketValueType
->({
-  inputValueTypes,
-  outputValueType,
-  unaryEvalFunc,
-}: {
-  inputValueTypes: [TIn1, TIn2];
-  outputValueType: TOut;
-  unaryEvalFunc: (a: ValueTypeNameMapping<TIn1>, b: ValueTypeNameMapping<TIn2>) => ValueTypeNameMapping<TOut>;
-}) {
-  const socketsDefinition  = {
-    inputSockets: {
-      a: {
-        valueType: inputValueTypes[0],
-      },
-      b: {
-        valueType: inputValueTypes[1],
-      },
-    },
-    outputSockets: {
-      result: {
-        valueType: outputValueType,
-      },
-    },
-  } satisfies IHasSockets;
-
-  return makeImmediateNodeDefinition({
-    socketsDefinition,
-    exec: ({ readInput, writeOutput }) => {
-      const inputA = readInput('a') as OptionalValueTypeMapping<TIn1>;
-      const inputB = readInput('b') as OptionalValueTypeMapping<TIn2>;
-      if (typeof inputA !== 'undefined' && typeof inputB !== 'undefined') {
-        writeOutput('result', unaryEvalFunc(inputA, inputB));
-      }
-    },
-  });
-}
-
-
 // type LengthOfArray<T extends Array<any>> = T.length;
 
+// type ValueTypeMapping = {
+//   "string": string,
+//   "boolean": boolean,
+//   "float": number,
+//   "integer": number
+// }
 
-type ValueTypeNameMappings<TValues extends [SocketValueType]
-  | [SocketValueType, SocketValueType]
-  | [SocketValueType, SocketValueType]
-  | [SocketValueType, SocketValueType, SocketValueType]> = {
-    [TValue in TValues]: 
-  } 
+// type ValueType = keyof ValueTypeMapping;
 
+type ValuesForValueTypes<T extends readonly SocketSpec[]> = {
+  [K in keyof T]: ValueTypeNameMapping<T[K]['valueType']>;
+};
 
-export function makeInNOutNodes<
-  TIn extends SocketValueType[],
-  TOut extends SocketValueType
->({
+type unaryEvalFunction<TInput extends readonly SocketSpec[], TOutput extends SocketSpec> = (
+  ...params: ValuesForValueTypes<TInput>
+) => ValueTypeNameMapping<TOutput['valueType']>;
+
+// type SocketSpec = [string, SocketValueType];
+
+// type ValueTypeFromSockets<T extends SocketSpec[]> = {
+//   [V in keyof T]: T[V]['valueType']
+// }
+
+// type ToObject<T> = T extends readonly [infer Key, infer Func]
+//   ? Key extends PropertyKey
+//     ? { [P in Key]: Func }
+//     : never
+//   : never;
+
+// type ToObjectsArray<T> = {
+//   [I in keyof T]: ToObject<T[I]>;
+// };
+
+// type UnionToIntersection<U> =
+//   (U extends any ? (k: U) => void : never) extends ((k: infer I) => void) ? I : never;
+
+export type SocketSpec = {
+  name: string;
+  valueType: SocketValueType;
+};
+
+export type SocketNames<T extends readonly SocketSpec[]> = {
+  [K in keyof T]: T[K]['name'];
+};
+
+type ToSocket<T extends SocketSpec> = {
+  [P in T['name']]: {
+    valueType: T['valueType'];
+  };
+};
+
+export type ToObjectsArray<T extends readonly SocketSpec[]> = {
+  [I in keyof T]: ToSocket<T[I]>;
+};
+
+type Known<T extends any | unknown | never> = Exclude<T, unknown | never>;
+
+// export type UnionToIntersection<Union> = // `extends unknown` is always going to be the case and is used to convert the
+//   // `Union` into a [distributive conditional
+//   // type](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-8.html#distributive-conditional-types).
+//   (
+//     Union extends unknown
+//       ? // The union type is used as the only argument to a function since the union
+//         // of function arguments is an intersection.
+//         (distributedUnion: Union) => void
+//       : // This won't happen.
+//         never
+//   ) extends // Infer the `Intersection` type since TypeScript represents the positional
+//   // arguments of unions of functions as an intersection of the union.
+//   (mergedIntersection: infer Intersection) => void
+//     ? Intersection
+//     : never;
+
+export type SocketsFromSpec<T extends readonly SocketSpec[]> = Known<UnionToIntersection<ToObjectsArray<T>[number]>>;
+
+// type Params = [{ name: 'a'; valueType: 'float' }, { name: 'b'; valueType: 'string' }];
+
+// type mapped = SocketsFromSpec<Params>;
+
+// type x = mapped['a'];
+
+// type SocketsForSpec<T extends readonly SocketSpec[]> = T extends readonly [infer Key, infer SocketValueType]
+//   ? Key extends PropertyKey
+//     ? { [P in Key]: SocketValueType }
+//     : never
+//   : never;
+
+// type SocketsForSpec<T extends readonly SocketSpec[]> = {
+//   [V in keyof T as `${V}`]: T[V]['valueType']
+// }
+
+// type MapKey<BaseType> = BaseType extends Map<infer KeyType, unknown> ? KeyType : never;
+// type MapValue<BaseType> = BaseType extends Map<unknown, infer ValueType> ? ValueType : never;
+// type MapEntry<BaseType> = [MapKey<BaseType>, MapValue<BaseType>];
+// type Entries<T extends { [key: string]: SocketValueType }> = Array<MapEntry<T>>
+
+// type SocketsForValuesType<T extends { [key: string]: SocketValueType }, J = Entries<T>> = {
+//   [K in keyof J]: J[K]
+// }
+
+// type x = SocketsForValuesType<{
+//   a: 'string',
+//   b: 'float'
+// }>;
+
+// test
+
+// const fn: unaryEvalFunction<['string', 'float'], 'float'> = (a, b) => {
+//   return 5;
+// };
+
+export function makeSocketsFromSpec<TSockets extends readonly SocketSpec[]>(socketSpecs: TSockets) {
+  const sockets: any = {};
+
+  for (const { name, valueType } of socketSpecs) {
+    sockets[name] = { valueType } satisfies ISocketDefinition;
+  }
+
+  return sockets as SocketsFromSpec<TSockets>;
+}
+
+type immediateReadIn<TSockets extends SocketSpec[]> = <socket extends TSockets[number]>(
+  key: socket['name']
+) => ValueTypeNameMapping<socket['valueType']>;
+
+export function makeInNOutNodes<TIn extends readonly SocketSpec[], TOut extends SocketSpec>({
   inputValueTypes,
   outputValueType,
   unaryEvalFunc,
 }: {
-  inputValueTypes: TIn
-  outputValueType: TOut
-  unaryEvalFunc: (...params: TIn) => ValueTypeNameMapping<TOut>;
+  inputValueTypes: TIn;
+  outputValueType: TOut;
+  unaryEvalFunc: unaryEvalFunction<TIn, TOut>;
 }) {
-  const socketsDefinition  = {
-    inputSockets: {
-      a: {
-        valueType: inputValueTypes[0],
-      },
-      b: {
-        valueType: inputValueTypes[1],
-      },
-    },
-    outputSockets: {
-      result: {
-        valueType: outputValueType,
-      },
-    },
-  } satisfies IHasSockets;
+  const inputSockets = makeSocketsFromSpec(inputValueTypes) satisfies Sockets;
+  const outputSockets = makeSocketsFromSpec([outputValueType]) satisfies Sockets;
 
   return makeImmediateNodeDefinition({
-    socketsDefinition,
+    socketsDefinition: {
+      inputSockets,
+      outputSockets,
+    },
     exec: ({ readInput, writeOutput }) => {
+      const iputVals: any[] = [];
+
+      // if (inputValueTypes.length > 0) {
+      // const firstName = inputValueTypes[0].name;
+      //  readInput(firstName)
+      for (const { name } of inputValueTypes) {
+        const x = name satisfies keyof typeof inputSockets;
+
+        const inputVal = readInput(name satisfies keyof typeof inputSockets);
+        // }
+      }
+
+      const inputVals = [inputType in inputValueTypes];
       const inputA = readInput('a') as OptionalValueTypeMapping<TIn1>;
       const inputB = readInput('b') as OptionalValueTypeMapping<TIn2>;
       if (typeof inputA !== 'undefined' && typeof inputB !== 'undefined') {
@@ -270,9 +338,6 @@ export function makeInNOutNodes<
     },
   });
 }
-
-
-
 
 // function recordFromEntries<K extends string, V>(entries: [K, V][]): Record<K, V> {
 //   return Object.fromEntries(entries) as Record<K, V>;
@@ -295,3 +360,11 @@ export function makeInNOutNodes<
 // const extractor = makeObjectExtractor('g');
 
 // extractor('asdfasdf');
+
+// type FnForSpecific = (...params: ForSpecific) => {
+
+// }
+
+// type ValuesForValueTypes<T extends ValueType[]> = [
+//   [K in T]: ValueTypeMapping[K]
+// ]
