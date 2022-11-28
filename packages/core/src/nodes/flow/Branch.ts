@@ -1,4 +1,4 @@
-import { makeFlowNodeDefinition } from '../schema/INodeDefinition';
+import { makeFlowNodeDefinition } from '../schema/FlowNodes';
 
 const Branch = makeFlowNodeDefinition({
   socketsDefinition: {

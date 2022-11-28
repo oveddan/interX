@@ -1,16 +1,15 @@
+import { makeFlowNodeDefinition, readNodeInputFn } from './FlowNodes';
 import {
   FlowSockets,
   IHasSockets,
-  makeFlowNodeDefinition,
   OutputValueType,
-  readNodeInputFn,
   ValueSockets,
   ExtractValueType,
   ValueTypeNameMapping,
   SocketSpec,
   SocketValueTypes,
   SocketNames,
-} from './INodeDefinition';
+} from './Sockets';
 import { expectType } from './testUtils';
 
 describe('TriggeredParams', () => {
