@@ -144,13 +144,13 @@ type ImmediateExecFn<TIn extends readonly SocketSpec[], TOut extends SocketSpec>
   params: ImmediateExecParams<TIn, TOut>
 ) => void;
 
-export interface IImmediateNode<T extends IHasSockets, TIn extends SocketSpec[], TOut extends SocketSpec> {
-  socketsDefinition: T;
+export interface IImmediateNode<TIn extends readonly SocketSpec[], TOut extends SocketSpec> {
+  socketsDefinition: IHasSockets;
   exec: ImmediateExecFn<TIn, TOut>;
 }
 
-function makeImmediateNodeDefinition<T extends IHasSockets, TIn extends SocketSpec[], TOut extends SocketSpec>(
-  node: IImmediateNode<T, TIn, TOut>
+function makeImmediateNodeDefinition<TIn extends SocketSpec[], TOut extends SocketSpec>(
+  node: IImmediateNode<TIn, TOut>
 ) {
   return node;
 }
@@ -162,25 +162,6 @@ export type SocketValueTypes<T extends readonly SocketSpec[]> = {
 type unaryEvalFunction<TInput extends readonly SocketSpec[], TOutput extends SocketSpec> = (
   ...params: SocketValueTypes<TInput>
 ) => ValueTypeNameMapping<TOutput['valueType']>;
-
-// type SocketSpec = [string, SocketValueType];
-
-// type ValueTypeFromSockets<T extends SocketSpec[]> = {
-//   [V in keyof T]: T[V]['valueType']
-// }
-
-// type ToObject<T> = T extends readonly [infer Key, infer Func]
-//   ? Key extends PropertyKey
-//     ? { [P in Key]: Func }
-//     : never
-//   : never;
-
-// type ToObjectsArray<T> = {
-//   [I in keyof T]: ToObject<T[I]>;
-// };
-
-// type UnionToIntersection<U> =
-//   (U extends any ? (k: U) => void : never) extends ((k: infer I) => void) ? I : never;
 
 export type SocketSpec = {
   name: string;
@@ -203,22 +184,6 @@ export type ToObjectsArray<T extends readonly SocketSpec[]> = {
 
 type Known<T extends any | unknown | never> = Exclude<T, unknown | never>;
 
-// export type UnionToIntersection<Union> = // `extends unknown` is always going to be the case and is used to convert the
-//   // `Union` into a [distributive conditional
-//   // type](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-8.html#distributive-conditional-types).
-//   (
-//     Union extends unknown
-//       ? // The union type is used as the only argument to a function since the union
-//         // of function arguments is an intersection.
-//         (distributedUnion: Union) => void
-//       : // This won't happen.
-//         never
-//   ) extends // Infer the `Intersection` type since TypeScript represents the positional
-//   // arguments of unions of functions as an intersection of the union.
-//   (mergedIntersection: infer Intersection) => void
-//     ? Intersection
-//     : never;
-
 export type SocketsFromSpec<T extends readonly SocketSpec[]> = Known<UnionToIntersection<ToObjectsArray<T>[number]>>;
 
 export function makeSocketsFromSpec<TSockets extends readonly SocketSpec[]>(socketSpecs: TSockets) {
@@ -231,7 +196,7 @@ export function makeSocketsFromSpec<TSockets extends readonly SocketSpec[]>(sock
   return sockets as SocketsFromSpec<TSockets>;
 }
 
-export function makeInNOutNodes<TIn extends readonly SocketSpec[], TOut extends SocketSpec>({
+export function makeImmediateInNOutNode<TIn extends readonly SocketSpec[], TOut extends SocketSpec>({
   inputValueTypes,
   outputValueType,
   unaryEvalFunc,
@@ -239,7 +204,7 @@ export function makeInNOutNodes<TIn extends readonly SocketSpec[], TOut extends 
   inputValueTypes: TIn;
   outputValueType: TOut;
   unaryEvalFunc: unaryEvalFunction<TIn, TOut>;
-}) {
+}): IImmediateNode<TIn, TOut> {
   const inputSockets = makeSocketsFromSpec(inputValueTypes) satisfies Sockets;
   const outputSockets = makeSocketsFromSpec([outputValueType]) satisfies Sockets;
 
