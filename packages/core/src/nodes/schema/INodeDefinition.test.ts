@@ -8,10 +8,8 @@ import {
   ExtractValueType,
   ValueTypeNameMapping,
   SocketSpec,
-  SocketsFromSpec,
-  makeSocketsFromSpec,
-  ToObjectsArray,
-  UnionToIntersection,
+  SocketValueTypes,
+  SocketNames,
 } from './INodeDefinition';
 import { expectType } from './testUtils';
 
@@ -46,7 +44,7 @@ describe('TriggeredParams', () => {
         },
       } satisfies IHasSockets;
 
-      const flowNode = makeFlowNodeDefinition({
+      makeFlowNodeDefinition({
         socketsDefinition: vals,
         triggered: ({ commit, readInput, writeOutput }) => {
           const a = readInput('a');
@@ -90,24 +88,9 @@ describe('TriggeredParams', () => {
       { name: 'g', valueType: 'string' },
     ] as const;
 
-    // const socketSpecs = makeSocketsFromSpec([
-    //   { name: 'a', valueType: 'float' },
-    //   { name: 'g', valueType: 'string' }
-    // ] as const);
+    const outputSocketDef = { name: 'c', valueType: 'float' } satisfies SocketSpec;
 
-    // socketSpecs['a'];
-
-    type x = typeof socketDefs;
-
-    type y = SocketsFromSpec<x>;
-
-    expectType<x>({
-      a: {
-        valueType: 'float',
-      },
-      g: {
-        valueType: 'string',
-      },
-    });
+    expectType<SocketValueTypes<typeof socketDefs>>([1.0, '6']);
+    expectType<SocketNames<typeof socketDefs>>(['a', 'g']);
   });
 });
