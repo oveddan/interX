@@ -20,7 +20,6 @@ const Branch = makeFlowNodeDefinition({
   triggered: ({ commit, readInput }) => {
     const value = readInput('condition');
     commit(value ? 'true' : 'false');
-    return undefined;
   },
   initialState: () => undefined,
 });

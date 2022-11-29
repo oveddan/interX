@@ -59,17 +59,21 @@ export const buildStubEngineForFlowNode = <TInput extends Sockets, TOutput exten
 
   const trigger = (triggeringSocketName: FlowSocketNames<TInput>) => {
     // trigger node and update the state with the triggered result.
-    nodeState = flowNodeDefinition.triggered({
+    const result = flowNodeDefinition.triggered({
       ...triggeredParams,
       state: nodeState,
       triggeringSocketName,
     });
+    // if there is no node state, result will be undefined
+    // so then we know that we dont need to update the node state
+    if (typeof result !== 'undefined') nodeState = result;
   };
 
   const writeInput = <TValueSockets extends ValueSockets<TInput>, J extends keyof TValueSockets>(
     param: J,
     value: ValueTypeNameMapping<TValueSockets[J]['valueType']>
   ) => {
+    // build fake write input fn that stores the write to an interval value store
     // @ts-ignore
     inputValuesState[param] = value;
   };

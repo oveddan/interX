@@ -37,9 +37,13 @@ export type TriggeredParams<TInput extends Sockets, TOutput extends Sockets, TNo
   triggeringSocketName: FlowSocketNames<TInput>;
 };
 
-export type TriggeredFunction<TInput extends Sockets, TOutput extends Sockets, TNodeState> = (
-  params: TriggeredParams<TInput, TOutput, TNodeState>
-) => TNodeState;
+export type TriggeredFunction<
+  TInput extends Sockets,
+  TOutput extends Sockets,
+  TNodeState
+> = TNodeState extends undefined
+  ? (params: TriggeredParams<TInput, TOutput, TNodeState>) => void
+  : (params: TriggeredParams<TInput, TOutput, TNodeState>) => TNodeState;
 
 export interface IFlowNode<TInputSockets extends Sockets, TOutputSockets extends Sockets, TNodeState>
   extends IHasSockets<TInputSockets, TOutputSockets> {
@@ -50,7 +54,7 @@ export interface IFlowNode<TInputSockets extends Sockets, TOutputSockets extends
 export function makeFlowNodeDefinition<
   TInputSockets extends Sockets,
   TOutputSockets extends Sockets,
-  TNodeState = void
+  TNodeState = undefined
 >(flowNode: IFlowNode<TInputSockets, TOutputSockets, TNodeState>) {
   return flowNode;
 }
