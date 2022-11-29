@@ -1,54 +1,40 @@
+import { IFlowNode, TriggeredParams } from './FlowNodes';
+import { FlowSocketNames, Sockets, ValueSockets, ValueTypeNameMapping } from './Sockets';
+
 /**
  * Assert parameter is of a specific type.
  *
  * @param value - Value that should be identical to type `T`.
  */
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
+export function expectType<T>(value: T): void {}
 
-import { collapseTextChangeRangesAcrossMultipleVersions } from 'typescript';
-import {
-  ExtractValueType,
-  IFlowNode,
-  IHasSockets,
-  InputFlowSocketNames,
-  InputValueSockets,
-  InputValueType,
-  NodeInputValues,
-  OutputFlowSocketNames,
-  OutputFlowSockets,
-  OutputValueSocketNames,
-  TriggeredParams,
-} from './INodeDefinition';
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function expectType<T>(value: T): void {
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-}
-
-type RecordedOutputWrite<T extends IHasSockets> =
+type RecordedOutputWrite<TOutput extends Sockets> =
   | {
       writeType: 'flow';
-      socketName: OutputFlowSocketNames<T>;
+      socketName: FlowSocketNames<TOutput>;
     }
   | {
       writeType: 'value';
-      socketName: OutputValueSocketNames<T>;
+      socketName: keyof ValueSockets<TOutput>;
       value: any;
     };
 
-export type RecordedOutputWrites<T extends IHasSockets> = RecordedOutputWrite<T>[];
+type NodeInputValues<TSockets extends Sockets> = {
+  [K in keyof TSockets]?: ValueTypeNameMapping<TSockets[K]['valueType']>;
+};
 
-export const buildStubEngineForFlowNode = <TSockets extends IHasSockets, TState>(
-  flowNodeDefinition: IFlowNode<TSockets, TState>
+export type RecordedOutputWrites<T extends Sockets> = RecordedOutputWrite<T>[];
+
+export const buildStubEngineForFlowNode = <TInput extends Sockets, TOutput extends Sockets, TState>(
+  flowNodeDefinition: IFlowNode<TInput, TOutput, TState>
 ) => {
-  const outputWrites: RecordedOutputWrites<TSockets> = [];
+  const outputWrites: RecordedOutputWrites<TOutput> = [];
 
   const getOutputWrites = () => outputWrites;
 
-  let inputValuesState: NodeInputValues<TSockets> = {};
+  let inputValuesState: NodeInputValues<ValueSockets<TInput>> = {};
 
-  const triggeredParams: Omit<TriggeredParams<TSockets, TState>, 'state' | 'triggeringSocketName'> = {
+  const triggeredParams: Omit<TriggeredParams<TInput, TOutput, TState>, 'state' | 'triggeringSocketName'> = {
     commit: (param) => {
       outputWrites.push({
         writeType: 'flow',
@@ -56,11 +42,13 @@ export const buildStubEngineForFlowNode = <TSockets extends IHasSockets, TState>
       });
     },
     readInput: (param) => {
+      // @ts-ignore
       return inputValuesState[param];
     },
     writeOutput: (param, value) => {
       outputWrites.push({
         writeType: 'value',
+        // @ts-ignore
         socketName: param,
         value,
       });
@@ -69,7 +57,7 @@ export const buildStubEngineForFlowNode = <TSockets extends IHasSockets, TState>
 
   let nodeState = flowNodeDefinition.initialState();
 
-  const trigger = (triggeringSocketName: InputFlowSocketNames<TSockets>) => {
+  const trigger = (triggeringSocketName: FlowSocketNames<TInput>) => {
     // trigger node and update the state with the triggered result.
     nodeState = flowNodeDefinition.triggered({
       ...triggeredParams,
@@ -78,7 +66,11 @@ export const buildStubEngineForFlowNode = <TSockets extends IHasSockets, TState>
     });
   };
 
-  const writeInput = <J extends keyof InputValueSockets<TSockets>>(param: J, value: InputValueType<TSockets, J>) => {
+  const writeInput = <TValueSockets extends ValueSockets<TInput>, J extends keyof TValueSockets>(
+    param: J,
+    value: ValueTypeNameMapping<TValueSockets[J]['valueType']>
+  ) => {
+    // @ts-ignore
     inputValuesState[param] = value;
   };
 

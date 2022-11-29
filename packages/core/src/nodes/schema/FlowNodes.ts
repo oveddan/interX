@@ -1,9 +1,12 @@
 import { FlowSocketNames, FlowSockets, IHasSockets, Sockets, ValueSockets, ValueTypeNameMapping } from './Sockets';
 /** Node Engine Access Functions */
 
-export type readNodeInputFn<TSockets extends Sockets> = <V extends ValueSockets<TSockets>, J extends keyof V>(
-  param: J
-) => ValueTypeNameMapping<V[J]['valueType']>;
+export type readNodeInputFn<TSockets extends Sockets> = <
+  TValueSockets extends ValueSockets<TSockets>,
+  KValueSocket extends keyof TValueSockets
+>(
+  param: KValueSocket
+) => ValueTypeNameMapping<TValueSockets[KValueSocket]['valueType']>;
 
 export type writeNodeOutputFn<TSockets extends Sockets> = <V extends ValueSockets<TSockets>, J extends keyof V>(
   param: J,

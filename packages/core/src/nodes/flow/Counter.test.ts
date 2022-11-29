@@ -10,7 +10,7 @@ describe('Branch', () => {
       trigger('flow');
       trigger('flow');
 
-      const expected: RecordedOutputWrites<typeof Counter.socketsDefinition> = [
+      const expected: RecordedOutputWrites<typeof Counter.outputSockets> = [
         {
           writeType: 'value',
           socketName: 'count',
@@ -41,7 +41,7 @@ describe('Branch', () => {
       trigger('reset');
       trigger('flow');
 
-      const expected: RecordedOutputWrites<typeof Counter.socketsDefinition> = [
+      const expected: RecordedOutputWrites<typeof Counter.outputSockets> = [
         {
           writeType: 'value',
           socketName: 'count',

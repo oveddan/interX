@@ -61,9 +61,6 @@ describe('TriggeredParams', () => {
       expectType<ValueTypeNameMapping<'boolean'>>(true);
       expectType<ValueTypeNameMapping<'string'>>('asdfasfd');
       expectType<ExtractValueType<typeof flowDef.inputSockets, 'a'>>(false);
-      // expectType<OutputValueType<typeof vals, 'c'>>(1.0);
-      // expectType<OutputValueType<typeof vals, 'd'>>(1n);
-      // expectType<OutputValueType<typeof vals, 'f'>>('asdfasfd');
 
       expectType<Parameters<readNodeInputFn<typeof flowDef.inputSockets>>>(['a']);
       expectType<Parameters<readNodeInputFn<typeof flowDef.inputSockets>>>(['b']);
