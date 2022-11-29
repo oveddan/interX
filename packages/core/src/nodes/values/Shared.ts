@@ -1,59 +1,62 @@
-import { makeImmediateInNOutNode, SocketValueType } from '../schema/INodeDefinition';
+import { makeImmediateNodeDefinition } from '../schema/ImmediateNodes';
+import { Sockets, SocketValueType } from '../schema/Sockets';
 
 export function makeConstant<TValueType extends SocketValueType>(valueType: TValueType) {
-  return makeImmediateInNOutNode({
-    inputValueTypes: [{ name: 'a', valueType }],
-    outputValueType: { name: 'result', valueType: valueType },
-    unaryEvalFunc: (a) => a,
+  return makeImmediateNodeDefinition({
+    inputSockets: { a: { valueType } } satisfies Sockets,
+    outputSockets: { result: { valueType } } satisfies Sockets,
+    exec: ({ readInput, writeOutput }) => {
+      writeOutput('result', readInput('a'));
+    },
   });
 }
 
 export function makeEqual<TValueType extends SocketValueType>(valueType: TValueType) {
-  return makeImmediateInNOutNode({
-    inputValueTypes: [
-      { name: 'a', valueType },
-      { name: 'b', valueType },
-    ] as const,
-    outputValueType: { name: 'result', valueType: 'boolean' },
-    unaryEvalFunc: (a, b) => a === b,
+  return makeImmediateNodeDefinition({
+    inputSockets: { a: { valueType }, b: { valueType } } satisfies Sockets,
+    outputSockets: { result: { valueType } } satisfies Sockets,
+    exec: ({ readInput, writeOutput }) => {
+      writeOutput('result', readInput('a') === readInput('b'));
+    },
   });
 }
 
 type NumberSocketValueTypes = Extract<SocketValueType, 'float' | 'integer'>;
 
 export function makeAdd<TValueType extends NumberSocketValueTypes>(valueType: TValueType) {
-  return makeImmediateInNOutNode({
-    inputValueTypes: [
-      { name: 'a', valueType },
-      { name: 'b', valueType },
-    ] as const,
-    outputValueType: { name: 'result', valueType },
-    unaryEvalFunc: (a, b) =>
-      // @ts-ignore
-      a + b,
+  return makeImmediateNodeDefinition({
+    inputSockets: { a: { valueType }, b: { valueType } } satisfies Sockets,
+    outputSockets: { result: { valueType } } satisfies Sockets,
+    exec: ({ readInput, writeOutput }) => {
+      writeOutput(
+        'result',
+        // @ts-ignore
+        readInput('a') + readInput('b')
+      );
+    },
   });
 }
 
 export function makeSub<TValueType extends NumberSocketValueTypes>(valueType: TValueType) {
-  const inputTypes = [
-    { name: 'a', valueType },
-    { name: 'b', valueType },
-  ] as const;
-  return makeImmediateInNOutNode({
-    inputValueTypes: inputTypes,
-    outputValueType: { name: 'result', valueType },
-    unaryEvalFunc: (a, b) =>
-      // @ts-ignore
-      a - b,
+  return makeImmediateNodeDefinition({
+    inputSockets: { a: { valueType }, b: { valueType } } satisfies Sockets,
+    outputSockets: { result: { valueType } } satisfies Sockets,
+    exec: ({ readInput, writeOutput }) => {
+      writeOutput(
+        'result',
+        // @ts-ignore
+        readInput('a') - readInput('b')
+      );
+    },
   });
 }
 
 export function makeNegate<TValueType extends NumberSocketValueTypes>(valueType: TValueType) {
-  return makeImmediateInNOutNode({
-    inputValueTypes: [{ name: 'a', valueType }] as const,
-    outputValueType: { name: 'result', valueType },
-    unaryEvalFunc: (a) =>
-      // @ts-ignore
-      -a,
+  return makeImmediateNodeDefinition({
+    inputSockets: { a: { valueType } } satisfies Sockets,
+    outputSockets: { result: { valueType } } satisfies Sockets,
+    exec: ({ readInput, writeOutput }) => {
+      writeOutput('result', -readInput('a'));
+    },
   });
 }

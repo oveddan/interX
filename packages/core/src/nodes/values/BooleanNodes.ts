@@ -1,41 +1,61 @@
-import { makeImmediateInNOutNode, SocketSpec, SocketValueType } from '../schema/INodeDefinition';
+import { makeImmediateNodeDefinition } from '../schema/ImmediateNodes';
+import { Sockets, SocketSpec } from '../schema/Sockets';
 import { makeConstant, makeEqual } from './Shared';
 
-const makeOutputNode = <T extends SocketValueType>(t: T) => ({ name: 'result', valueType: t });
+const singleBoolean = {
+  a: {
+    valueType: 'boolean',
+  },
+} satisfies Sockets;
+const doubleBoolean = {
+  ...singleBoolean,
+  b: {
+    valueType: 'boolean',
+  },
+} satisfies Sockets;
 
-const booleans = (['a', 'b', 'c', 'd'] as const).map((name) => ({
-  name,
-  valueType: 'boolean',
-})) satisfies SocketSpec[];
-
-const singleBoolean = [booleans[0]] as const;
-const doubleBoolean = [booleans[0], booleans[1]] as const;
-const outputBoolean = makeOutputNode('boolean');
+const singleOutput = {
+  result: {
+    valueType: 'boolean',
+  },
+} satisfies Sockets;
 
 export const Constant = makeConstant('boolean');
 
-export const And = makeImmediateInNOutNode({
-  inputValueTypes: doubleBoolean,
-  outputValueType: outputBoolean,
-  unaryEvalFunc: (a, b) => a && b,
+export const And = makeImmediateNodeDefinition({
+  inputSockets: doubleBoolean,
+  outputSockets: singleOutput,
+  exec: ({ readInput, writeOutput }) => {
+    writeOutput('result', readInput('a') && readInput('b'));
+  },
 });
 
-export const Or = makeImmediateInNOutNode({
-  inputValueTypes: doubleBoolean,
-  outputValueType: outputBoolean,
-  unaryEvalFunc: (a, b) => a || b,
+export const Or = makeImmediateNodeDefinition({
+  inputSockets: doubleBoolean,
+  outputSockets: singleOutput,
+  exec: ({ readInput, writeOutput }) => {
+    writeOutput('result', readInput('a') || readInput('b'));
+  },
 });
 
-export const Not = makeImmediateInNOutNode({
-  inputValueTypes: singleBoolean,
-  outputValueType: outputBoolean,
-  unaryEvalFunc: (a) => !a,
+export const Not = makeImmediateNodeDefinition({
+  inputSockets: singleBoolean,
+  outputSockets: singleOutput,
+  exec: ({ readInput, writeOutput }) => {
+    writeOutput('result', !readInput('a'));
+  },
 });
 
-export const ToFloat = makeImmediateInNOutNode({
-  inputValueTypes: singleBoolean,
-  outputValueType: makeOutputNode('float'),
-  unaryEvalFunc: (a) => (a ? 1 : 0),
+export const ToFloat = makeImmediateNodeDefinition({
+  inputSockets: singleBoolean,
+  outputSockets: {
+    result: {
+      valueType: 'float',
+    },
+  },
+  exec: ({ readInput, writeOutput }) => {
+    writeOutput('result', readInput('a') ? 1 : 0);
+  },
 });
 
 export const Equal = makeEqual('boolean');

@@ -1,22 +1,4 @@
-import { makeImmediateInNOutNode, SocketSpec, SocketValueType } from '../schema/INodeDefinition';
 import { makeAdd, makeConstant, makeEqual, makeNegate, makeSub } from './Shared';
-import * as FloatNodes from '@behave-graph/core/src/Profiles/Core/Values/FloatNodes';
-import { Graph } from '@behave-graph/core';
-
-// Unreal Engine Blueprint Float nodes: https://docs.unrealengine.com/4.27/en-US/BlueprintAPI/Math/Float/
-
-// FloatNodes.Abs.factory(FloatNodes.Abs).inputSockets;
-
-const makeOutputNode = <T extends SocketValueType>(t: T) => ({ name: 'result', valueType: t });
-
-const floats = (['a', 'b', 'c', 'd'] as const).map((name) => ({
-  name,
-  valueType: 'float',
-})) satisfies SocketSpec[];
-
-const singleFloat = [floats[0]] as const;
-const doubleFloat = [floats[0], floats[1]] as const;
-const outputFloat = makeOutputNode('float');
 
 export const Constant = makeConstant('float');
 export const Equal = makeEqual('float');

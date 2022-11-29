@@ -1,9 +1,8 @@
-import { FlowNode, NodeCategory, Socket } from '@behave-graph/core';
-import { UnionToIntersection } from 'type-fest';
+import { NodeCategory } from '@behave-graph/core';
 import { IHasSockets } from './Sockets';
 
-export interface INodeDefinition extends IHasSockets {
-  typeName: string;
-  category: NodeCategory;
-  label: string;
-}
+// export interface INodeDefinition extends IHasSockets {
+//   typeName: string;
+//   category: NodeCategory;
+//   label: string;
+// }

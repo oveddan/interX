@@ -1,22 +1,20 @@
 import { makeFlowNodeDefinition } from '../schema/FlowNodes';
 
 const Branch = makeFlowNodeDefinition({
-  socketsDefinition: {
-    inputSockets: {
-      flow: {
-        valueType: 'flow',
-      },
-      condition: {
-        valueType: 'boolean',
-      },
+  inputSockets: {
+    flow: {
+      valueType: 'flow',
     },
-    outputSockets: {
-      true: {
-        valueType: 'flow',
-      },
-      false: {
-        valueType: 'flow',
-      },
+    condition: {
+      valueType: 'boolean',
+    },
+  },
+  outputSockets: {
+    true: {
+      valueType: 'flow',
+    },
+    false: {
+      valueType: 'flow',
     },
   },
   triggered: ({ commit, readInput }) => {

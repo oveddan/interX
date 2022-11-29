@@ -1,22 +1,20 @@
 import { makeFlowNodeDefinition } from '../schema/FlowNodes';
 
 const Counter = makeFlowNodeDefinition({
-  socketsDefinition: {
-    inputSockets: {
-      flow: {
-        valueType: 'flow',
-      },
-      reset: {
-        valueType: 'flow',
-      },
+  inputSockets: {
+    flow: {
+      valueType: 'flow',
     },
-    outputSockets: {
-      flow: {
-        valueType: 'flow',
-      },
-      count: {
-        valueType: 'integer',
-      },
+    reset: {
+      valueType: 'flow',
+    },
+  },
+  outputSockets: {
+    flow: {
+      valueType: 'flow',
+    },
+    count: {
+      valueType: 'integer',
     },
   },
   triggered: ({ commit, writeOutput, state, triggeringSocketName }) => {

@@ -1,80 +1,78 @@
-import {
-  IHasSockets,
-  Known,
-  makeSocketsFromSpec,
-  SocketNames,
-  Sockets,
-  SocketsFromSpec,
-  SocketSpec,
-  SocketValueTypes,
-  ValueTypeNameMapping,
-} from './Sockets';
+import { ReadWriteToNodeParams } from './FlowNodes';
+import { Sockets } from './Sockets';
 
-export type unaryEvalFunction<TInput extends readonly SocketSpec[], TOutputs extends readonly SocketSpec[]> = (
-  ...params: SocketValueTypes<TInput>
-) => SocketValueTypes<TOutputs>;
+// type PickSocket<TSockets extends Sockets, k extends keyof TSockets> = TSockets[k];
 
-export type immediateReadIn<TSockets extends readonly SocketSpec[]> = <
-  S extends Known<SocketsFromSpec<TSockets>>,
-  K extends keyof S
->(
-  key: K
-) => S[K];
+// type PickValueTypes<TSockets extends Sockets, inputOrder extends readonly (keyof TSockets)[]> = {
+//   readonly [K in keyof inputOrder]: ValueTypeNameMapping<PickSocket<TSockets, inputOrder[K]>['valueType']>;
+// };
 
-export type immediateWriteOut<TSockets extends readonly SocketSpec[]> = <
-  S extends Known<SocketsFromSpec<TSockets>>,
-  K extends keyof S
->(
-  key: K,
-  value: S[K]
+// type unaryEvalFunction<
+//   TInput extends Sockets,
+//   TOutputs extends Sockets,
+//   inputOrder extends readonly (keyof TInput)[],
+//   outputOrder extends readonly (keyof TOutputs)[]
+// > = (...params: PickValueTypes<TInput, inputOrder>) => PickValueTypes<TOutputs, outputOrder>;
+
+export type ImmediateExecFn<TIn extends Sockets, TOut extends Sockets> = (
+  params: ReadWriteToNodeParams<TIn, TOut>
 ) => void;
 
-type ImmediateExecParams<TIn extends readonly SocketSpec[], TOut extends readonly SocketSpec[]> = {
-  readInput: immediateReadIn<TIn>;
-  writeOutput: immediateWriteOut<TOut>;
-};
-
-type ImmediateExecFn<TIn extends readonly SocketSpec[], TOut extends readonly SocketSpec[]> = (
-  params: ImmediateExecParams<TIn, TOut>
-) => void;
-
-export interface IImmediateNode<TIn extends readonly SocketSpec[], TOut extends readonly SocketSpec[]> {
+export interface IImmediateNode<TIn extends Sockets, TOut extends Sockets> {
   inputSockets: TIn;
   outputSockets: TOut;
   exec: ImmediateExecFn<TIn, TOut>;
 }
 
-export function makeImmediateInNOutNodeDefinition<
-  TIn extends readonly SocketSpec[],
-  TOut extends readonly SocketSpec[]
->({
-  inputValueTypes,
-  outputValueTypes,
-  unaryEvalFunc,
-}: {
-  inputValueTypes: TIn;
-  outputValueTypes: TOut;
-  unaryEvalFunc: unaryEvalFunction<TIn, TOut>;
-}): IImmediateNode<TIn, TOut> {
-  const exec: ImmediateExecFn<TIn, TOut> = ({ readInput, writeOutput }) => {
-    const inputNames = inputValueTypes.map(({ name }) => name) as SocketNames<TIn>;
-    const outputNames = outputValueTypes.map(({ name }) => name) as SocketNames<TOut>;
-
-    const inputValues = inputNames.map((x) => readInput(x)) as unknown as SocketValueTypes<TIn>;
-
-    const outputValues = unaryEvalFunc(...inputValues) as unknown as SocketValueTypes<TOut>;
-
-    outputNames.forEach((outputName, i) => {
-      // @ts-ignore
-      writeOutput(outputName, outputValues[i]);
-    });
-  };
-
-  const node: IImmediateNode<TIn, TOut> = {
-    inputSockets: inputValueTypes,
-    outputSockets: outputValueTypes,
-    exec,
-  };
-
-  return node;
+export function makeImmediateNodeDefinition<TIn extends Sockets, TOut extends Sockets>(
+  nodeDefinition: IImmediateNode<TIn, TOut>
+) {
+  return nodeDefinition;
 }
+
+export function makeExec<TIn extends Sockets, TOut extends Sockets>(exec: ImmediateExecFn<TIn, TOut>) {
+  return exec;
+}
+
+// export function makeImmediateInNOutNodeDefinition<
+//   TIn extends Sockets,
+//   TOut extends Sockets,
+//   inputOrder extends (keyof TIn)[],
+//   outputOrder extends (keyof TOut)[]
+// >({
+//   inputValueTypes,
+//   outputValueTypes,
+//   unaryEvalFunc,
+// }: {
+//   inputValueTypes: TIn;
+//   outputValueTypes: TOut;
+//   inputOrder: keyof TIn[];
+//   outputOrder: keyof TOut[];
+//   unaryEvalFunc: unaryEvalFunction<TIn, TOut, inputOrder, outputOrder>;
+// }): IImmediateNode<TIn, TOut> {
+//   const exec: ReadWriteToNodeParams<TIn, TOut> = ({ readInput }) => {
+//     return;
+//   };
+
+//   // = ({ readInput, writeOutput }) => {
+//   //   const inputNames = inputValueTypes.map(({ name }) => name) as SocketNames<TIn>;
+//   //   const outputNames = outputValueTypes.map(({ name }) => name) as SocketNames<TOut>;
+
+//   //   const inputValues = inputNames.map((x) => readInput(x)) as unknown as SocketValueTypes<TIn>;
+
+//   //   const outputValues = unaryEvalFunc(...inputValues) as unknown as SocketValueTypes<TOut>;
+
+//   //   outputNames.forEach((outputName, i) => {
+//   //     // @ts-ignore
+//   //     writeOutput(outputName, outputValues[i]);
+//   //   });
+//   // };
+
+//   const node: IImmediateNode<TIn, TOut> = {
+//     inputSockets: inputValueTypes,
+//     outputSockets: outputValueTypes,
+//     exec,
+//   };
+
+//   return node;
+// }
