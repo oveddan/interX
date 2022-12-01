@@ -28,3 +28,10 @@ export interface ISceneWithQueries extends IScene {
   getProperties: () => Properties;
   removeOnClickedListener(jsonPath: string, callback: (jsonPath: string) => void): void;
 }
+
+export interface IVariableStore {
+  get: (key: string) => any;
+  set: (key: string, value: any) => void;
+  // registerOnValueChangedListener: (id: string, cb: (value: any) => void) => void;
+  // removeOnValueChangedListener: (id: string, cb: (count: bigint) => void) => void;
+}
