@@ -9,6 +9,7 @@ import '@openzeppelin/contracts/access/Ownable.sol';
 import '@openzeppelin/contracts/utils/Counters.sol';
 
 enum NodeType {
+  ExternalTrigger,
   Counter,
   Add,
   Gate,
@@ -16,9 +17,9 @@ enum NodeType {
 }
 
 enum VariableType {
-    Int,
-    Bool,
-    NotAVariable
+  Int,
+  Bool,
+  NotAVariable
 }
 
 struct NodeDefinition {
@@ -46,14 +47,14 @@ struct NodeDefinition {
 // }
 
 struct EdgeDefinition {
-  string from;
-  string to;
-  string fromLabel;
+  string fromNode;
+  string toNode;
+  string fromSocket;
   string toSocket;
 }
 
 struct EdgeToNode {
-  string to;
+  string toNode;
   string toSocket;
   bool set;
 }
@@ -83,13 +84,13 @@ contract BehaviorGraph is ERC721, ERC721URIStorage, Ownable {
     mapping(uint256 => mapping(string => mapping(string => uint256))) private _nodeStateVals;
     mapping(uint256 => mapping(string => mapping(string => bool))) private _nodeBoolVals;
     mapping(uint256 => mapping(string => mapping(string => EdgeToNode))) private _tokenEdges;
-    mapping(uint256 => mapping(string => uint256)) private _tokenNodeEmitCount;
 
     Counters.Counter private _tokenIdCounter;
 
-    event SafeMint(uint256 tokenId, address to, string uri, NodeDefinition[] nodes);
+    event SafeMint(uint256 tokenId, address toNode, string uri, NodeDefinition[] nodes);
 
     error InvalidActionId(string nodeId);
+    error CannotTriggerExternally(string nodeId);
     error MissingTokens(string nodeId, address tokenAddress);
 
     event IntVariableUpdated(address executor, uint256 tokenId, string variableId, uint256 value);
@@ -136,7 +137,7 @@ contract BehaviorGraph is ERC721, ERC721URIStorage, Ownable {
         }
         for(uint256 i = 0; i < _edges.length; i++) {
           EdgeDefinition calldata edge = _edges[i];
-          _tokenEdges[tokenId][edge.from][edge.fromLabel] = EdgeToNode(edge.to, edge.toSocket, true);
+          _tokenEdges[tokenId][edge.fromNode][edge.fromSocket] = EdgeToNode(edge.toNode, edge.toSocket, true);
         }
     }
 
@@ -156,7 +157,7 @@ contract BehaviorGraph is ERC721, ERC721URIStorage, Ownable {
     function _triggerEdge(uint256 tokenId, string memory _nodeId, string memory _label) private {
       EdgeToNode memory edge = _getEdge(tokenId, _nodeId, _label);
       if(edge.set) {
-        trigger(tokenId, edge.to, edge.toSocket);
+        _triggerNode(tokenId, edge.toNode, edge.toSocket);
       }
     }
 
@@ -167,10 +168,10 @@ contract BehaviorGraph is ERC721, ERC721URIStorage, Ownable {
       // if the edge exists
       if (edge.set) {
         // write the node value to the input socket
-        _nodeInputIntVals[tokenId][edge.to][edge.toSocket] = val;
+        _nodeInputIntVals[tokenId][edge.toNode][edge.toSocket] = val;
       
         // if is an immediate node, exec it
-        _exec(tokenId, edge.to);
+        _exec(tokenId, edge.toNode);
       }
     }
 
@@ -193,7 +194,7 @@ contract BehaviorGraph is ERC721, ERC721URIStorage, Ownable {
         return node.nodeType == NodeType.Add;
     }
 
-    function trigger(uint256 tokenId, string memory _nodeId, string memory _triggeringSocketName) public {
+    function _triggerNode(uint256 tokenId, string memory _nodeId, string memory _triggeringSocketName) public {
         NodeDefinition memory node = getNodeDefinition(tokenId, _nodeId);
         
         if (node.nodeType == NodeType.Counter) {
@@ -219,5 +220,16 @@ contract BehaviorGraph is ERC721, ERC721URIStorage, Ownable {
         } else {
           revert InvalidActionId(_nodeId);
         }
+    }
+
+
+    function trigger(uint256 tokenId, string memory _nodeId) public {
+        NodeDefinition memory node = getNodeDefinition(tokenId, _nodeId);
+        
+        if (node.nodeType != NodeType.ExternalTrigger) {
+          revert CannotTriggerExternally(_nodeId);
+        }
+
+        _triggerEdge(tokenId, _nodeId, FLOW_SOCKET_NAME);
     }
 }

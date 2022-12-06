@@ -7,20 +7,40 @@ import { BehaviorGraph__factory } from '../typechain-types';
 import { ethers } from 'hardhat';
 import { BigNumber, Signer } from 'ethers';
 import { BehaviorGraph, NodeDefinitionStruct, EdgeDefinitionStruct } from '../typechain-types/contracts/BehaviorGraph';
-import { Token } from '../typechain-types/contracts/Token';
-import { token } from '../typechain-types/@openzeppelin/contracts';
 
 enum NodeTypes {
-  Counter = 0,
-  Add = 1,
-  Gate = 2,
-  Variable = 3,
+  ExternalTrigger = 0,
+  Counter = 1,
+  Add = 2,
+  Gate = 3,
+  Variable = 4,
 }
 
 enum VariableType {
   Int = 0,
   Bool = 1,
   NotAVariable = 2,
+}
+
+function connect({
+  a,
+  b,
+  fromSocket,
+  toSocket,
+}: {
+  a: Pick<NodeDefinitionStruct, 'id'>;
+  b: Pick<NodeDefinitionStruct, 'id'>;
+  fromSocket: string;
+  toSocket: string;
+}) {
+  const result: EdgeDefinitionStruct = {
+    fromNode: a.id,
+    toNode: b.id,
+    fromSocket,
+    toSocket,
+  };
+
+  return result;
 }
 
 describe('BehaviorGraph', function () {
@@ -54,243 +74,142 @@ describe('BehaviorGraph', function () {
   });
   describe('trigger', () => {
     describe('basic counter', () => {
+      const externalTriggerNodeId = 'external';
       const counterNodeId = 'a';
       const variableNodeId = 'b';
       const variableName = 'counterOutput';
-      const nodeDefinitions: NodeDefinitionStruct[] = [
-        {
+      const nodeDefinitions: { [key: string]: NodeDefinitionStruct } = {
+        externalTrigger: {
+          id: externalTriggerNodeId,
+          defined: true,
+          nodeType: NodeTypes.ExternalTrigger,
+          variableType: VariableType.NotAVariable,
+          variableName: '',
+        },
+        counter: {
           id: counterNodeId,
           defined: true,
           nodeType: NodeTypes.Counter,
           variableType: VariableType.NotAVariable,
           variableName: '',
         },
-        {
+        variable: {
           id: variableNodeId,
           defined: true,
           nodeType: NodeTypes.Variable,
           variableType: VariableType.Int,
           variableName: variableName,
         },
-      ];
-
-      it('should not trigger an action when there is no flow connection', async () => {
+      };
+      it('should raise an error if the counter is triggered directly', async () => {
         const { behaviorGraph, socketNames } = await loadFixture(deployFixture);
+
+        const nodes = [nodeDefinitions.counter, nodeDefinitions.variable];
 
         const edges: EdgeDefinitionStruct[] = [
           // edge from output value of counter to the variable
-          {
-            from: counterNodeId,
-            to: variableNodeId,
-            fromLabel: socketNames.inOutSocketA,
+          connect({
+            a: { id: counterNodeId },
+            b: { id: variableNodeId },
+            fromSocket: socketNames.inOutSocketA,
             toSocket: socketNames.inOutSocketA,
-          },
+          }),
         ];
 
         const ipfsHash = 'asdfasdfasfda';
-        const tx = await behaviorGraph.safeMint(ipfsHash, nodeDefinitions, edges);
+        const tx = await behaviorGraph.safeMint(ipfsHash, nodes, edges);
 
         await tx.wait();
 
         const tokenId = 0;
 
-        await expect(behaviorGraph.trigger(tokenId, counterNodeId, socketNames.flowSocketName)).to.not.emit(
+        await expect(behaviorGraph.trigger(tokenId, counterNodeId)).to.be.rejected;
+      });
+
+      it('should not trigger an action when there is no flow connection to a variable', async () => {
+        const { behaviorGraph, socketNames } = await loadFixture(deployFixture);
+
+        const nodes = [nodeDefinitions.externalTrigger, nodeDefinitions.counter, nodeDefinitions.variable];
+
+        const edges: EdgeDefinitionStruct[] = [
+          // edge from external trigger to counter
+          connect({
+            a: nodeDefinitions.externalTrigger,
+            b: nodeDefinitions.counter,
+            fromSocket: socketNames.flowSocketName,
+            toSocket: socketNames.flowSocketName,
+          }),
+          // edge from output value of counter to the variable
+          connect({
+            a: nodeDefinitions.counter,
+            b: nodeDefinitions.variable,
+            fromSocket: socketNames.inOutSocketA,
+            toSocket: socketNames.inOutSocketA,
+          }),
+        ];
+
+        const ipfsHash = 'asdfasdfasfda';
+        const tx = await behaviorGraph.safeMint(ipfsHash, nodes, edges);
+
+        await tx.wait();
+
+        const tokenId = 0;
+
+        await expect(behaviorGraph.trigger(tokenId, externalTriggerNodeId)).to.not.emit(
           behaviorGraph,
           'IntVariableUpdated'
         );
 
-        await expect(behaviorGraph.trigger(tokenId, counterNodeId, socketNames.flowSocketName)).to.not.emit(
+        await expect(behaviorGraph.trigger(tokenId, externalTriggerNodeId)).to.not.emit(
           behaviorGraph,
           'IntVariableUpdated'
         );
       });
 
-      it('should increment the counter and trigger an action when there is a basic counter', async () => {
+      it('should emit that a variable is updated when a flow is connected to the variable input', async () => {
         const { behaviorGraph, owner, socketNames } = await loadFixture(deployFixture);
 
+        const nodes = [nodeDefinitions.externalTrigger, nodeDefinitions.counter, nodeDefinitions.variable];
+
         const edges: EdgeDefinitionStruct[] = [
-          // edge from output value of counter to the variable
-          {
-            from: counterNodeId,
-            to: variableNodeId,
-            fromLabel: socketNames.inOutSocketA,
-            toSocket: socketNames.inOutSocketA,
-          },
-          // edge from flow of counter to flow of variable
-          {
-            from: counterNodeId,
-            to: variableNodeId,
-            fromLabel: socketNames.flowSocketName,
+          // edge from external trigger to counter
+          connect({
+            a: nodeDefinitions.externalTrigger,
+            b: nodeDefinitions.counter,
+            fromSocket: socketNames.flowSocketName,
             toSocket: socketNames.flowSocketName,
-          },
+          }),
+          // edge from output value of counter to the variable
+          connect({
+            a: nodeDefinitions.counter,
+            b: nodeDefinitions.variable,
+            fromSocket: socketNames.inOutSocketA,
+            toSocket: socketNames.inOutSocketA,
+          }),
+          // edge from flow of counter to flow of variable
+          connect({
+            a: nodeDefinitions.counter,
+            b: nodeDefinitions.variable,
+            fromSocket: socketNames.flowSocketName,
+            toSocket: socketNames.flowSocketName,
+          }),
         ];
 
         const ipfsHash = 'asdfasdfasfda';
-        const tx = await behaviorGraph.safeMint(ipfsHash, nodeDefinitions, edges);
+        const tx = await behaviorGraph.safeMint(ipfsHash, nodes, edges);
 
         await tx.wait();
 
         const tokenId = 0;
 
-        await expect(behaviorGraph.trigger(tokenId, counterNodeId, socketNames.flowSocketName))
+        await expect(behaviorGraph.trigger(tokenId, externalTriggerNodeId))
           .to.emit(behaviorGraph, 'IntVariableUpdated')
           .withArgs(await owner.getAddress(), tokenId, variableName, 1);
 
-        await expect(behaviorGraph.trigger(tokenId, counterNodeId, socketNames.flowSocketName))
+        await expect(behaviorGraph.trigger(tokenId, externalTriggerNodeId))
           .to.emit(behaviorGraph, 'IntVariableUpdated')
           .withArgs(await owner.getAddress(), tokenId, variableName, 2);
       });
     });
   });
-
-  //   it('creates a token with the list of node onto the list of nodes', async () => {
-  //     const { behaviorGraph, otherAccount } = await loadFixture(deployFixture);
-
-  //     const ipfsHash = 'asdfasdfasfda';
-
-  //     const nodesToCreate: NodeStruct[] = [
-  //       {
-  //         nodeType: 0,
-  //         id: '0',
-  //         tokenGateRule: {
-  //           active: false,
-  //           tokenContract: otherAccount.address,
-  //         },
-  //       },
-  //       {
-  //         nodeType: 1,
-  //         id: '5',
-  //         tokenGateRule: {
-  //           active: true,
-  //           tokenContract: behaviorGraph.address,
-  //         },
-  //       },
-  //     ];
-
-  //     const tx = await behaviorGraph.safeMint(ipfsHash, nodesToCreate);
-
-  //     await tx.wait();
-
-  //     const tokenId = 0;
-
-  //     const node = await behaviorGraph.getNode(tokenId, '5');
-
-  //     expect(node.nodeType).to.eql(nodesToCreate[1].nodeType);
-  //   });
-  // });
-
-  // describe('executeAction', () => {
-  //   let nodesToCreate: NodeStruct[] = [];
-
-  //   let contract: BehaviorGraph;
-  //   let otherTokenContract: Token;
-  //   let otherAccount: Signer;
-
-  //   beforeEach(async () => {
-  //     const { behaviorGraph, otherAccount: _otherAccount } = await deployFixture();
-  //     const TokenContract = await ethers.getContractFactory('Token');
-
-  //     const tokenContract = (await TokenContract.deploy()) as Token;
-
-  //     contract = behaviorGraph;
-  //     otherTokenContract = tokenContract;
-  //     otherAccount = _otherAccount;
-  //   });
-
-  //   describe('when the action is not token gated', () => {
-  //     it('can successfully execute that action and emits an event with the count', async () => {
-  //       const actionId = '5';
-  //       const nodesToCreate = [
-  //         {
-  //           nodeType: 0,
-  //           id: actionId,
-  //           tokenGateRule: {
-  //             active: false,
-  //             tokenContract: contract.address,
-  //           },
-  //         },
-  //       ];
-
-  //       const ipfsHash = 'asdfasfda';
-  //       const tx = await contract.safeMint(ipfsHash, nodesToCreate);
-  //       await tx.wait();
-
-  //       const tokenId = 0;
-
-  //       const executerAddress = otherAccount;
-
-  //       const actionCount = 1;
-
-  //       await expect(contract.connect(executerAddress).executeAction(tokenId, actionId))
-  //         .to.emit(contract, 'ActionExecuted')
-  //         .withArgs(await executerAddress.getAddress(), tokenId, actionId, actionCount);
-
-  //       await expect(contract.connect(executerAddress).executeAction(tokenId, actionId))
-  //         .to.emit(contract, 'ActionExecuted')
-  //         .withArgs(await executerAddress.getAddress(), tokenId, actionId, actionCount + 1);
-  //     });
-  //   });
-
-  //   describe('when the action is token gated', () => {
-  //     beforeEach(async () => {
-  //       const nodesToCreate = [
-  //         {
-  //           nodeType: 0,
-  //           id: '10',
-  //           tokenGateRule: {
-  //             active: false,
-  //             tokenContract: contract.address,
-  //           },
-  //         },
-  //         {
-  //           nodeType: 0,
-  //           id: '1',
-  //           // this rule requires you to have a token from another contract
-  //           tokenGateRule: {
-  //             active: true,
-  //             tokenContract: otherTokenContract.address,
-  //           },
-  //         },
-  //       ];
-
-  //       // mint 2 tokens
-  //       await contract.safeMint('0asdfasfd', []);
-  //       const tx = await contract.safeMint('asdfasdfasfd', nodesToCreate);
-
-  //       await tx.wait();
-  //     });
-  //     describe('when the user does not have a token of that acollection', () => {
-  //       it('cannot successfully execute that action', async () => {
-  //         // user does not have a token of that other account, so this fails.
-  //         const tokenId = 1;
-  //         const actionId = '1';
-  //         await expect(contract.connect(otherAccount).executeAction(tokenId, actionId)).to.be.reverted;
-  //       });
-  //     });
-
-  //     describe('when the user has a token of that collection', () => {
-  //       it('can successfully execute that action and emits the result', async () => {
-  //         const executerAccount = otherAccount;
-  //         const executerAccountAddress = await executerAccount.getAddress();
-
-  //         const tokenId = 1;
-  //         const actionId = '1';
-  //         const actionCount = 1;
-
-  //         // mint a token on the other contract the balance should be good now
-  //         const tx = await otherTokenContract.connect(executerAccount).safeMint('asdfasdfafs');
-  //         await tx.wait();
-
-  //         // verify that we have a token in the other contract
-  //         const balance = await otherTokenContract.balanceOf(executerAccountAddress);
-  //         expect(balance).to.eql(BigNumber.from(1));
-
-  //         // successfully call eecute the other action
-  //         await expect(contract.connect(otherAccount).executeAction(tokenId, actionId))
-  //           .to.emit(contract, 'ActionExecuted')
-  //           .withArgs(await executerAccountAddress, tokenId, actionId, actionCount); // We accept any value as `when` arg
-  //       });
-  //     });
-  //   });
-  // });
 });

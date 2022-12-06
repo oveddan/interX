@@ -40,6 +40,7 @@
     "build-editor": "yarn workspace @behavior-graph/editor build",
     "chain": "npx hardhat node",
     "compile": "npx hardhat compile",
+    "recompile": "rm -r cache && rm -r artifacts && rm -r typechain-types && yarn compile",
     "test": "npx hardhat test",
     "start": "yarn workspace @behavior-graph/editor dev",
     "lint": "npx eslint \"src/**/*.{ts,json}\"",
