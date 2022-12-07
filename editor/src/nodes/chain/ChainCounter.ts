@@ -9,7 +9,7 @@ export class ChainCounter extends FlowNode implements IChainNode {
     new NodeDescription(
       'chain/counter',
       'Flow',
-      'Counter',
+      'Chain Counter',
       (description, graph) => new ChainCounter(description, graph)
     );
 

@@ -3,7 +3,7 @@ import { EventNode, NodeDescription } from '@behave-graph/core';
 import { IChainGraph } from '../../abstractions';
 import { flowSocketName } from './ExternalTrigger';
 
-const smartActionInvokedTypeName = 'chain/value';
+const smartActionInvokedTypeName = 'chain/intVariableGet';
 export const variableNameSocket = 'variableName';
 export const valueSocketName = 'value';
 

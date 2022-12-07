@@ -4,7 +4,7 @@ import { IChainGraph } from '../../abstractions';
 import { flowSocketName } from './ExternalTrigger';
 import { ChainNodeSpec, ChainNodeTypes, ChainValueType, IChainNode } from './IChainNode';
 
-const smartActionInvokedTypeName = 'chain/value';
+const smartActionInvokedTypeName = 'chain/intVariableSet';
 export const variableNameSocket = 'variableName';
 export const valueSocketName = 'value';
 
