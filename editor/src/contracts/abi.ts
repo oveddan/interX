@@ -12,6 +12,17 @@ export const abi = [
         "type": "string"
       }
     ],
+    "name": "CannotTriggerExternally",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "nodeId",
+        "type": "string"
+      }
+    ],
     "name": "InvalidActionId",
     "type": "error"
   },
@@ -30,37 +41,6 @@ export const abi = [
     ],
     "name": "MissingTokens",
     "type": "error"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "executor",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "string",
-        "name": "actionId",
-        "type": "string"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "count",
-        "type": "uint256"
-      }
-    ],
-    "name": "ActionExecuted",
-    "type": "event"
   },
   {
     "anonymous": false,
@@ -116,6 +96,68 @@ export const abi = [
     "anonymous": false,
     "inputs": [
       {
+        "indexed": false,
+        "internalType": "address",
+        "name": "executor",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "tokenId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "variableId",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "value",
+        "type": "bool"
+      }
+    ],
+    "name": "BoolVariableUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "executor",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "tokenId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "variableId",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "value",
+        "type": "uint256"
+      }
+    ],
+    "name": "IntVariableUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
         "indexed": true,
         "internalType": "address",
         "name": "previousOwner",
@@ -143,7 +185,7 @@ export const abi = [
       {
         "indexed": false,
         "internalType": "address",
-        "name": "to",
+        "name": "toNode",
         "type": "address"
       },
       {
@@ -165,25 +207,23 @@ export const abi = [
             "type": "uint8"
           },
           {
-            "components": [
-              {
-                "internalType": "bool",
-                "name": "active",
-                "type": "bool"
-              },
-              {
-                "internalType": "address",
-                "name": "tokenContract",
-                "type": "address"
-              }
-            ],
-            "internalType": "struct TokenGateRule",
-            "name": "tokenGateRule",
-            "type": "tuple"
+            "internalType": "bool",
+            "name": "defined",
+            "type": "bool"
+          },
+          {
+            "internalType": "enum VariableType",
+            "name": "variableType",
+            "type": "uint8"
+          },
+          {
+            "internalType": "string",
+            "name": "variableName",
+            "type": "string"
           }
         ],
         "indexed": false,
-        "internalType": "struct Node[]",
+        "internalType": "struct NodeDefinition[]",
         "name": "nodes",
         "type": "tuple[]"
       }
@@ -215,6 +255,29 @@ export const abi = [
     ],
     "name": "Transfer",
     "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "tokenId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "_nodeId",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "_triggeringSocketName",
+        "type": "string"
+      }
+    ],
+    "name": "_triggerNode",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
   },
   {
     "inputs": [
@@ -259,72 +322,6 @@ export const abi = [
         "internalType": "uint256",
         "name": "tokenId",
         "type": "uint256"
-      },
-      {
-        "internalType": "string",
-        "name": "_nodeId",
-        "type": "string"
-      }
-    ],
-    "name": "executeAction",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "string",
-        "name": "_nodeId",
-        "type": "string"
-      }
-    ],
-    "name": "getActionCount",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "string[]",
-        "name": "_nodeIds",
-        "type": "string[]"
-      }
-    ],
-    "name": "getActionCounts",
-    "outputs": [
-      {
-        "internalType": "uint256[]",
-        "name": "",
-        "type": "uint256[]"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
       }
     ],
     "name": "getApproved",
@@ -351,7 +348,7 @@ export const abi = [
         "type": "string"
       }
     ],
-    "name": "getNode",
+    "name": "getNodeDefinition",
     "outputs": [
       {
         "components": [
@@ -366,29 +363,72 @@ export const abi = [
             "type": "uint8"
           },
           {
-            "components": [
-              {
-                "internalType": "bool",
-                "name": "active",
-                "type": "bool"
-              },
-              {
-                "internalType": "address",
-                "name": "tokenContract",
-                "type": "address"
-              }
-            ],
-            "internalType": "struct TokenGateRule",
-            "name": "tokenGateRule",
-            "type": "tuple"
+            "internalType": "bool",
+            "name": "defined",
+            "type": "bool"
+          },
+          {
+            "internalType": "enum VariableType",
+            "name": "variableType",
+            "type": "uint8"
+          },
+          {
+            "internalType": "string",
+            "name": "variableName",
+            "type": "string"
           }
         ],
-        "internalType": "struct Node",
+        "internalType": "struct NodeDefinition",
         "name": "",
         "type": "tuple"
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getSocketNames",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "string",
+            "name": "inOutSocketA",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "inOutSocketB",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "inOutSocketResult",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "flowSocketName",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "gateTrueSocketName",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "gateFalseSocketName",
+            "type": "string"
+          }
+        ],
+        "internalType": "struct SocketNames",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "pure",
     "type": "function"
   },
   {
@@ -487,25 +527,50 @@ export const abi = [
             "type": "uint8"
           },
           {
-            "components": [
-              {
-                "internalType": "bool",
-                "name": "active",
-                "type": "bool"
-              },
-              {
-                "internalType": "address",
-                "name": "tokenContract",
-                "type": "address"
-              }
-            ],
-            "internalType": "struct TokenGateRule",
-            "name": "tokenGateRule",
-            "type": "tuple"
+            "internalType": "bool",
+            "name": "defined",
+            "type": "bool"
+          },
+          {
+            "internalType": "enum VariableType",
+            "name": "variableType",
+            "type": "uint8"
+          },
+          {
+            "internalType": "string",
+            "name": "variableName",
+            "type": "string"
           }
         ],
-        "internalType": "struct Node[]",
+        "internalType": "struct NodeDefinition[]",
         "name": "_nodes",
+        "type": "tuple[]"
+      },
+      {
+        "components": [
+          {
+            "internalType": "string",
+            "name": "fromNode",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "toNode",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "fromSocket",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "toSocket",
+            "type": "string"
+          }
+        ],
+        "internalType": "struct EdgeDefinition[]",
+        "name": "_edges",
         "type": "tuple[]"
       }
     ],
@@ -672,6 +737,24 @@ export const abi = [
       }
     ],
     "name": "transferOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_tokenId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "_nodeId",
+        "type": "string"
+      }
+    ],
+    "name": "trigger",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

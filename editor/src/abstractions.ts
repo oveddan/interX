@@ -1,9 +1,11 @@
 import { IScene } from '@behave-graph/core';
 
-export interface ISmartContractActions {
-  invoke: (id: string) => void;
-  registerTriggerHandler: (id: string, cb: (count: bigint) => void) => void;
-  unRegisterTriggerHandler: (id: string, cb: (count: bigint) => void) => void;
+type IntVariableHandler = (value: bigint) => void;
+
+export interface IChainGraph {
+  trigger: (nodeId: string, socketId: string) => void;
+  registerIntVariableValueListener: (id: string, cb: IntVariableHandler) => void;
+  unRegisterIntVariableValueListener: (id: string, cb: IntVariableHandler) => void;
 }
 
 export type ResourceOption = {

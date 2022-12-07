@@ -1,12 +1,12 @@
 import { Registry } from '@behave-graph/core';
 import { useCallback } from 'react';
-import { ISmartContractActions } from '../abstractions';
-import { registerSmartContractActions } from '../hooks/profiles';
+import { IChainGraph } from '../abstractions';
+import { registerChainGraphProfile } from '../hooks/profiles';
 
-const useRegisterSmartContractActions = (actions: ISmartContractActions) => {
+const useRegisterChainGraphProfile = (actions: IChainGraph) => {
   const register = useCallback(
     (registry: Registry) => {
-      registerSmartContractActions(registry, actions);
+      registerChainGraphProfile(registry, actions);
     },
     [actions]
   );
@@ -14,4 +14,4 @@ const useRegisterSmartContractActions = (actions: ISmartContractActions) => {
   return register;
 };
 
-export default useRegisterSmartContractActions;
+export default useRegisterChainGraphProfile;

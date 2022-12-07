@@ -16,7 +16,7 @@ import Flow from './flowEditor/FlowEditorApp';
 import SplitEditor from './SplitEditor';
 import { examplePairs } from './flowEditor/components/LoadModal';
 import { Registry } from '@behave-graph/core';
-import useRegisterSmartContractActions from './onChainWorld/useRegisterSmartContractActions';
+import useRegisterChainGraphProfile from './onChainWorld/useRegisterSmartContractActions';
 
 const [initialModelFile, initialBehaviorGraph] = examplePairs[0];
 
@@ -25,7 +25,7 @@ const initialBehaviorGraphUrl = exampleBehaveGraphFileUrl(initialBehaviorGraph);
 
 function EditorAndScene({ web3Enabled }: { web3Enabled?: boolean }) {
   const smartContractActions = useMockSmartContractActions();
-  const registerSmartContractActions = useRegisterSmartContractActions(smartContractActions);
+  const registerSmartContractActions = useRegisterChainGraphProfile(smartContractActions);
 
   const { modelFile, setModelFile, gltf } = useSetAndLoadModelFile({
     initialFileUrl: initialModelFileUrl,

@@ -1,20 +1,11 @@
-import { time, loadFixture } from '@nomicfoundation/hardhat-network-helpers';
+import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import '@nomicfoundation/hardhat-chai-matchers';
-import { anyValue } from '@nomicfoundation/hardhat-chai-matchers/withArgs';
 import { expect } from 'chai';
 import '@nomiclabs/hardhat-ethers';
 import { BehaviorGraph__factory } from '../typechain-types';
 import { ethers } from 'hardhat';
-import { BigNumber, Signer } from 'ethers';
-import { BehaviorGraph, NodeDefinitionStruct, EdgeDefinitionStruct } from '../typechain-types/contracts/BehaviorGraph';
-
-enum NodeTypes {
-  ExternalTrigger = 0,
-  Counter = 1,
-  Add = 2,
-  Gate = 3,
-  Variable = 4,
-}
+import { NodeDefinitionStruct, EdgeDefinitionStruct } from '../typechain-types/contracts/BehaviorGraph';
+import { ChainNodeTypes } from '../editor/src/nodes/chain/IChainNode';
 
 enum VariableType {
   Int = 0,
@@ -82,21 +73,21 @@ describe('BehaviorGraph', function () {
         externalTrigger: {
           id: externalTriggerNodeId,
           defined: true,
-          nodeType: NodeTypes.ExternalTrigger,
+          nodeType: ChainNodeTypes.ExternalTrigger,
           variableType: VariableType.NotAVariable,
           variableName: '',
         },
         counter: {
           id: counterNodeId,
           defined: true,
-          nodeType: NodeTypes.Counter,
+          nodeType: ChainNodeTypes.Counter,
           variableType: VariableType.NotAVariable,
           variableName: '',
         },
         variable: {
           id: variableNodeId,
           defined: true,
-          nodeType: NodeTypes.Variable,
+          nodeType: ChainNodeTypes.Value,
           variableType: VariableType.Int,
           variableName: variableName,
         },

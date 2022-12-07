@@ -1,14 +1,16 @@
-import { GraphJSON } from '@behave-graph/core';
+import { GraphJSON, Registry } from '@behave-graph/core';
 import { useParams } from 'react-router-dom';
-import { useSceneModificationEngine } from '../hooks/behaviorFlow';
 import useLoadOnChainWorld from '../hooks/useLoadOnChainWorld';
-import useLoadSceneAndRegistry from '../hooks/useLoadSceneAndRegistry';
 import Web3Login from '../web3/Web3Login';
 import Scene from '../scene/Scene';
 import useTokenContractAddress from '../web3/useTokenContractAddress';
-import useSmartContractActions from './useSmartContractActions';
-import { ISmartContractActions } from '../abstractions';
+import useChainGraph from './useChainGraph';
+import { IChainGraph } from '../abstractions';
 import { useGLTF } from '@react-three/drei';
+import useSceneModifier from '../scene/useSceneModifier';
+import { useCallback } from 'react';
+import { useEngine, useRegistry } from '../hooks';
+import useRegisterChainGraphProfile from './useRegisterSmartContractActions';
 
 const OnChainWorld = ({
   graphJson,
@@ -18,20 +20,32 @@ const OnChainWorld = ({
 }: {
   graphJson: GraphJSON;
   sceneFileUrl: string;
-  smartContractActions: ISmartContractActions;
+  smartContractActions: IChainGraph;
   tokenId: number;
 }) => {
   const gltf = useGLTF(sceneFileUrl);
-  const { sceneOnClickListeners, registry, lifecyleEmitter, animations } = useLoadSceneAndRegistry({
-    smartContractActions,
-    gltf,
+
+  const { animations, sceneOnClickListeners, registerSceneProfile } = useSceneModifier(gltf);
+
+  const registerChainGraphProfile = useRegisterChainGraphProfile(smartContractActions);
+
+  const registerProfiles = useCallback(
+    (registry: Registry) => {
+      registerChainGraphProfile(registry);
+      registerSceneProfile(registry);
+    },
+    [registerSceneProfile, registerChainGraphProfile]
+  );
+
+  const { registry, lifecyleEmitter } = useRegistry({
+    registerProfiles,
   });
 
-  useSceneModificationEngine({
+  useEngine({
     graphJson,
-    eventEmitter: lifecyleEmitter,
     registry,
-    run: true,
+    eventEmitter: lifecyleEmitter,
+    autoRun: true,
   });
 
   return (
@@ -62,7 +76,7 @@ const OnChainWorld = ({
 const OnChainWorldLoader = ({ tokenId, contractAddress }: { tokenId: number; contractAddress: string }) => {
   const { graphJson, sceneFileUrl } = useLoadOnChainWorld(tokenId, contractAddress);
 
-  const smartContractActions = useSmartContractActions(contractAddress, tokenId);
+  const smartContractActions = useChainGraph(contractAddress, tokenId);
 
   if (!sceneFileUrl || !graphJson || !smartContractActions) return null;
 

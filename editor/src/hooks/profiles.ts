@@ -18,10 +18,11 @@ import {
   IScene,
 } from '@behave-graph/core';
 import { registerSerializersForValueType } from '@behave-graph/core/src/Profiles/Core/registerSerializersForValueType';
-import { ISceneWithQueries, ISmartContractActions } from '../abstractions';
+import { ISceneWithQueries, IChainGraph } from '../abstractions';
+import { ChainCounter } from '../nodes/chain/ChainCounter';
+import { ChainValue } from '../nodes/chain/ChainValue';
+import { ExternalTrigger } from '../nodes/chain/ExternalTrigger';
 import { OnSceneNodeClick } from '../nodes/scene/OnSceneNodeClick';
-import { OnSmartActionInvoked } from '../nodes/smartContracts/OnSmartActionInvoked';
-import { TokenGatedActionInvoker } from '../nodes/smartContracts/TokenGatedActionInvoker';
 
 export function registerSharedSceneProfiles(registry: Registry, scene: IScene) {
   const { values, nodes } = registry;
@@ -63,16 +64,13 @@ export function registerSharedSceneProfiles(registry: Registry, scene: IScene) {
 export function registerSpecificSceneProfiles(registry: Registry, scene: ISceneWithQueries) {
   const { nodes } = registry;
 
-  // TODO: register scene node types with IScene.
-
   nodes.register(OnSceneNodeClick.Description(scene));
 }
 
-export function registerSmartContractActions(registry: Registry, actions: ISmartContractActions) {
+export function registerChainGraphProfile(registry: Registry, actions: IChainGraph) {
   const { nodes } = registry;
 
-  // TODO: register scene node types with IScene.
-
-  nodes.register(TokenGatedActionInvoker.Description(actions));
-  nodes.register(OnSmartActionInvoked.Description(actions));
+  nodes.register(ChainCounter.Description(actions));
+  nodes.register(ChainValue.Description(actions));
+  nodes.register(ExternalTrigger.Description(actions));
 }

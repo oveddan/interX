@@ -2,11 +2,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useContract, useContractEvent, useSigner } from 'wagmi';
 import { abi } from '../contracts/abi';
 import { BigNumber } from 'ethers';
-import { ISmartContractActions } from '../abstractions';
+import { IChainGraph } from '../abstractions';
 
 type hn = { [id: string]: (count: bigint) => void };
 
-const useSmartContractActions = (contractAddress: string, tokenId: number) => {
+const useChainGraph = (contractAddress: string, tokenId: number) => {
   const { data: signer } = useSigner();
 
   const contract = useContract({
@@ -32,12 +32,12 @@ const useSmartContractActions = (contractAddress: string, tokenId: number) => {
   useContractEvent({
     address: contractAddress,
     abi,
-    eventName: 'ActionExecuted',
-    listener: (executerAddress, actionTokenId, nodeId, actionCount) => {
+    eventName: 'IntVariableUpdated',
+    listener: (executerAddress, actionTokenId, nodeId, value) => {
       if (tokenId !== actionTokenId.toNumber()) return;
 
       const handler = actionExecutedHandlers.current[nodeId];
-      if (handler) handler(BigInt(actionCount.toNumber()));
+      if (handler) handler(BigInt(value.toNumber()));
     },
   });
 
@@ -87,10 +87,10 @@ const useSmartContractActions = (contractAddress: string, tokenId: number) => {
     delete actionExecutedHandlers.current[id];
   }, []);
 
-  const invoke = useCallback(
+  const trigger = useCallback(
     async (actionId: string, connectedContract: typeof contract) => {
       if (!connectedContract) return;
-      const transaction = await connectedContract.executeAction(BigNumber.from(tokenId), actionId);
+      const transaction = await connectedContract.trigger(BigNumber.from(tokenId), actionId);
 
       await transaction.wait();
     },
@@ -99,19 +99,19 @@ const useSmartContractActions = (contractAddress: string, tokenId: number) => {
 
   const smartContractAction = useMemo(() => {
     if (!connectedContract) return;
-    const result: ISmartContractActions = {
-      invoke: (actionId: string) => {
+    const result: IChainGraph = {
+      trigger: (nodeId: string, socketId: string) => {
         if (!connectedContract) return;
-        invoke(actionId, connectedContract);
+        trigger(nodeId, connectedContract);
       },
-      registerTriggerHandler,
-      unRegisterTriggerHandler,
+      registerIntVariableValueListener: registerTriggerHandler,
+      unRegisterIntVariableValueListener: unRegisterTriggerHandler,
     };
 
     return result;
-  }, [invoke, registerTriggerHandler, unRegisterTriggerHandler, connectedContract]);
+  }, [trigger, registerTriggerHandler, unRegisterTriggerHandler, connectedContract]);
 
   return smartContractAction;
 };
 
-export default useSmartContractActions;
+export default useChainGraph;

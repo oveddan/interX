@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useRef } from 'react';
-import { ISmartContractActions } from '../abstractions';
+import { IChainGraph } from '../abstractions';
 
 type hn = { [id: string]: (count: bigint) => void };
 
@@ -27,9 +27,9 @@ const useMockSmartContractActions = () => {
   }, []);
 
   const smartContractAction = useMemo(() => {
-    const result: ISmartContractActions = {
+    const result: IChainGraph = {
       invoke,
-      registerTriggerHandler,
+      registerIntVariableValueListener: registerTriggerHandler,
       unRegisterTriggerHandler,
     };
 

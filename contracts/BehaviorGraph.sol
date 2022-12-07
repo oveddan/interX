@@ -13,7 +13,7 @@ enum NodeType {
   Counter,
   Add,
   Gate,
-  Variable
+  Value 
 }
 
 enum VariableType {
@@ -209,7 +209,7 @@ contract BehaviorGraph is ERC721, ERC721URIStorage, Ownable {
           string memory toTrigger = _nodeBoolVals[tokenId][_nodeId][_triggeringSocketName] ? GATE_TRUE_SOCKET_NAME : GATE_FALSE_SOCKET_NAME;
           // trigger the flow edge along that socket
           _triggerEdge(tokenId, _nodeId, toTrigger);
-        } else if (node.nodeType == NodeType.Variable) {
+        } else if (node.nodeType == NodeType.Value) {
           // emit that variable is updated, notifiying the outside world
           // if it is an int variable
           if (node.variableType == VariableType.Int) {
@@ -222,14 +222,13 @@ contract BehaviorGraph is ERC721, ERC721URIStorage, Ownable {
         }
     }
 
-
-    function trigger(uint256 tokenId, string memory _nodeId) public {
-        NodeDefinition memory node = getNodeDefinition(tokenId, _nodeId);
+    function trigger(uint256 _tokenId, string memory _nodeId) public {
+        NodeDefinition memory node = getNodeDefinition(_tokenId, _nodeId);
         
         if (node.nodeType != NodeType.ExternalTrigger) {
           revert CannotTriggerExternally(_nodeId);
         }
 
-        _triggerEdge(tokenId, _nodeId, FLOW_SOCKET_NAME);
+        _triggerEdge(_tokenId, _nodeId, FLOW_SOCKET_NAME);
     }
 }
