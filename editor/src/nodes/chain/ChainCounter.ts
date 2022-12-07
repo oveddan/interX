@@ -23,7 +23,7 @@ export class ChainCounter extends FlowNode implements IChainNode {
   }
 
   toNodeDefinition = (): ChainNodeSpec => ({
-    nodeType: ChainNodeTypes.Value,
+    nodeType: ChainNodeTypes.Counter,
     inputValueType: ChainValueType.NotAVariable,
   });
 

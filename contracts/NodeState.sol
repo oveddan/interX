@@ -1,21 +1,19 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "hardhat/console.sol";
-
 struct BooleanValueAndLabel {
   bool value;
-  string label;
+  uint8 socket;
 }
 
 struct IntValueAndLabel {
   int256 value;
-  string label;
+  uint8 socket;
 }
 
 struct StringValueAndLabel {
   string value;
-  string label;
+  uint8 socket;
 }
 
 struct InitialValues {
@@ -40,15 +38,15 @@ struct StringValue {
 }
 
 contract NodeState {
-    mapping(uint256 => mapping(string => mapping(string => IntValue))) private _nodeInputIntVals;
-    mapping(uint256 => mapping(string => mapping(string => StringValue))) private _nodeInputStringVals;
-    mapping(uint256 => mapping(string => mapping(string => BoolValue))) private _nodeBoolInputVals;
+    mapping(uint256 => mapping(string => mapping(uint8 => IntValue))) private _nodeInputIntVals;
+    mapping(uint256 => mapping(string => mapping(uint8 => StringValue))) private _nodeInputStringVals;
+    mapping(uint256 => mapping(string => mapping(uint8 => BoolValue))) private _nodeBoolInputVals;
 
     mapping(uint256 => mapping(string => mapping(string => IntValue))) private _nodeIntStateVals;
 
     constructor() {}
 
-    function getIntInputVal(uint256 tokenId, string memory _nodeId, string memory _socketName) public view returns(int256) {
+    function getIntInputVal(uint256 tokenId, string memory _nodeId, uint8 _socketName) public view returns(int256) {
       // uint256 val = uint256(_nodeInputIntVals[tokenId][_nodeId][_socketName]);
       // console.log("get int input val %s %s: %i",_nodeId,  _socketName, val);
 
@@ -58,23 +56,23 @@ contract NodeState {
       return 0;
     }
 
-    function _setIntInputVal(uint256 tokenId, string memory _nodeId, string memory _socketName, int256 val) internal {
+    function _setIntInputVal(uint256 tokenId, string memory _nodeId, uint8 _socketName, int256 val) internal {
       // console.log("set int input val %s %s: %i", _nodeId, _socketName, uint256(val));
       _nodeInputIntVals[tokenId][_nodeId][_socketName] = IntValue(val, true);
     }
 
-    function getBoolInputVal(uint256 tokenId, string memory _nodeId, string memory _socketName) public view returns(bool) {
+    function getBoolInputVal(uint256 tokenId, string memory _nodeId, uint8 _socketName) public view returns(bool) {
       BoolValue memory val = _nodeBoolInputVals[tokenId][_nodeId][_socketName];
     
       if (val.set) return val.value;
       return false;
     }
 
-    function _setBoolInputVal(uint256 tokenId, string memory _nodeId, string memory _socketName, bool val) internal {
+    function _setBoolInputVal(uint256 tokenId, string memory _nodeId, uint8 _socketName, bool val) internal {
       _nodeBoolInputVals[tokenId][_nodeId][_socketName] = BoolValue(val, true);
     }
 
-    function getStringInputVal(uint256 tokenId, string memory _nodeId, string memory _socketName) public view returns(string memory) {
+    function getStringInputVal(uint256 tokenId, string memory _nodeId, uint8 _socketName) public view returns(string memory) {
       StringValue memory val = _nodeInputStringVals[tokenId][_nodeId][_socketName];
     
       if (val.set) return val.value;
@@ -82,7 +80,7 @@ contract NodeState {
       return '';
     }
 
-    function _setStringInputVal(uint256 tokenId, string memory _nodeId, string memory _socketName, string memory val) internal {
+    function _setStringInputVal(uint256 tokenId, string memory _nodeId, uint8 _socketName, string memory val) internal {
       _nodeInputStringVals[tokenId][_nodeId][_socketName] = StringValue(val, true);
     }
 
@@ -102,24 +100,19 @@ contract NodeState {
       // set initial boolean values
       for(uint256 j = 0; j < _initialValues.booleans.length; j++) {
         BooleanValueAndLabel memory boolVal = _initialValues.booleans[j];
-        _setBoolInputVal(tokenId, _nodeId, boolVal.label, boolVal.value);
+        _setBoolInputVal(tokenId, _nodeId, boolVal.socket, boolVal.value);
       }
       
       // set initial int values
       for(uint256 j= 0; j < _initialValues.integers.length; j++) {
         IntValueAndLabel memory intVal = _initialValues.integers[j];
-        _setIntInputVal(tokenId, _nodeId, intVal.label, intVal.value);
+        _setIntInputVal(tokenId, _nodeId, intVal.socket, intVal.value);
       }
       
       // set initial string values
       for(uint256 j = 0; j < _initialValues.strings.length; j++) {
         StringValueAndLabel memory stringVal = _initialValues.strings[j];
-        _setStringInputVal(tokenId, _nodeId, stringVal.label, stringVal.value);
+        _setStringInputVal(tokenId, _nodeId, stringVal.socket, stringVal.value);
       }
     }
-}
-
-
-contract VariablesState {
-
 }

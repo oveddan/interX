@@ -31,7 +31,7 @@ export class ChainVariableSet extends FlowNode implements IChainNode {
   }
 
   toNodeDefinition = (): ChainNodeSpec => ({
-    nodeType: ChainNodeTypes.Value,
+    nodeType: ChainNodeTypes.VariableSet,
     inputValueType: ChainValueType.Int,
   });
 

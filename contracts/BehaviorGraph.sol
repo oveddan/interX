@@ -7,7 +7,6 @@ import '@openzeppelin/contracts/token/ERC721/ERC721.sol';
 import '@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
 import '@openzeppelin/contracts/utils/Counters.sol';
-import "@openzeppelin/contracts/utils/Strings.sol";
 
 import './NodeState.sol';
 
@@ -44,32 +43,32 @@ struct NodeDefinitionAndValues {
 struct EdgeDefinition {
   string fromNode;
   string toNode;
-  string fromSocket;
-  string toSocket;
+  uint8 fromSocket;
+  uint8 toSocket;
 }
 
 struct EdgeToNode {
   string toNode;
-  string toSocket;
+  uint8 toSocket;
   bool set;
 }
 
-string constant IN_OUT_SOCKET_A = "a";
-string constant IN_OUT_SOCKET_B = "b";
-string constant IN_OUT_SOCKET_RESULT = "result";
-string constant FLOW_SOCKET_NAME = "flow";
-string constant GATE_TRUE_SOCKET_NAME = "true";
-string constant GATE_FALSE_SOCKET_NAME = "false";
-string constant VARIABLE_NAME_SOCKET = "variableName";
+uint8 constant IN_OUT_SOCKET_A = 0;
+uint8 constant IN_OUT_SOCKET_B = 1;
+uint8 constant IN_OUT_SOCKET_RESULT = 2;
+uint8 constant FLOW_SOCKET_NAME = 3;
+uint8 constant GATE_TRUE_SOCKET_NAME = 4;
+uint8 constant GATE_FALSE_SOCKET_NAME =5;
+uint8 constant VARIABLE_NAME_SOCKET = 6;
 
 struct SocketNames{
-    string inOutSocketA;
-    string inOutSocketB;
-    string inOutSocketResult;
-    string flowSocketName;
-    string gateTrueSocketName;
-    string gateFalseSocketName;
-    string variableNameSocket;
+  uint8 inOutSocketA;
+  uint8 inOutSocketB;
+  uint8 inOutSocketResult;
+  uint8 flowSocketName;
+  uint8 gateTrueSocketName;
+  uint8 gateFalseSocketName;
+  uint8 variableNameSocket;
 }
 
 
@@ -81,7 +80,7 @@ contract BehaviorGraph is ERC721, ERC721URIStorage, Ownable, NodeState  {
     mapping(uint256 => mapping(string => NodeDefinition)) private _nodeDefinition;
     mapping(uint256 => mapping(string => int256)) private _intVarVals;
     mapping(uint256 => mapping(string => bool)) private _boolVarVals;
-    mapping(uint256 => mapping(string => mapping(string => EdgeToNode))) private _tokenEdges;
+    mapping(uint256 => mapping(string => mapping(uint8 => EdgeToNode))) private _tokenEdges;
 
     event SafeMint(uint256 tokenId, address toNode, string uri, NodeDefinitionAndValues[] nodes);
 
@@ -148,21 +147,21 @@ contract BehaviorGraph is ERC721, ERC721URIStorage, Ownable, NodeState  {
         return _nodeDefinition[tokenId][_nodeId];
     }
 
-    function _getEdge(uint256 tokenId, string memory _nodeId, string memory _label) private view returns(EdgeToNode memory) {
+    function _getEdge(uint256 tokenId, string memory _nodeId, uint8 _label) private view returns(EdgeToNode memory) {
         EdgeToNode memory edge = _tokenEdges[tokenId][_nodeId][_label];
         return edge;
     }
 
-    function _triggerEdge(uint256 tokenId, string memory _nodeId, string memory _label) private {
+    function _triggerEdge(uint256 tokenId, string memory _nodeId, uint8 _label) private {
       EdgeToNode memory edge = _getEdge(tokenId, _nodeId, _label);
       if(edge.set) {
         _triggerNode(tokenId, edge.toNode, edge.toSocket);
       }
     }
 
-    function _writeToIntOutput(uint256 tokenId, string memory _nodeId, string memory _socketName, int256 val) private {
+    function _writeToIntOutput(uint256 tokenId, string memory _nodeId, uint8 _socketId, int256 val) private {
       // get the edge to the next node
-      EdgeToNode memory edge = _getEdge(tokenId, _nodeId, _socketName);
+      EdgeToNode memory edge = _getEdge(tokenId, _nodeId, _socketId);
 
       // if the edge exists
       if (edge.set) {
@@ -178,10 +177,9 @@ contract BehaviorGraph is ERC721, ERC721URIStorage, Ownable, NodeState  {
         NodeDefinition memory node = _nodeDefinition[tokenId][_nodeId];
         if(node.nodeType == NodeType.Add) {
             // get the value from input a and input b
-            uint256 val = uint256(getIntInputVal(tokenId, _nodeId, IN_OUT_SOCKET_A)) + uint256(getIntInputVal(tokenId, _nodeId, IN_OUT_SOCKET_B));
+            int256 val = getIntInputVal(tokenId, _nodeId, IN_OUT_SOCKET_A) + getIntInputVal(tokenId, _nodeId, IN_OUT_SOCKET_B);
         
-        //     console.log('is add');
-        //     _writeToIntOutput(tokenId, _nodeId, IN_OUT_SOCKET_RESULT, val);
+            _writeToIntOutput(tokenId, _nodeId, IN_OUT_SOCKET_RESULT, val);
         } 
     }
 
@@ -208,7 +206,7 @@ contract BehaviorGraph is ERC721, ERC721URIStorage, Ownable, NodeState  {
         return _boolVarVals[tokenId][_variableName];
     }
 
-    function _triggerNode(uint256 tokenId, string memory _nodeId, string memory _triggeringSocketName) public {
+    function _triggerNode(uint256 tokenId, string memory _nodeId, uint8 _triggeringSocketName) public {
         NodeDefinition memory node = getNodeDefinition(tokenId, _nodeId);
         
         if (node.nodeType == NodeType.Counter) {
@@ -218,12 +216,11 @@ contract BehaviorGraph is ERC721, ERC721URIStorage, Ownable, NodeState  {
           _setNodeIntStateVal(tokenId, _nodeId, "count", newStateVal);
           // trigger the flow edge
 
-          console.log("triggering flow edge %i", uint256(newStateVal));
           _writeToIntOutput(tokenId, _nodeId, IN_OUT_SOCKET_A, newStateVal);
           _triggerEdge(tokenId, _nodeId, FLOW_SOCKET_NAME);
         } else if (node.nodeType == NodeType.Gate) {
           // get the socket to trigger
-          string memory toTrigger = getBoolInputVal(tokenId, _nodeId, _triggeringSocketName) ? GATE_TRUE_SOCKET_NAME : GATE_FALSE_SOCKET_NAME;
+          uint8 toTrigger = getBoolInputVal(tokenId, _nodeId, _triggeringSocketName) ? GATE_TRUE_SOCKET_NAME : GATE_FALSE_SOCKET_NAME;
           // trigger the flow edge along that socket
           _triggerEdge(tokenId, _nodeId, toTrigger);
         } else if (node.nodeType == NodeType.VariableSet) {
@@ -232,7 +229,6 @@ contract BehaviorGraph is ERC721, ERC721URIStorage, Ownable, NodeState  {
           string memory variableSocketName = getStringInputVal(tokenId, _nodeId, VARIABLE_NAME_SOCKET);
 
           if (node.inputValueType == ValueType.Int) {
-            console.log("node input val %i", uint256(getIntInputVal(tokenId, _nodeId, IN_OUT_SOCKET_A)));
             _setIntVariable(tokenId, variableSocketName, getIntInputVal(tokenId, _nodeId, IN_OUT_SOCKET_A));
           } else {
             _setBoolVariable(tokenId, variableSocketName, getBoolInputVal(tokenId, _nodeId, IN_OUT_SOCKET_A));
