@@ -10,7 +10,7 @@ import { useGLTF } from '@react-three/drei';
 import useSceneModifier from '../scene/useSceneModifier';
 import { useCallback } from 'react';
 import { useEngine, useRegistry } from '../hooks';
-import useRegisterChainGraphProfile from './useRegisterSmartContractActions';
+import useRegisterChainGraphProfile from './useRegisterChainGraphProfile';
 
 const OnChainWorld = ({
   graphJson,

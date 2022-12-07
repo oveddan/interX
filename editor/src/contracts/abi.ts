@@ -110,7 +110,7 @@ export const abi = [
       {
         "indexed": false,
         "internalType": "string",
-        "name": "variableId",
+        "name": "nodeId",
         "type": "string"
       },
       {
@@ -120,7 +120,7 @@ export const abi = [
         "type": "bool"
       }
     ],
-    "name": "BoolVariableUpdated",
+    "name": "BoolValueUpdated",
     "type": "event"
   },
   {
@@ -141,7 +141,7 @@ export const abi = [
       {
         "indexed": false,
         "internalType": "string",
-        "name": "variableId",
+        "name": "nodeId",
         "type": "string"
       },
       {
@@ -151,7 +151,7 @@ export const abi = [
         "type": "uint256"
       }
     ],
-    "name": "IntVariableUpdated",
+    "name": "IntValueUpdated",
     "type": "event"
   },
   {
@@ -212,14 +212,9 @@ export const abi = [
             "type": "bool"
           },
           {
-            "internalType": "enum VariableType",
-            "name": "variableType",
+            "internalType": "enum ValueType",
+            "name": "inputValueType",
             "type": "uint8"
-          },
-          {
-            "internalType": "string",
-            "name": "variableName",
-            "type": "string"
           }
         ],
         "indexed": false,
@@ -368,14 +363,9 @@ export const abi = [
             "type": "bool"
           },
           {
-            "internalType": "enum VariableType",
-            "name": "variableType",
+            "internalType": "enum ValueType",
+            "name": "inputValueType",
             "type": "uint8"
-          },
-          {
-            "internalType": "string",
-            "name": "variableName",
-            "type": "string"
           }
         ],
         "internalType": "struct NodeDefinition",
@@ -532,14 +522,9 @@ export const abi = [
             "type": "bool"
           },
           {
-            "internalType": "enum VariableType",
-            "name": "variableType",
+            "internalType": "enum ValueType",
+            "name": "inputValueType",
             "type": "uint8"
-          },
-          {
-            "internalType": "string",
-            "name": "variableName",
-            "type": "string"
           }
         ],
         "internalType": "struct NodeDefinition[]",

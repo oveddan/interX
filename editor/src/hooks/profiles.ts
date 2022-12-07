@@ -66,11 +66,3 @@ export function registerSpecificSceneProfiles(registry: Registry, scene: ISceneW
 
   nodes.register(OnSceneNodeClick.Description(scene));
 }
-
-export function registerChainGraphProfile(registry: Registry, actions: IChainGraph) {
-  const { nodes } = registry;
-
-  nodes.register(ChainCounter.Description(actions));
-  nodes.register(ChainValue.Description(actions));
-  nodes.register(ExternalTrigger.Description(actions));
-}

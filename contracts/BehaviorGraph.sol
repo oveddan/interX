@@ -16,7 +16,7 @@ enum NodeType {
   Value 
 }
 
-enum VariableType {
+enum ValueType {
   Int,
   Bool,
   NotAVariable
@@ -27,8 +27,7 @@ struct NodeDefinition {
    NodeType nodeType;
    bool defined;
    // will only be set if this is a variable
-   VariableType variableType;
-   string variableName;
+   ValueType inputValueType;
 }
 
 
@@ -93,8 +92,8 @@ contract BehaviorGraph is ERC721, ERC721URIStorage, Ownable {
     error CannotTriggerExternally(string nodeId);
     error MissingTokens(string nodeId, address tokenAddress);
 
-    event IntVariableUpdated(address executor, uint256 tokenId, string variableId, uint256 value);
-    event BoolVariableUpdated(address executor, uint256 tokenId, string variableId, bool value);
+    event IntValueUpdated(address executor, uint256 tokenId, string nodeId, uint256 value);
+    event BoolValueUpdated(address executor, uint256 tokenId, string nodeId, bool value);
 
     constructor() ERC721("MyToken", "MTK") {}
 
@@ -212,10 +211,10 @@ contract BehaviorGraph is ERC721, ERC721URIStorage, Ownable {
         } else if (node.nodeType == NodeType.Value) {
           // emit that variable is updated, notifiying the outside world
           // if it is an int variable
-          if (node.variableType == VariableType.Int) {
-            emit IntVariableUpdated(msg.sender, tokenId, node.variableName, _nodeInputIntVals[tokenId][_nodeId][IN_OUT_SOCKET_A]);
+          if (node.inputValueType == ValueType.Int) {
+            emit IntValueUpdated(msg.sender, tokenId, _nodeId, _nodeInputIntVals[tokenId][_nodeId][IN_OUT_SOCKET_A]);
           } else {
-            emit BoolVariableUpdated(msg.sender, tokenId, node.variableName, _nodeBoolVals[tokenId][_nodeId][IN_OUT_SOCKET_A]);
+            emit BoolValueUpdated(msg.sender, tokenId, _nodeId, _nodeBoolVals[tokenId][_nodeId][IN_OUT_SOCKET_A]);
           }
         } else {
           revert InvalidActionId(_nodeId);

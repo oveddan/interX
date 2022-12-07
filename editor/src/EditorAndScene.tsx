@@ -16,7 +16,7 @@ import Flow from './flowEditor/FlowEditorApp';
 import SplitEditor from './SplitEditor';
 import { examplePairs } from './flowEditor/components/LoadModal';
 import { Registry } from '@behave-graph/core';
-import useRegisterChainGraphProfile from './onChainWorld/useRegisterSmartContractActions';
+import useRegisterChainGraphProfile from './onChainWorld/useRegisterChainGraphProfile';
 
 const [initialModelFile, initialBehaviorGraph] = examplePairs[0];
 

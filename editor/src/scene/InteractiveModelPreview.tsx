@@ -1,26 +1,38 @@
-import { useEffect, useState } from 'react';
-import { GraphJSON } from '@behave-graph/core';
+import { useCallback, useEffect, useState } from 'react';
+import { GraphJSON, Registry } from '@behave-graph/core';
 import { useGLTF } from '@react-three/drei';
-import useLoadSceneAndRegistry from '../hooks/useLoadSceneAndRegistry';
 import useMockSmartContractActions from '../onChainWorld/useMockSmartContractActions';
 import Scene from './Scene';
 import { dataUrlFromFile } from '../hooks/useSaveAndLoad';
-import { useSceneModificationEngine } from '../hooks/behaviorFlow';
+import useRegisterChainGraphProfile from '../onChainWorld/useRegisterChainGraphProfile';
+import useSceneModifier from './useSceneModifier';
+import { useEngine, useRegistry } from '../hooks';
 
 const Inner = ({ fileDataUrl, graphJson }: { fileDataUrl: string; graphJson: GraphJSON }) => {
   const gltf = useGLTF(fileDataUrl);
   const smartContractActions = useMockSmartContractActions();
 
-  const { animations, sceneOnClickListeners, lifecyleEmitter, registry } = useLoadSceneAndRegistry({
-    gltf,
-    smartContractActions,
+  const { animations, sceneOnClickListeners, registerSceneProfile } = useSceneModifier(gltf);
+
+  const registerChainGraphProfile = useRegisterChainGraphProfile(smartContractActions);
+
+  const registerProfiles = useCallback(
+    (registry: Registry) => {
+      registerChainGraphProfile(registry);
+      registerSceneProfile(registry);
+    },
+    [registerSceneProfile, registerChainGraphProfile]
+  );
+
+  const { registry, lifecyleEmitter } = useRegistry({
+    registerProfiles,
   });
 
-  useSceneModificationEngine({
+  useEngine({
     graphJson,
     registry,
     eventEmitter: lifecyleEmitter,
-    run: true,
+    autoRun: true,
   });
 
   return <Scene gltf={gltf} onClickListeners={sceneOnClickListeners} animationsState={animations} />;

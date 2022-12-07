@@ -32,7 +32,7 @@ const useChainGraph = (contractAddress: string, tokenId: number) => {
   useContractEvent({
     address: contractAddress,
     abi,
-    eventName: 'IntVariableUpdated',
+    eventName: 'IntValueUpdated',
     listener: (executerAddress, actionTokenId, nodeId, value) => {
       if (tokenId !== actionTokenId.toNumber()) return;
 

@@ -2,14 +2,12 @@ import { FlowNode, Graph, NodeDescription, Socket } from '@behave-graph/core';
 import { Fiber } from '@behave-graph/core/src/Execution/Fiber';
 
 import { IChainGraph } from '../../abstractions';
-import { ChainNodeTypes, IChainNode } from './IChainNode';
+import { ChainNodeSpec, ChainNodeTypes, ChainValueType, IChainNode } from './IChainNode';
 
 export class ChainCounter extends FlowNode implements IChainNode {
-  chainNodeType = ChainNodeTypes.Counter;
-
   public static Description = (smartContractActions: IChainGraph) =>
     new NodeDescription(
-      'flow/counter',
+      'chain/counter',
       'Flow',
       'Counter',
       (description, graph) => new ChainCounter(description, graph)
@@ -23,6 +21,11 @@ export class ChainCounter extends FlowNode implements IChainNode {
       [new Socket('flow', 'flow'), new Socket('integer', 'count')]
     );
   }
+
+  toNodeDefinition = (): ChainNodeSpec => ({
+    nodeType: ChainNodeTypes.Value,
+    inputValueType: ChainValueType.NotAVariable,
+  });
 
   // @ts-ignore
   triggered(fiber: Fiber, triggeringSocketName: string) {
