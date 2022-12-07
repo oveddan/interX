@@ -7,13 +7,17 @@ import '@openzeppelin/contracts/token/ERC721/ERC721.sol';
 import '@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
 import '@openzeppelin/contracts/utils/Counters.sol';
+import "@openzeppelin/contracts/utils/Strings.sol";
+
+import './NodeState.sol';
+
 
 enum NodeType {
   ExternalTrigger,
   Counter,
   Add,
   Gate,
-  Value 
+  VariableSet 
 }
 
 enum ValueType {
@@ -21,6 +25,8 @@ enum ValueType {
   Bool,
   NotAVariable
 }
+
+
 
 struct NodeDefinition {
    string id;
@@ -30,20 +36,10 @@ struct NodeDefinition {
    ValueType inputValueType;
 }
 
-
-
-// struct NodeVals {
-//   uint256 intValA;
-//   uint256 intValB;
-//   uint256 intValC;
-//   bool boolValA;
-//   bool boolValB;
-//   bool boolValC;
-//   uint256 intStateValA;
-//   uint256 intStateValB;
-//   bool boolStateValA;
-//   bool boolStateValB;
-// }
+struct NodeDefinitionAndValues {
+  NodeDefinition definition;
+  InitialValues initialValues;
+}
 
 struct EdgeDefinition {
   string fromNode;
@@ -64,6 +60,7 @@ string constant IN_OUT_SOCKET_RESULT = "result";
 string constant FLOW_SOCKET_NAME = "flow";
 string constant GATE_TRUE_SOCKET_NAME = "true";
 string constant GATE_FALSE_SOCKET_NAME = "false";
+string constant VARIABLE_NAME_SOCKET = "variableName";
 
 struct SocketNames{
     string inOutSocketA;
@@ -72,28 +69,28 @@ struct SocketNames{
     string flowSocketName;
     string gateTrueSocketName;
     string gateFalseSocketName;
+    string variableNameSocket;
 }
 
 
-contract BehaviorGraph is ERC721, ERC721URIStorage, Ownable {
+contract BehaviorGraph is ERC721, ERC721URIStorage, Ownable, NodeState  {
     using Counters for Counters.Counter;
-
-    mapping(uint256 => mapping(string => NodeDefinition)) private _nodeDefinition;
-    mapping(uint256 => mapping(string => mapping(string => uint256))) private _nodeInputIntVals;
-    mapping(uint256 => mapping(string => mapping(string => uint256))) private _nodeStateVals;
-    mapping(uint256 => mapping(string => mapping(string => bool))) private _nodeBoolVals;
-    mapping(uint256 => mapping(string => mapping(string => EdgeToNode))) private _tokenEdges;
 
     Counters.Counter private _tokenIdCounter;
 
-    event SafeMint(uint256 tokenId, address toNode, string uri, NodeDefinition[] nodes);
+    mapping(uint256 => mapping(string => NodeDefinition)) private _nodeDefinition;
+    mapping(uint256 => mapping(string => int256)) private _intVarVals;
+    mapping(uint256 => mapping(string => bool)) private _boolVarVals;
+    mapping(uint256 => mapping(string => mapping(string => EdgeToNode))) private _tokenEdges;
+
+    event SafeMint(uint256 tokenId, address toNode, string uri, NodeDefinitionAndValues[] nodes);
 
     error InvalidActionId(string nodeId);
     error CannotTriggerExternally(string nodeId);
     error MissingTokens(string nodeId, address tokenAddress);
 
-    event IntValueUpdated(address executor, uint256 tokenId, string nodeId, uint256 value);
-    event BoolValueUpdated(address executor, uint256 tokenId, string nodeId, bool value);
+    event IntVariableUpdated(address executor, uint256 tokenId, string variableName, int256 value);
+    event BoolVariableUpdated(address executor, uint256 tokenId, string variableName, bool value);
 
     constructor() ERC721("MyToken", "MTK") {}
 
@@ -101,7 +98,7 @@ contract BehaviorGraph is ERC721, ERC721URIStorage, Ownable {
         return "ipfs://";
     }
 
-    function safeMint(string memory sceneUri, NodeDefinition[] calldata _nodes, EdgeDefinition[] calldata _edges) public returns(uint256) {
+    function safeMint(string memory sceneUri, NodeDefinitionAndValues[] calldata _nodes, EdgeDefinition[] calldata _edges) public returns(uint256) {
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
         address to = msg.sender;
@@ -129,10 +126,13 @@ contract BehaviorGraph is ERC721, ERC721URIStorage, Ownable {
         return super.tokenURI(tokenId);
     } 
 
-    function _createNodes(uint256 tokenId, NodeDefinition[] calldata _nodes, EdgeDefinition[] calldata _edges) private {
+    function _createNodes(uint256 tokenId, NodeDefinitionAndValues[] calldata _nodes, EdgeDefinition[] calldata _edges) private {
         for(uint256 i = 0; i < _nodes.length; i++) {
-          NodeDefinition calldata node = _nodes[i];
+          NodeDefinitionAndValues calldata nodeAndValues = _nodes[i];
+          NodeDefinition calldata node = nodeAndValues.definition;
           _nodeDefinition[tokenId][node.id] = node;
+
+          _setInitialValues(tokenId, node.id, nodeAndValues.initialValues);
         }
         for(uint256 i = 0; i < _edges.length; i++) {
           EdgeDefinition calldata edge = _edges[i];
@@ -141,7 +141,7 @@ contract BehaviorGraph is ERC721, ERC721URIStorage, Ownable {
     }
 
     function getSocketNames() public pure returns(SocketNames memory) {
-        return SocketNames(IN_OUT_SOCKET_A, IN_OUT_SOCKET_B, IN_OUT_SOCKET_RESULT, FLOW_SOCKET_NAME, GATE_TRUE_SOCKET_NAME, GATE_FALSE_SOCKET_NAME);
+        return SocketNames(IN_OUT_SOCKET_A, IN_OUT_SOCKET_B, IN_OUT_SOCKET_RESULT, FLOW_SOCKET_NAME, GATE_TRUE_SOCKET_NAME, GATE_FALSE_SOCKET_NAME, VARIABLE_NAME_SOCKET);
     }
 
     function getNodeDefinition(uint256 tokenId, string memory _nodeId) public view returns(NodeDefinition memory) {
@@ -160,31 +160,28 @@ contract BehaviorGraph is ERC721, ERC721URIStorage, Ownable {
       }
     }
 
-    function _writeToIntOutput(uint256 tokenId, string memory _nodeId, string memory _socketName, uint256 val) private {
+    function _writeToIntOutput(uint256 tokenId, string memory _nodeId, string memory _socketName, int256 val) private {
       // get the edge to the next node
       EdgeToNode memory edge = _getEdge(tokenId, _nodeId, _socketName);
 
       // if the edge exists
       if (edge.set) {
         // write the node value to the input socket
-        _nodeInputIntVals[tokenId][edge.toNode][edge.toSocket] = val;
+        _setIntInputVal(tokenId, edge.toNode, edge.toSocket, val);
       
         // if is an immediate node, exec it
         _exec(tokenId, edge.toNode);
       }
     }
 
-    function _getNodeInputVal(uint256 tokenId, string memory _nodeId, string memory _socketName) private view returns(uint256) {
-      return _nodeInputIntVals[tokenId][_nodeId][_socketName];
-    }
-
     function _exec(uint256 tokenId, string memory _nodeId) private {
         NodeDefinition memory node = _nodeDefinition[tokenId][_nodeId];
         if(node.nodeType == NodeType.Add) {
             // get the value from input a and input b
-            uint256 val = _getNodeInputVal(tokenId, _nodeId, IN_OUT_SOCKET_A) + _getNodeInputVal(tokenId, _nodeId, IN_OUT_SOCKET_B);
+            uint256 val = uint256(getIntInputVal(tokenId, _nodeId, IN_OUT_SOCKET_A)) + uint256(getIntInputVal(tokenId, _nodeId, IN_OUT_SOCKET_B));
         
-            _writeToIntOutput(tokenId, _nodeId, IN_OUT_SOCKET_RESULT, val);
+        //     console.log('is add');
+        //     _writeToIntOutput(tokenId, _nodeId, IN_OUT_SOCKET_RESULT, val);
         } 
     }
 
@@ -193,28 +190,52 @@ contract BehaviorGraph is ERC721, ERC721URIStorage, Ownable {
         return node.nodeType == NodeType.Add;
     }
 
+    function _setIntVariable(uint256 tokenId, string memory _variableName, int256 val) private {
+        _intVarVals[tokenId][_variableName] = val;
+        emit IntVariableUpdated(msg.sender, tokenId, _variableName, val);
+    }
+
+    function getIntVariable(uint256 tokenId, string memory _variableName) public view returns(int256) {
+        return _intVarVals[tokenId][_variableName];
+    }
+
+    function _setBoolVariable(uint256 tokenId, string memory _variableName, bool val) private {
+        _boolVarVals[tokenId][_variableName] = val;
+        emit BoolVariableUpdated(msg.sender, tokenId, _variableName, val);
+    }
+
+    function getBoolVariable(uint256 tokenId, string memory _variableName) public view returns(bool) {
+        return _boolVarVals[tokenId][_variableName];
+    }
+
     function _triggerNode(uint256 tokenId, string memory _nodeId, string memory _triggeringSocketName) public {
         NodeDefinition memory node = getNodeDefinition(tokenId, _nodeId);
         
         if (node.nodeType == NodeType.Counter) {
           // update state to increment counter
           // this is internal, so we dont need to store it in constant
-          _nodeStateVals[tokenId][_nodeId]["count"] += 1;
+          int256 newStateVal = getNodeStateVal(tokenId, _nodeId, "count") + 1;
+          _setNodeIntStateVal(tokenId, _nodeId, "count", newStateVal);
           // trigger the flow edge
-          _writeToIntOutput(tokenId, _nodeId, IN_OUT_SOCKET_A, _nodeStateVals[tokenId][_nodeId]["count"]);
+
+          console.log("triggering flow edge %i", uint256(newStateVal));
+          _writeToIntOutput(tokenId, _nodeId, IN_OUT_SOCKET_A, newStateVal);
           _triggerEdge(tokenId, _nodeId, FLOW_SOCKET_NAME);
         } else if (node.nodeType == NodeType.Gate) {
           // get the socket to trigger
-          string memory toTrigger = _nodeBoolVals[tokenId][_nodeId][_triggeringSocketName] ? GATE_TRUE_SOCKET_NAME : GATE_FALSE_SOCKET_NAME;
+          string memory toTrigger = getBoolInputVal(tokenId, _nodeId, _triggeringSocketName) ? GATE_TRUE_SOCKET_NAME : GATE_FALSE_SOCKET_NAME;
           // trigger the flow edge along that socket
           _triggerEdge(tokenId, _nodeId, toTrigger);
-        } else if (node.nodeType == NodeType.Value) {
+        } else if (node.nodeType == NodeType.VariableSet) {
           // emit that variable is updated, notifiying the outside world
           // if it is an int variable
+          string memory variableSocketName = getStringInputVal(tokenId, _nodeId, VARIABLE_NAME_SOCKET);
+
           if (node.inputValueType == ValueType.Int) {
-            emit IntValueUpdated(msg.sender, tokenId, _nodeId, _nodeInputIntVals[tokenId][_nodeId][IN_OUT_SOCKET_A]);
+            console.log("node input val %i", uint256(getIntInputVal(tokenId, _nodeId, IN_OUT_SOCKET_A)));
+            _setIntVariable(tokenId, variableSocketName, getIntInputVal(tokenId, _nodeId, IN_OUT_SOCKET_A));
           } else {
-            emit BoolValueUpdated(msg.sender, tokenId, _nodeId, _nodeBoolVals[tokenId][_nodeId][IN_OUT_SOCKET_A]);
+            _setBoolVariable(tokenId, variableSocketName, getBoolInputVal(tokenId, _nodeId, IN_OUT_SOCKET_A));
           }
         } else {
           revert InvalidActionId(_nodeId);

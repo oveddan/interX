@@ -20,7 +20,7 @@ import {
 import { registerSerializersForValueType } from '@behave-graph/core/src/Profiles/Core/registerSerializersForValueType';
 import { ISceneWithQueries, IChainGraph } from '../abstractions';
 import { ChainCounter } from '../nodes/chain/ChainCounter';
-import { ChainValue } from '../nodes/chain/ChainValue';
+import { ChainVariableSet } from '../nodes/chain/ChainVariableSet';
 import { ExternalTrigger } from '../nodes/chain/ExternalTrigger';
 import { OnSceneNodeClick } from '../nodes/scene/OnSceneNodeClick';
 

@@ -1,4 +1,4 @@
-import { Graph, Socket, Engine, Assert } from '@behave-graph/core';
+import { Graph, Socket, Engine, Assert, FlowNode } from '@behave-graph/core';
 import { EventNode, NodeDescription } from '@behave-graph/core';
 import { IChainGraph } from '../../abstractions';
 import { flowSocketName } from './ExternalTrigger';
@@ -8,13 +8,13 @@ const smartActionInvokedTypeName = 'chain/value';
 export const variableNameSocket = 'variableName';
 export const valueSocketName = 'value';
 
-export class ChainValue extends EventNode implements IChainNode {
+export class ChainVariableSet extends FlowNode implements IChainNode {
   public static Description = (smartContractActions: IChainGraph) =>
     new NodeDescription(
       smartActionInvokedTypeName,
-      'Event',
-      'On Chain Int Value',
-      (description, graph) => new ChainValue(description, graph, smartContractActions)
+      'Flow',
+      'Set On Chain Int Value',
+      (description, graph) => new ChainVariableSet(description, graph, smartContractActions)
     );
 
   constructor(description: NodeDescription, graph: Graph, private readonly smartContractActions: IChainGraph) {
@@ -26,7 +26,7 @@ export class ChainValue extends EventNode implements IChainNode {
         new Socket('flow', flowSocketName),
         new Socket('integer', valueSocketName),
       ],
-      [new Socket('flow', flowSocketName), new Socket('integer', valueSocketName)]
+      []
     );
   }
 
@@ -37,16 +37,8 @@ export class ChainValue extends EventNode implements IChainNode {
 
   private handleValueUpdated: ((count: bigint) => void) | undefined = undefined;
 
-  init(engine: Engine) {
-    Assert.mustBeTrue(this.handleValueUpdated === undefined);
-
-    this.handleValueUpdated = (count: bigint) => {
-      this.writeOutput(valueSocketName, count);
-      engine.commitToNewFiber(this, flowSocketName);
-    };
-
-    const smartContractActions = this.smartContractActions;
-    smartContractActions.registerIntVariableValueListener(this.id, this.handleValueUpdated);
+  triggered() {
+    // TODO: if fake smart contract, trigger somewhere?
   }
 
   dispose(engine: Engine) {

@@ -27,8 +27,7 @@ export class ChainCounter extends FlowNode implements IChainNode {
     inputValueType: ChainValueType.NotAVariable,
   });
 
-  // @ts-ignore
-  triggered(fiber: Fiber, triggeringSocketName: string) {
+  triggered() {
     // TODO: if fake - do something
   }
 }

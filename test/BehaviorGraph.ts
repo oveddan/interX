@@ -4,13 +4,25 @@ import { expect } from 'chai';
 import '@nomiclabs/hardhat-ethers';
 import { BehaviorGraph__factory } from '../typechain-types';
 import { ethers } from 'hardhat';
-import { NodeDefinitionStruct, EdgeDefinitionStruct } from '../typechain-types/contracts/BehaviorGraph';
-import { ChainNodeTypes } from '../editor/src/nodes/chain/IChainNode';
+import {
+  NodeDefinitionStruct,
+  EdgeDefinitionStruct,
+  NodeDefinitionAndValuesStruct,
+  InitialValuesStruct,
+} from '../typechain-types/contracts/BehaviorGraph';
 
 enum VariableType {
   Int = 0,
   Bool = 1,
   NotAVariable = 2,
+}
+
+enum NodeType {
+  ExternalTrigger = 0,
+  Counter = 1,
+  Add = 2,
+  Gate = 3,
+  VariableSet = 4,
 }
 
 function connect({
@@ -34,6 +46,14 @@ function connect({
   return result;
 }
 
+const VARIABLE_NAME_SOCKET = 'variableName';
+
+const emptyInitialValues = (): InitialValuesStruct => ({
+  booleans: [],
+  integers: [],
+  strings: [],
+});
+
 describe('BehaviorGraph', function () {
   // We define a fixture to reuse the same setup in every test.
   // We use loadFixture to run this setup once, snapshot that state,
@@ -56,7 +76,7 @@ describe('BehaviorGraph', function () {
 
       const ipfsHash = 'asdfasdfasfda';
 
-      const nodesToCreate: NodeDefinitionStruct[] = [];
+      const nodesToCreate: NodeDefinitionAndValuesStruct[] = [];
       const edgesToCreate: EdgeDefinitionStruct[] = [];
 
       await expect(behaviorGraph.connect(otherAccount).safeMint(ipfsHash, nodesToCreate, edgesToCreate)).to.not.be
@@ -69,27 +89,41 @@ describe('BehaviorGraph', function () {
       const counterNodeId = 'a';
       const variableNodeId = 'b';
       const variableName = 'counterOutput';
-      const nodeDefinitions: { [key: string]: NodeDefinitionStruct } = {
+      const nodeDefinitions: { [key: string]: NodeDefinitionAndValuesStruct } = {
         externalTrigger: {
-          id: externalTriggerNodeId,
-          defined: true,
-          nodeType: ChainNodeTypes.ExternalTrigger,
-          variableType: VariableType.NotAVariable,
-          variableName: '',
+          definition: {
+            id: externalTriggerNodeId,
+            defined: true,
+            nodeType: NodeType.ExternalTrigger,
+            inputValueType: VariableType.NotAVariable,
+          },
+          initialValues: emptyInitialValues(),
         },
         counter: {
-          id: counterNodeId,
-          defined: true,
-          nodeType: ChainNodeTypes.Counter,
-          variableType: VariableType.NotAVariable,
-          variableName: '',
+          definition: {
+            id: counterNodeId,
+            defined: true,
+            nodeType: NodeType.Counter,
+            inputValueType: VariableType.NotAVariable,
+          },
+          initialValues: emptyInitialValues(),
         },
         variable: {
-          id: variableNodeId,
-          defined: true,
-          nodeType: ChainNodeTypes.Value,
-          variableType: VariableType.Int,
-          variableName: variableName,
+          definition: {
+            id: variableNodeId,
+            defined: true,
+            nodeType: NodeType.VariableSet,
+            inputValueType: VariableType.Int,
+          },
+          initialValues: {
+            ...emptyInitialValues(),
+            strings: [
+              {
+                label: VARIABLE_NAME_SOCKET,
+                value: variableName,
+              },
+            ],
+          },
         },
       };
       it('should raise an error if the counter is triggered directly', async () => {
@@ -125,15 +159,15 @@ describe('BehaviorGraph', function () {
         const edges: EdgeDefinitionStruct[] = [
           // edge from external trigger to counter
           connect({
-            a: nodeDefinitions.externalTrigger,
-            b: nodeDefinitions.counter,
+            a: nodeDefinitions.externalTrigger.definition,
+            b: nodeDefinitions.counter.definition,
             fromSocket: socketNames.flowSocketName,
             toSocket: socketNames.flowSocketName,
           }),
           // edge from output value of counter to the variable
           connect({
-            a: nodeDefinitions.counter,
-            b: nodeDefinitions.variable,
+            a: nodeDefinitions.counter.definition,
+            b: nodeDefinitions.variable.definition,
             fromSocket: socketNames.inOutSocketA,
             toSocket: socketNames.inOutSocketA,
           }),
@@ -157,7 +191,7 @@ describe('BehaviorGraph', function () {
         );
       });
 
-      it('should emit that a variable is updated when a flow is connected to the variable input', async () => {
+      it.only('should emit that a variable is updated when a flow is connected to the variable input', async () => {
         const { behaviorGraph, owner, socketNames } = await loadFixture(deployFixture);
 
         const nodes = [nodeDefinitions.externalTrigger, nodeDefinitions.counter, nodeDefinitions.variable];
@@ -165,22 +199,22 @@ describe('BehaviorGraph', function () {
         const edges: EdgeDefinitionStruct[] = [
           // edge from external trigger to counter
           connect({
-            a: nodeDefinitions.externalTrigger,
-            b: nodeDefinitions.counter,
+            a: nodeDefinitions.externalTrigger.definition,
+            b: nodeDefinitions.counter.definition,
             fromSocket: socketNames.flowSocketName,
             toSocket: socketNames.flowSocketName,
           }),
           // edge from output value of counter to the variable
           connect({
-            a: nodeDefinitions.counter,
-            b: nodeDefinitions.variable,
+            a: nodeDefinitions.counter.definition,
+            b: nodeDefinitions.variable.definition,
             fromSocket: socketNames.inOutSocketA,
             toSocket: socketNames.inOutSocketA,
           }),
           // edge from flow of counter to flow of variable
           connect({
-            a: nodeDefinitions.counter,
-            b: nodeDefinitions.variable,
+            a: nodeDefinitions.counter.definition,
+            b: nodeDefinitions.variable.definition,
             fromSocket: socketNames.flowSocketName,
             toSocket: socketNames.flowSocketName,
           }),

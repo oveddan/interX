@@ -15,7 +15,7 @@ export enum ChainNodeTypes {
   Counter = 1,
   Add = 2,
   Gate = 3,
-  Value = 4,
+  VariableSet = 4,
 }
 
 export enum ChainValueType {
