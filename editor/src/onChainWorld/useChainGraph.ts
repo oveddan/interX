@@ -41,7 +41,7 @@ const useChainGraph = (contractAddress: string, tokenId: number) => {
     },
   });
 
-  const getActionCount = useCallback(
+  const getIntVariableValue = useCallback(
     async (id: string, connectedContract: typeof contract) => {
       console.log('no connected contract yet');
       if (!connectedContract) return;
@@ -61,12 +61,12 @@ const useChainGraph = (contractAddress: string, tokenId: number) => {
 
     console.log('got connected contract', actionExecutedHandlers.current);
     Object.entries(actionExecutedHandlers.current).forEach(async ([action, handler]) => {
-      const actionCount = await getActionCount(action, connectedContract);
+      const actionCount = await getIntVariableValue(action, connectedContract);
 
       console.log('connected now executing', actionCount);
       handler(BigInt(actionCount || 0));
     });
-  }, [connectedContract, getActionCount]);
+  }, [connectedContract, getIntVariableValue]);
 
   const registerTriggerHandler = useCallback(
     async (id: string, cb: (count: bigint) => void) => {
@@ -74,13 +74,13 @@ const useChainGraph = (contractAddress: string, tokenId: number) => {
       if (!connectedContract) return;
       console.log('setting trigger handler', actionExecutedHandlers.current);
 
-      const actionCount = await getActionCount(id, connectedContract);
+      const actionCount = await getIntVariableValue(id, connectedContract);
 
       if (actionCount) {
         cb(BigInt(actionCount));
       }
     },
-    [getActionCount, connectedContract]
+    [getIntVariableValue, connectedContract]
   );
 
   const unRegisterTriggerHandler = useCallback((id: string, cb: (count: bigint) => void) => {

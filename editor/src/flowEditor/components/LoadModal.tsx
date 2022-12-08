@@ -17,6 +17,7 @@ const modelFiles = {
 
 const graphFiles = {
   clickButtonToAnimate: 'ClickButtonToAnimate.json',
+  onChainClickButtonToAnimate: 'OnChainClickButtonToAnimate.json',
   spinningSuzanne: 'SpinningSuzanne.json',
   tokenGatedClick: 'TokenGatedClick.json',
   delay: 'Delay.json',
@@ -26,7 +27,7 @@ const graphFiles = {
 };
 
 export const examplePairs: [string, string][] = [
-  [modelFiles.pressButtonToStartElevator, graphFiles.clickButtonToAnimate],
+  [modelFiles.pressButtonToStartElevator, graphFiles.onChainClickButtonToAnimate],
   [modelFiles.suzanne, graphFiles.spinningSuzanne],
   [modelFiles.suzanne, graphFiles.tokenGatedClick],
   // [graphFiles.helloWorld],

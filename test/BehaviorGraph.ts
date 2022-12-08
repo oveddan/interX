@@ -33,8 +33,8 @@ function connect({
 }: {
   a: Pick<NodeDefinitionStruct, 'id'>;
   b: Pick<NodeDefinitionStruct, 'id'>;
-  fromSocket: number;
-  toSocket: number;
+  fromSocket: string;
+  toSocket: string;
 }) {
   const result: EdgeDefinitionStruct = {
     fromNode: a.id,

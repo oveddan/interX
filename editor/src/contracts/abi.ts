@@ -7,9 +7,9 @@ export const abi = [
   {
     "inputs": [
       {
-        "internalType": "string",
+        "internalType": "uint128",
         "name": "nodeId",
-        "type": "string"
+        "type": "uint128"
       }
     ],
     "name": "CannotTriggerExternally",
@@ -18,9 +18,9 @@ export const abi = [
   {
     "inputs": [
       {
-        "internalType": "string",
+        "internalType": "uint128",
         "name": "nodeId",
-        "type": "string"
+        "type": "uint128"
       }
     ],
     "name": "InvalidActionId",
@@ -110,7 +110,7 @@ export const abi = [
       {
         "indexed": false,
         "internalType": "string",
-        "name": "nodeId",
+        "name": "variableName",
         "type": "string"
       },
       {
@@ -120,7 +120,7 @@ export const abi = [
         "type": "bool"
       }
     ],
-    "name": "BoolValueUpdated",
+    "name": "BoolVariableUpdated",
     "type": "event"
   },
   {
@@ -141,17 +141,17 @@ export const abi = [
       {
         "indexed": false,
         "internalType": "string",
-        "name": "nodeId",
+        "name": "variableName",
         "type": "string"
       },
       {
         "indexed": false,
-        "internalType": "uint256",
+        "internalType": "int256",
         "name": "value",
-        "type": "uint256"
+        "type": "int256"
       }
     ],
-    "name": "IntValueUpdated",
+    "name": "IntVariableUpdated",
     "type": "event"
   },
   {
@@ -197,28 +197,93 @@ export const abi = [
       {
         "components": [
           {
-            "internalType": "string",
-            "name": "id",
-            "type": "string"
+            "components": [
+              {
+                "internalType": "uint128",
+                "name": "id",
+                "type": "uint128"
+              },
+              {
+                "internalType": "enum NodeType",
+                "name": "nodeType",
+                "type": "uint8"
+              },
+              {
+                "internalType": "bool",
+                "name": "defined",
+                "type": "bool"
+              },
+              {
+                "internalType": "enum ValueType",
+                "name": "inputValueType",
+                "type": "uint8"
+              }
+            ],
+            "internalType": "struct NodeDefinition",
+            "name": "definition",
+            "type": "tuple"
           },
           {
-            "internalType": "enum NodeType",
-            "name": "nodeType",
-            "type": "uint8"
-          },
-          {
-            "internalType": "bool",
-            "name": "defined",
-            "type": "bool"
-          },
-          {
-            "internalType": "enum ValueType",
-            "name": "inputValueType",
-            "type": "uint8"
+            "components": [
+              {
+                "components": [
+                  {
+                    "internalType": "bool",
+                    "name": "value",
+                    "type": "bool"
+                  },
+                  {
+                    "internalType": "uint8",
+                    "name": "socket",
+                    "type": "uint8"
+                  }
+                ],
+                "internalType": "struct BooleanValueAndLabel[]",
+                "name": "booleans",
+                "type": "tuple[]"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "int256",
+                    "name": "value",
+                    "type": "int256"
+                  },
+                  {
+                    "internalType": "uint8",
+                    "name": "socket",
+                    "type": "uint8"
+                  }
+                ],
+                "internalType": "struct IntValueAndLabel[]",
+                "name": "integers",
+                "type": "tuple[]"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "string",
+                    "name": "value",
+                    "type": "string"
+                  },
+                  {
+                    "internalType": "uint8",
+                    "name": "socket",
+                    "type": "uint8"
+                  }
+                ],
+                "internalType": "struct StringValueAndLabel[]",
+                "name": "strings",
+                "type": "tuple[]"
+              }
+            ],
+            "internalType": "struct InitialValues",
+            "name": "initialValues",
+            "type": "tuple"
           }
         ],
         "indexed": false,
-        "internalType": "struct NodeDefinition[]",
+        "internalType": "struct NodeDefinitionAndValues[]",
         "name": "nodes",
         "type": "tuple[]"
       }
@@ -259,14 +324,14 @@ export const abi = [
         "type": "uint256"
       },
       {
-        "internalType": "string",
+        "internalType": "uint128",
         "name": "_nodeId",
-        "type": "string"
+        "type": "uint128"
       },
       {
-        "internalType": "string",
+        "internalType": "uint8",
         "name": "_triggeringSocketName",
-        "type": "string"
+        "type": "uint8"
       }
     ],
     "name": "_triggerNode",
@@ -338,9 +403,115 @@ export const abi = [
         "type": "uint256"
       },
       {
-        "internalType": "string",
+        "internalType": "uint128",
         "name": "_nodeId",
+        "type": "uint128"
+      },
+      {
+        "internalType": "uint8",
+        "name": "_socketName",
+        "type": "uint8"
+      }
+    ],
+    "name": "getBoolInputVal",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "tokenId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "_variableName",
         "type": "string"
+      }
+    ],
+    "name": "getBoolVariable",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "tokenId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint128",
+        "name": "_nodeId",
+        "type": "uint128"
+      },
+      {
+        "internalType": "uint8",
+        "name": "_socketName",
+        "type": "uint8"
+      }
+    ],
+    "name": "getIntInputVal",
+    "outputs": [
+      {
+        "internalType": "int256",
+        "name": "",
+        "type": "int256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "tokenId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "_variableName",
+        "type": "string"
+      }
+    ],
+    "name": "getIntVariable",
+    "outputs": [
+      {
+        "internalType": "int256",
+        "name": "",
+        "type": "int256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "tokenId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint128",
+        "name": "_nodeId",
+        "type": "uint128"
       }
     ],
     "name": "getNodeDefinition",
@@ -348,9 +519,9 @@ export const abi = [
       {
         "components": [
           {
-            "internalType": "string",
+            "internalType": "uint128",
             "name": "id",
-            "type": "string"
+            "type": "uint128"
           },
           {
             "internalType": "enum NodeType",
@@ -377,40 +548,74 @@ export const abi = [
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "tokenId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint128",
+        "name": "_nodeId",
+        "type": "uint128"
+      },
+      {
+        "internalType": "string",
+        "name": "_stateVar",
+        "type": "string"
+      }
+    ],
+    "name": "getNodeStateVal",
+    "outputs": [
+      {
+        "internalType": "int256",
+        "name": "",
+        "type": "int256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "getSocketNames",
     "outputs": [
       {
         "components": [
           {
-            "internalType": "string",
+            "internalType": "uint8",
             "name": "inOutSocketA",
-            "type": "string"
+            "type": "uint8"
           },
           {
-            "internalType": "string",
+            "internalType": "uint8",
             "name": "inOutSocketB",
-            "type": "string"
+            "type": "uint8"
           },
           {
-            "internalType": "string",
+            "internalType": "uint8",
             "name": "inOutSocketResult",
-            "type": "string"
+            "type": "uint8"
           },
           {
-            "internalType": "string",
+            "internalType": "uint8",
             "name": "flowSocketName",
-            "type": "string"
+            "type": "uint8"
           },
           {
-            "internalType": "string",
+            "internalType": "uint8",
             "name": "gateTrueSocketName",
-            "type": "string"
+            "type": "uint8"
           },
           {
-            "internalType": "string",
+            "internalType": "uint8",
             "name": "gateFalseSocketName",
-            "type": "string"
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint8",
+            "name": "variableNameSocket",
+            "type": "uint8"
           }
         ],
         "internalType": "struct SocketNames",
@@ -419,6 +624,35 @@ export const abi = [
       }
     ],
     "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "tokenId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint128",
+        "name": "_nodeId",
+        "type": "uint128"
+      },
+      {
+        "internalType": "uint8",
+        "name": "_socketName",
+        "type": "uint8"
+      }
+    ],
+    "name": "getStringInputVal",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -507,51 +741,116 @@ export const abi = [
       {
         "components": [
           {
-            "internalType": "string",
-            "name": "id",
-            "type": "string"
+            "components": [
+              {
+                "internalType": "uint128",
+                "name": "id",
+                "type": "uint128"
+              },
+              {
+                "internalType": "enum NodeType",
+                "name": "nodeType",
+                "type": "uint8"
+              },
+              {
+                "internalType": "bool",
+                "name": "defined",
+                "type": "bool"
+              },
+              {
+                "internalType": "enum ValueType",
+                "name": "inputValueType",
+                "type": "uint8"
+              }
+            ],
+            "internalType": "struct NodeDefinition",
+            "name": "definition",
+            "type": "tuple"
           },
           {
-            "internalType": "enum NodeType",
-            "name": "nodeType",
-            "type": "uint8"
-          },
-          {
-            "internalType": "bool",
-            "name": "defined",
-            "type": "bool"
-          },
-          {
-            "internalType": "enum ValueType",
-            "name": "inputValueType",
-            "type": "uint8"
+            "components": [
+              {
+                "components": [
+                  {
+                    "internalType": "bool",
+                    "name": "value",
+                    "type": "bool"
+                  },
+                  {
+                    "internalType": "uint8",
+                    "name": "socket",
+                    "type": "uint8"
+                  }
+                ],
+                "internalType": "struct BooleanValueAndLabel[]",
+                "name": "booleans",
+                "type": "tuple[]"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "int256",
+                    "name": "value",
+                    "type": "int256"
+                  },
+                  {
+                    "internalType": "uint8",
+                    "name": "socket",
+                    "type": "uint8"
+                  }
+                ],
+                "internalType": "struct IntValueAndLabel[]",
+                "name": "integers",
+                "type": "tuple[]"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "string",
+                    "name": "value",
+                    "type": "string"
+                  },
+                  {
+                    "internalType": "uint8",
+                    "name": "socket",
+                    "type": "uint8"
+                  }
+                ],
+                "internalType": "struct StringValueAndLabel[]",
+                "name": "strings",
+                "type": "tuple[]"
+              }
+            ],
+            "internalType": "struct InitialValues",
+            "name": "initialValues",
+            "type": "tuple"
           }
         ],
-        "internalType": "struct NodeDefinition[]",
+        "internalType": "struct NodeDefinitionAndValues[]",
         "name": "_nodes",
         "type": "tuple[]"
       },
       {
         "components": [
           {
-            "internalType": "string",
+            "internalType": "uint128",
             "name": "fromNode",
-            "type": "string"
+            "type": "uint128"
           },
           {
-            "internalType": "string",
+            "internalType": "uint128",
             "name": "toNode",
-            "type": "string"
+            "type": "uint128"
           },
           {
-            "internalType": "string",
+            "internalType": "uint8",
             "name": "fromSocket",
-            "type": "string"
+            "type": "uint8"
           },
           {
-            "internalType": "string",
+            "internalType": "uint8",
             "name": "toSocket",
-            "type": "string"
+            "type": "uint8"
           }
         ],
         "internalType": "struct EdgeDefinition[]",
@@ -734,9 +1033,9 @@ export const abi = [
         "type": "uint256"
       },
       {
-        "internalType": "string",
+        "internalType": "uint128",
         "name": "_nodeId",
-        "type": "string"
+        "type": "uint128"
       }
     ],
     "name": "trigger",
