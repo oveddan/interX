@@ -25,7 +25,7 @@ enum NodeType {
   VariableSet = 4,
 }
 
-function connect({
+function connectEdge({
   a,
   b,
   fromSocket,
@@ -33,8 +33,8 @@ function connect({
 }: {
   a: Pick<NodeDefinitionStruct, 'id'>;
   b: Pick<NodeDefinitionStruct, 'id'>;
-  fromSocket: string;
-  toSocket: string;
+  fromSocket: number;
+  toSocket: number;
 }) {
   const result: EdgeDefinitionStruct = {
     fromNode: a.id,
@@ -65,9 +65,9 @@ describe('BehaviorGraph', function () {
     const BehaviorGraph = (await ethers.getContractFactory('BehaviorGraph')) as BehaviorGraph__factory;
     const behaviorGraph = await BehaviorGraph.deploy();
 
-    const socketNames = await behaviorGraph.getSocketNames();
+    const socketIndeces = await behaviorGraph.getSocketIndecesByNodeType();
 
-    return { behaviorGraph, owner, otherAccount, anotherAccount, socketNames };
+    return { behaviorGraph, owner, otherAccount, anotherAccount, socketIndeces };
   }
 
   describe('safeMint', () => {
@@ -119,25 +119,26 @@ describe('BehaviorGraph', function () {
             ...emptyInitialValues(),
             strings: [
               {
-                socket: VARIABLE_NAME_SOCKET,
+                socket: 2, // socketIndeces.variableSet.variableName,
                 value: variableName,
               },
             ],
           },
         },
       };
+
       it('should raise an error if the counter is triggered directly', async () => {
-        const { behaviorGraph, socketNames } = await loadFixture(deployFixture);
+        const { behaviorGraph, socketIndeces } = await loadFixture(deployFixture);
 
         const nodes = [nodeDefinitions.counter, nodeDefinitions.variable];
 
         const edges: EdgeDefinitionStruct[] = [
           // edge from output value of counter to the variable
-          connect({
+          connectEdge({
             a: { id: counterNodeId },
             b: { id: variableNodeId },
-            fromSocket: socketNames.inOutSocketA,
-            toSocket: socketNames.inOutSocketA,
+            fromSocket: socketIndeces.counter.outputCount.valueOf(),
+            toSocket: socketIndeces.variableSet.inputVal.valueOf(),
           }),
         ];
 
@@ -152,24 +153,24 @@ describe('BehaviorGraph', function () {
       });
 
       it('should not trigger an action when there is no flow connection to a variable', async () => {
-        const { behaviorGraph, socketNames } = await loadFixture(deployFixture);
+        const { behaviorGraph, socketIndeces } = await loadFixture(deployFixture);
 
         const nodes = [nodeDefinitions.externalTrigger, nodeDefinitions.counter, nodeDefinitions.variable];
 
         const edges: EdgeDefinitionStruct[] = [
           // edge from external trigger to counter
-          connect({
+          connectEdge({
             a: nodeDefinitions.externalTrigger.definition,
             b: nodeDefinitions.counter.definition,
-            fromSocket: socketNames.flowSocketName,
-            toSocket: socketNames.flowSocketName,
+            fromSocket: socketIndeces.externalTrigger.outputFlowSocket,
+            toSocket: socketIndeces.counter.input,
           }),
           // edge from output value of counter to the variable
-          connect({
+          connectEdge({
             a: nodeDefinitions.counter.definition,
             b: nodeDefinitions.variable.definition,
-            fromSocket: socketNames.inOutSocketA,
-            toSocket: socketNames.inOutSocketA,
+            fromSocket: socketIndeces.counter.outputCount,
+            toSocket: socketIndeces.variableSet.inputVal,
           }),
         ];
 
@@ -191,32 +192,32 @@ describe('BehaviorGraph', function () {
         );
       });
 
-      it.only('should emit that a variable is updated when a flow is connected to the variable input', async () => {
-        const { behaviorGraph, owner, socketNames } = await loadFixture(deployFixture);
+      it('should emit that a variable is updated when a flow is connected to the variable input', async () => {
+        const { behaviorGraph, owner, socketIndeces } = await loadFixture(deployFixture);
 
         const nodes = [nodeDefinitions.externalTrigger, nodeDefinitions.counter, nodeDefinitions.variable];
 
         const edges: EdgeDefinitionStruct[] = [
           // edge from external trigger to counter
-          connect({
+          connectEdge({
             a: nodeDefinitions.externalTrigger.definition,
             b: nodeDefinitions.counter.definition,
-            fromSocket: socketNames.flowSocketName,
-            toSocket: socketNames.flowSocketName,
+            fromSocket: socketIndeces.externalTrigger.outputFlowSocket,
+            toSocket: socketIndeces.counter.input,
           }),
           // edge from output value of counter to the variable
-          connect({
+          connectEdge({
             a: nodeDefinitions.counter.definition,
             b: nodeDefinitions.variable.definition,
-            fromSocket: socketNames.inOutSocketA,
-            toSocket: socketNames.inOutSocketA,
+            fromSocket: socketIndeces.counter.outputCount,
+            toSocket: socketIndeces.variableSet.inputVal,
           }),
           // edge from flow of counter to flow of variable
-          connect({
+          connectEdge({
             a: nodeDefinitions.counter.definition,
             b: nodeDefinitions.variable.definition,
-            fromSocket: socketNames.flowSocketName,
-            toSocket: socketNames.flowSocketName,
+            fromSocket: socketIndeces.counter.flow,
+            toSocket: socketIndeces.variableSet.inputFlow,
           }),
         ];
 
