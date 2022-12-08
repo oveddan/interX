@@ -42,7 +42,7 @@ struct EdgeDefinition {
 }
 
 struct EdgeToNode {
-  uint128 toNode;
+  uint16 toNode;
   uint8 toSocket;
   bool set;
 }
@@ -71,17 +71,17 @@ contract BehaviorGraph is ERC721, ERC721URIStorage, Ownable, NodeState, HasVaria
 
     Counters.Counter private _tokenIdCounter;
 
-    mapping(uint256 => mapping(string => uint128)) private _nodeIndeces;
+    mapping(uint16 => mapping(string => uint16)) private _nodeIndeces;
     // edges between nodes, indexed by token id, node index, and socket index
-    mapping(uint256 => mapping(uint128 => mapping(uint8 => EdgeToNode))) private _tokenEdges;
+    mapping(uint16 => mapping(uint16 => mapping(uint8 => EdgeToNode))) private _tokenEdges;
 
     // node node definition, mapped by node index and token id
-    mapping(uint256 => mapping(uint128 => NodeType)) private _nodeTypes;
-    mapping(uint256 => mapping(uint128 => ValueType)) private _inputValueTypes;
+    mapping(uint16 => mapping(uint16 => NodeType)) private _nodeTypes;
+    mapping(uint16 => mapping(uint16 => ValueType)) private _inputValueTypes;
     event SafeMint(uint256 tokenId, address toNode, string uri, NodeDefinitionAndValues[] nodes);
 
-    error InvalidActionId(uint128 nodeId);
-    error CannotTriggerExternally(uint128 nodeId);
+    error InvalidActionId(uint16 nodeId);
+    error CannotTriggerExternally(uint16 nodeId);
     error MissingTokens(string nodeId, address tokenAddress);
 
     constructor() ERC721("MyToken", "MTK") {}
@@ -96,18 +96,19 @@ contract BehaviorGraph is ERC721, ERC721URIStorage, Ownable, NodeState, HasVaria
         address to = msg.sender;
         _safeMint(to, tokenId);
         _setTokenURI(tokenId, sceneUri);
-        _createNodes(tokenId, _nodes, _edges);
+        // todo - fix overflow with uint16
+        _createNodes(uint16(tokenId), _nodes, _edges);
         emit SafeMint(tokenId, to, sceneUri, _nodes);
     
         return tokenId;
     }
 
   
-    function _nodeIndex(uint256 tokenId, string memory nodeId) private view returns(uint128) {
+    function _nodeIndex(uint16 tokenId, string memory nodeId) private view returns(uint16) {
         return _nodeIndeces[tokenId][nodeId];
     }
 
-    function _getNodeType(uint256 tokenId, uint128 nodeIndex) private view returns(NodeType) {
+    function _getNodeType(uint16 tokenId, uint16 nodeIndex) private view returns(NodeType) {
         return _nodeTypes[tokenId][nodeIndex];
     }
 
@@ -127,12 +128,12 @@ contract BehaviorGraph is ERC721, ERC721URIStorage, Ownable, NodeState, HasVaria
 
     
 
-    function _createNodes(uint256 tokenId, NodeDefinitionAndValues[] calldata _nodes, EdgeDefinition[] calldata _edges) private {
+    function _createNodes(uint16 tokenId, NodeDefinitionAndValues[] calldata _nodes, EdgeDefinition[] calldata _edges) private {
       // for each node definition and values, create a node and set the initial values
-      for(uint256 i = 0; i < _nodes.length; i++) {
+      for(uint16 i = 0; i < _nodes.length; i++) {
           NodeDefinitionAndValues calldata nodeAndValues = _nodes[i];
           NodeDefinition calldata node = nodeAndValues.definition;
-          uint128 nodeIndex = _nodeIndex(tokenId, node.id);
+          uint16 nodeIndex = _nodeIndex(tokenId, node.id);
           NodeType nodeType = node.nodeType;
 
           _nodeTypes[tokenId][nodeIndex] = nodeType;
@@ -143,11 +144,11 @@ contract BehaviorGraph is ERC721, ERC721URIStorage, Ownable, NodeState, HasVaria
           // store the indeces for the sockets, so that they can be mapped by int later.
           _setInputOutputNodeSocketIndeces(nodeType, node.inputSockets, node.outputSockets);
         }
-      for(uint256 i = 0; i < _edges.length; i++) {
+      for(uint16 i = 0; i < _edges.length; i++) {
         EdgeDefinition calldata edge = _edges[i];
 
-        uint128 fromNode = _nodeIndex(tokenId, edge.fromNode);
-        uint128 toNode = _nodeIndex(tokenId, edge.toNode);
+        uint16 fromNode = _nodeIndex(tokenId, edge.fromNode);
+        uint16 toNode = _nodeIndex(tokenId, edge.toNode);
         NodeType fromNodeType = _getNodeType(tokenId, fromNode);
         uint8 fromSocket = getInputNodeSocketIndex(fromNodeType, edge.fromSocket);
 
@@ -163,12 +164,12 @@ contract BehaviorGraph is ERC721, ERC721URIStorage, Ownable, NodeState, HasVaria
         return SocketNames(IN_OUT_SOCKET_A, IN_OUT_SOCKET_B, IN_OUT_SOCKET_RESULT, FLOW_SOCKET_NAME, GATE_TRUE_SOCKET_NAME, GATE_FALSE_SOCKET_NAME, VARIABLE_NAME_SOCKET);
     }
 
-    function _getEdge(uint256 tokenId, uint128 _nodeId, uint8 _socketIndex) private view returns(EdgeToNode memory) {
+    function _getEdge(uint16 tokenId, uint16 _nodeId, uint8 _socketIndex) private view returns(EdgeToNode memory) {
         EdgeToNode memory edge = _tokenEdges[tokenId][_nodeId][_socketIndex];
         return edge;
     }
 
-    function _triggerEdge(uint256 tokenId, uint128 _nodeId, NodeType nodeType, string memory _label) private {
+    function _triggerEdge(uint16 tokenId, uint16 _nodeId, NodeType nodeType, string memory _label) private {
       uint8 _socketIndex = getOutputNodeSocketIndex(nodeType, _label);
       EdgeToNode memory edge = _getEdge(tokenId, _nodeId, _socketIndex);
       if(edge.set) {
@@ -176,7 +177,7 @@ contract BehaviorGraph is ERC721, ERC721URIStorage, Ownable, NodeState, HasVaria
       }
     }
 
-    function _writeToIntOutput(uint256 tokenId, uint128 _nodeId, NodeType nodeType, string memory outputSocketName, int256 val) private {
+    function _writeToIntOutput(uint16 tokenId, uint16 _nodeId, NodeType nodeType, string memory outputSocketName, int256 val) private {
       uint8 _socketId = getOutputNodeSocketIndex(nodeType, outputSocketName);
       // get the edge to the next node
       EdgeToNode memory edge = _getEdge(tokenId, _nodeId, _socketId);
@@ -191,12 +192,12 @@ contract BehaviorGraph is ERC721, ERC721URIStorage, Ownable, NodeState, HasVaria
       }
     }
 
-    function _getIntInputVal(uint256 tokenId, uint128 _nodeId, NodeType nodeType, string memory socketName) private view returns(int256) {
+    function _getIntInputVal(uint16 tokenId, uint16 _nodeId, NodeType nodeType, string memory socketName) private view returns(int256) {
         uint8 socketId = getInputNodeSocketIndex(nodeType, socketName);
         return getIntInputVal(tokenId, _nodeId, socketId);
     }
 
-    function _exec(uint256 tokenId, uint128 _nodeId) private {
+    function _exec(uint16 tokenId, uint16 _nodeId) private {
         NodeType nodeType = _getNodeType(tokenId, _nodeId);
         if(nodeType == NodeType.Add) {
             // get the value from input a and input b
@@ -207,26 +208,26 @@ contract BehaviorGraph is ERC721, ERC721URIStorage, Ownable, NodeState, HasVaria
         } 
     }
 
-    function _isImmediateNode(uint256 tokenId, uint128 _nodeId) private view returns(bool) {
+    function _isImmediateNode(uint16 tokenId, uint16 _nodeId) private view returns(bool) {
         NodeType nodeType = _getNodeType(tokenId, _nodeId);
         return nodeType == NodeType.Add;
     }
 
-    function getStringInputVal(uint256 tokenId, uint128 _nodeId, NodeType _nodeType, string memory _socketName) public view returns(string memory) {
+    function getStringInputVal(uint16 tokenId, uint16 _nodeId, NodeType _nodeType, string memory _socketName) internal view returns(string memory) {
         uint8 socketIndex = getInputNodeSocketIndex(_nodeType, _socketName);
         return getStringInputVal(tokenId, _nodeId, socketIndex);
     }
 
 
     // overloaded function that looks up by socket name 
-    function _getBoolInputVal(uint256 tokenId, uint128 _nodeId, NodeType _nodeType, string memory _socketName) public view returns(bool) {
+    function _getBoolInputVal(uint16 tokenId, uint16 _nodeId, NodeType _nodeType, string memory _socketName) internal view returns(bool) {
       uint8 socketIndex = getInputNodeSocketIndex(_nodeType, _socketName);
     
       // call overloaded function that looks up by socket index
       return _getBoolInputVal(tokenId, _nodeId, socketIndex);
     }
 
-    function _triggerNode(uint256 tokenId, uint128 _nodeId, uint8 _triggeringSocketName) public {
+    function _triggerNode(uint16 tokenId, uint16 _nodeId, uint8 _triggeringSocketName) internal {
         // get the node type
         NodeType nodeType = _getNodeType(tokenId, _nodeId);
         
@@ -260,7 +261,7 @@ contract BehaviorGraph is ERC721, ERC721URIStorage, Ownable, NodeState, HasVaria
         }
     }
 
-    function trigger(uint256 _tokenId, uint128 _nodeId) public {
+    function trigger(uint16 _tokenId, uint16 _nodeId) public {
         NodeType _nodeType = _getNodeType(_tokenId, _nodeId);
         
         if (_nodeType != NodeType.ExternalTrigger) {

@@ -42,16 +42,16 @@ struct StringValue {
 
 
 contract NodeState {
-    mapping(uint256 => mapping(uint128 => mapping(uint8 => IntValue))) private _nodeInputIntVals;
-    mapping(uint256 => mapping(uint128 => mapping(uint8 => StringValue))) private _nodeInputStringVals;
-    mapping(uint256 => mapping(uint128 => mapping(uint8 => BoolValue))) private _nodeBoolInputVals;
+    mapping(uint16 => mapping(uint16 => mapping(uint8 => IntValue))) private _nodeInputIntVals;
+    mapping(uint16 => mapping(uint16 => mapping(uint8 => StringValue))) private _nodeInputStringVals;
+    mapping(uint16 => mapping(uint16 => mapping(uint8 => BoolValue))) private _nodeBoolInputVals;
 
-    mapping(uint256 => mapping(uint128 => mapping(string => IntValue))) private _nodeIntStateVals;
+    mapping(uint16 => mapping(uint16 => mapping(string => IntValue))) private _nodeIntStateVals;
 
     constructor() {}
 
-    function getIntInputVal(uint256 tokenId, uint128 _nodeId, uint8 _socketName) public view returns(int256) {
-      // uint256 val = uint256(_nodeInputIntVals[tokenId][_nodeId][_socketName]);
+    function getIntInputVal(uint16 tokenId, uint16 _nodeId, uint8 _socketName) public view returns(int256) {
+      // uint16 val = uint16(_nodeInputIntVals[tokenId][_nodeId][_socketName]);
       // console.log("get int input val %s %s: %i",_nodeId,  _socketName, val);
 
       IntValue memory val = _nodeInputIntVals[tokenId][_nodeId][_socketName];
@@ -61,30 +61,30 @@ contract NodeState {
     }
 
 
-    function _setIntInputVal(uint256 tokenId, uint128 _nodeId, uint8 _socketName, int256 val) internal {
-      // console.log("set int input val %s %s: %i", _nodeId, _socketName, uint256(val));
+    function _setIntInputVal(uint16 tokenId, uint16 _nodeId, uint8 _socketName, int256 val) internal {
+      // console.log("set int input val %s %s: %i", _nodeId, _socketName, uint16(val));
       _nodeInputIntVals[tokenId][_nodeId][_socketName] = IntValue(val, true);
     }
 
-    function getBoolInputVal(uint256 tokenId, uint128 _nodeId, uint8 _socketName) public view returns(bool) {
+    function getBoolInputVal(uint16 tokenId, uint16 _nodeId, uint8 _socketName) public view returns(bool) {
       BoolValue memory val = _nodeBoolInputVals[tokenId][_nodeId][_socketName];
     
       if (val.set) return val.value;
       return false;
     }
 
-    function _getBoolInputVal(uint256 tokenId, uint128 _nodeId, uint8 _socketIndex) public view returns(bool) {
+    function _getBoolInputVal(uint16 tokenId, uint16 _nodeId, uint8 _socketIndex) public view returns(bool) {
       BoolValue memory val = _nodeBoolInputVals[tokenId][_nodeId][_socketIndex];
     
       if (val.set) return val.value;
       return false;
     }
 
-    function _setBoolInputVal(uint256 tokenId, uint128 _nodeId, uint8 _socketName, bool val) internal {
+    function _setBoolInputVal(uint16 tokenId, uint16 _nodeId, uint8 _socketName, bool val) internal {
       _nodeBoolInputVals[tokenId][_nodeId][_socketName] = BoolValue(val, true);
     }
 
-    function getStringInputVal(uint256 tokenId, uint128 _nodeId, uint8 _socketName) public view returns(string memory) {
+    function getStringInputVal(uint16 tokenId, uint16 _nodeId, uint8 _socketName) public view returns(string memory) {
       StringValue memory val = _nodeInputStringVals[tokenId][_nodeId][_socketName];
     
       if (val.set) return val.value;
@@ -92,15 +92,15 @@ contract NodeState {
       return '';
     }
 
-    function _setStringInputVal(uint256 tokenId, uint128 _nodeId, uint8 _socketName, string memory val) internal {
+    function _setStringInputVal(uint16 tokenId, uint16 _nodeId, uint8 _socketName, string memory val) internal {
       _nodeInputStringVals[tokenId][_nodeId][_socketName] = StringValue(val, true);
     }
 
-    function _setNodeIntStateVal(uint256 tokenId, uint128 _nodeId, string memory _stateVar, int256 val) internal {
+    function _setNodeIntStateVal(uint16 tokenId, uint16 _nodeId, string memory _stateVar, int256 val) internal {
       _nodeIntStateVals[tokenId][_nodeId][_stateVar] = IntValue(val, true);
     }
 
-    function getNodeStateVal(uint256 tokenId, uint128 _nodeId, string memory _stateVar) public view returns(int256) {
+    function getNodeStateVal(uint16 tokenId, uint16 _nodeId, string memory _stateVar) public view returns(int256) {
       IntValue memory val = _nodeIntStateVals[tokenId][_nodeId][_stateVar];
     
       if(val.set) return val.value;
@@ -108,54 +108,95 @@ contract NodeState {
     }
 
 
-    function _setInitialValues(uint256 tokenId, uint128 _nodeId, InitialValues memory _initialValues) internal {
+    function _setInitialValues(uint16 tokenId, uint16 _nodeId, InitialValues memory _initialValues) internal {
       // set initial boolean values
-      for(uint256 j = 0; j < _initialValues.booleans.length; j++) {
+      for(uint16 j = 0; j < _initialValues.booleans.length; j++) {
         BooleanValueAndLabel memory boolVal = _initialValues.booleans[j];
         _setBoolInputVal(tokenId, _nodeId, boolVal.socket, boolVal.value);
       }
       
       // set initial int values
-      for(uint256 j= 0; j < _initialValues.integers.length; j++) {
+      for(uint16 j= 0; j < _initialValues.integers.length; j++) {
         IntValueAndLabel memory intVal = _initialValues.integers[j];
         _setIntInputVal(tokenId, _nodeId, intVal.socket, intVal.value);
       }
       
       // set initial string values
-      for(uint256 j = 0; j < _initialValues.strings.length; j++) {
+      for(uint16 j = 0; j < _initialValues.strings.length; j++) {
         StringValueAndLabel memory stringVal = _initialValues.strings[j];
         _setStringInputVal(tokenId, _nodeId, stringVal.socket, stringVal.value);
       }
     }
 }
 
-contract HasVariables {
-    // integer variable values
-    mapping(uint256 => mapping(string => int256)) private _intVarVals;
-    // boolean variable values
-    mapping(uint256 => mapping(string => bool)) private _boolVarVals;
+struct VariableIdAndSet {
+  bool set;
+  uint8 id;
+}
 
-    event IntVariableUpdated(address executor, uint256 tokenId, string variableName, int256 value);
-    event BoolVariableUpdated(address executor, uint256 tokenId, string variableName, bool value);
+contract HasVariables {
+    // // variable ids
+    // mapping(uint16 => uint8) private _variableCount;
+
+    // // variable ids
+    // mapping(uint16 => string[]) private _variableIds;
+    // // integer variable values
+    // mapping(uint16 => mapping(uint8 => int256)) private _intVarVals;
+    // // boolean variable values
+    // mapping(uint16 => mapping(uint8 => bool)) private _boolVarVals;
+
+    event IntVariableUpdated(address executor, uint16 tokenId, string variableName, int256 value);
+    event BoolVariableUpdated(address executor, uint16 tokenId, string variableName, bool value);
 
     constructor() {
     }  
 
-    function _setIntVariable(uint256 tokenId, string memory _variableName, int256 val) internal {
-        _intVarVals[tokenId][_variableName] = val;
+    // function _getVariableId(uint16 tokenId, string memory _variableName) private view returns(uint8) {
+    //     for(uint8 i = 0; i < _variableIds[tokenId].length; i++) {
+    //         if(keccak256(abi.encodePacked(_variableIds[tokenId][i])) == keccak256(abi.encodePacked(_variableName))) {
+    //             return i+1;
+    //         }
+    //     }
+    
+    //     // if returns 0, then variable not found
+    //     return 0;
+    // }
+
+    // function _getOrSetVariable(uint16 tokenId, string memory _variableName) private returns(uint8) {
+    //     for(uint8 i = 0; i < _variableIds[tokenId].length; i++) {
+    //         if(keccak256(abi.encodePacked(_variableIds[tokenId][i])) == keccak256(abi.encodePacked(_variableName))) {
+    //             return i;
+    //         }
+    //     }
+    //     _variableIds[tokenId].push(_variableName);
+    
+    //     // todo - constraint on max number of variables
+    //     // variable foudn means length + 1;
+    //     return uint8(_variableIds[tokenId].length);
+    // }
+
+    function _setIntVariable(uint16 tokenId, string memory _variableName, int256 val) internal {
+        // uint8 _variableId = _getOrSetVariable(tokenId, _variableName);
+        // _intVarVals[tokenId][_variableId] = val;
         emit IntVariableUpdated(msg.sender, tokenId, _variableName, val);
     }
 
-    function getIntVariable(uint256 tokenId, string memory _variableName) public view returns(int256) {
-        return _intVarVals[tokenId][_variableName];
-    }
+    // function getIntVariable(uint16 tokenId, string memory _variableName) internal view returns(int256) {
+    //     uint8 _variableId = _getVariableId(tokenId, _variableName);
+    //     if (_variableId > 0) return 0;
 
-    function _setBoolVariable(uint256 tokenId, string memory _variableName, bool val) internal {
-        _boolVarVals[tokenId][_variableName] = val;
+    //     return _intVarVals[tokenId][_variableId];
+    // }
+
+    function _setBoolVariable(uint16 tokenId, string memory _variableName, bool val) internal {
+        // uint8 _variableId = _getOrSetVariable(tokenId, _variableName);
+        // _boolVarVals[tokenId][_variableId] = val;
         emit BoolVariableUpdated(msg.sender, tokenId, _variableName, val);
     }
 
-    function getBoolVariable(uint256 tokenId, string memory _variableName) public view returns(bool) {
-        return _boolVarVals[tokenId][_variableName];
-    }
+    // function getBoolVariable(uint16 tokenId, string memory _variableName) internal view returns(bool) {
+    //     uint8 _variableId = _getVariableId(tokenId, _variableName);
+    //     if (_variableId > 0) return false;
+    //     return _boolVarVals[tokenId][_variableId];
+    // }
 }
