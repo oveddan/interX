@@ -1,13 +1,19 @@
 import { GraphJSON } from '@behave-graph/core';
 import { useEffect, useState } from 'react';
-import { usePrepareContractWrite, useContractWrite, useContractEvent } from 'wagmi';
+import { suspend } from 'suspend-react';
+import { usePrepareContractWrite, useContractWrite, useContractEvent, useContractRead } from 'wagmi';
 import { abi } from '../contracts/abi';
 import chainNodesToChainSpec from '../nodes/chain/chainNodesToChainSpec';
-import { SafeMintInputs } from '../nodes/chain/IChainNode';
+import { SafeMintInputs, SocketIndecesByNodeType } from '../nodes/chain/IChainNode';
 
-const toMintArgs = (cid: string, behaviorGraph: GraphJSON): SafeMintInputs => {
+const toMintArgs = (
+  cid: string,
+  behaviorGraph: GraphJSON,
+  socketIndecesByNodeType: SocketIndecesByNodeType | undefined
+): SafeMintInputs => {
   // convert chain nodes to on chain node defininitions
-  const { nodeDefinitions, edgeDefinitions } = chainNodesToChainSpec(behaviorGraph);
+  if (!socketIndecesByNodeType) return [cid, [], []];
+  const { nodeDefinitions, edgeDefinitions } = chainNodesToChainSpec(behaviorGraph, socketIndecesByNodeType);
 
   const result: SafeMintInputs = [cid, nodeDefinitions, edgeDefinitions];
 
@@ -40,12 +46,40 @@ const useMintWorld = ({
   worldCid: string;
   behaviorGraph: GraphJSON;
 }) => {
-  const [args, setArgs] = useState(() => toMintArgs(worldCid, behaviorGraph));
+  const {
+    data: socketIndecesByNodeType,
+    error: readError,
+    isLoading: readIsLoading,
+  } = useContractRead({
+    address: contractAddress,
+    abi,
+    functionName: 'getSocketIndecesByNodeType',
+  });
+
+  // console.log({ readError, socketIndecesByNodeTypeOptional, readIsLoading });
+
+  // const socketIndecesByNodeType = suspend(
+  //   (socketIndecesByNodeTypeOptional) => {
+  //     // if we have the socket indeces, we can return them
+  //     if (socketIndecesByNodeTypeOptional) {
+  //       console.log('return good');
+  //       return new Promise<SocketIndecesByNodeType>((resolve) => resolve(socketIndecesByNodeTypeOptional));
+  //     }
+
+  //     console.log('return empty promise');
+  //     // otherwise, return an empty promise that will never resolve
+  //     return new Promise<SocketIndecesByNodeType>((resolve) => {});
+  //   },
+  //   [socketIndecesByNodeTypeOptional]
+  // );
+
+  const [args, setArgs] = useState(() => toMintArgs(worldCid, behaviorGraph, socketIndecesByNodeType));
 
   useEffect(() => {
-    const args = toMintArgs(worldCid, behaviorGraph);
+    console.log({ socketIndecesByNodeType });
+    const args = toMintArgs(worldCid, behaviorGraph, socketIndecesByNodeType);
     setArgs(args);
-  }, [worldCid, behaviorGraph]);
+  }, [worldCid, behaviorGraph, socketIndecesByNodeType]);
 
   const { config, error, isError } = usePrepareContractWrite({
     address: contractAddress,

@@ -28,7 +28,7 @@ export const makeChainNodeSpecs = (socketIndeces: SocketIndecesByNodeType): Node
   [chainCointerSocketSpec, chainVariableSetSocketSpec, externalTriggerSocketSpec].reduce((acc: NodeSocketIO, x) => {
     return {
       ...acc,
-      [x.nodeType]: {
+      [x.nodeTypeName]: {
         nodeType: x.nodeType,
         inputValueType: x.inputValueType,
         ...generateInputOutputSocketMappings(

@@ -14,7 +14,7 @@ export type ChainSocketSpecGenerator<
   TSocketNames extends SocketNames<TSocketIndeces>
 > = {
   socketIndecesForType: (socketIndeces: SocketIndecesByNodeType) => TSocketIndeces;
-  socketTypeName: string;
+  nodeTypeName: string;
   nodeType: ChainNodeTypes;
   inputValueType: ChainValueType;
   socketNames: TSocketNames;

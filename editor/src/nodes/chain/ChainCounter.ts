@@ -6,7 +6,7 @@ import { makeChainNodeSpec } from './socketGeneration';
 
 export const chainCointerSocketSpec = makeChainNodeSpec({
   socketIndecesForType: ({ counter }) => counter,
-  socketTypeName: 'chain/counter',
+  nodeTypeName: 'chain/counter',
   nodeType: ChainNodeTypes.Counter,
   inputValueType: ChainValueType.NotAVariable,
   socketNames: {
@@ -24,7 +24,7 @@ export const chainCointerSocketSpec = makeChainNodeSpec({
 export class ChainCounter extends FlowNode {
   public static Description = (smartContractActions: IChainGraph) =>
     new NodeDescription(
-      chainCointerSocketSpec.socketTypeName,
+      chainCointerSocketSpec.nodeTypeName,
       'Flow',
       'Chain Counter',
       (description, graph) => new ChainCounter(description, graph)

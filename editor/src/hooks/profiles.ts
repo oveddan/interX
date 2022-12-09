@@ -18,10 +18,7 @@ import {
   IScene,
 } from '@behave-graph/core';
 import { registerSerializersForValueType } from '@behave-graph/core/src/Profiles/Core/registerSerializersForValueType';
-import { ISceneWithQueries, IChainGraph } from '../abstractions';
-import { ChainCounter } from '../nodes/chain/ChainCounter';
-import { ChainVariableSet } from '../nodes/chain/ChainVariableSet';
-import { ExternalTrigger } from '../nodes/chain/ExternalTrigger';
+import { ISceneWithQueries } from '../abstractions';
 import { OnSceneNodeClick } from '../nodes/scene/OnSceneNodeClick';
 
 export function registerSharedSceneProfiles(registry: Registry, scene: IScene) {
@@ -43,8 +40,10 @@ export function registerSharedSceneProfiles(registry: Registry, scene: IScene) {
   nodes.register(...getNodeDescriptions(EulerNodes));
   nodes.register(...getNodeDescriptions(QuatNodes));
 
-  // // actions
+  // actions
   const allValueTypeNames = values.getAllNames();
+  console.log(allValueTypeNames);
+  console.log(SetSceneProperty.GetDescriptions(scene, ...allValueTypeNames).map((x) => x.typeName));
   nodes.register(...SetSceneProperty.GetDescriptions(scene, ...allValueTypeNames));
   nodes.register(...GetSceneProperty.GetDescriptions(scene, ...allValueTypeNames));
 
@@ -53,12 +52,11 @@ export function registerSharedSceneProfiles(registry: Registry, scene: IScene) {
   // variables
 
   newValueTypeNames.forEach((valueTypeName) => {
-    registerSerializersForValueType(
-      // @ts-ignore
-      registry,
-      valueTypeName
-    );
+    // @ts-ignore
+    registerSerializersForValueType(registry, valueTypeName);
   });
+
+  return registry;
 }
 
 export function registerSpecificSceneProfiles(registry: Registry, scene: ISceneWithQueries) {

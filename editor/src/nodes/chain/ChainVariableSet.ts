@@ -6,7 +6,7 @@ import { makeChainNodeSpec } from './socketGeneration';
 
 export const chainVariableSetSocketSpec = makeChainNodeSpec({
   socketIndecesForType: ({ variableSet }) => variableSet,
-  socketTypeName: 'chain/intVariableSet',
+  nodeTypeName: 'chain/intVariableSet',
   nodeType: ChainNodeTypes.VariableSet,
   inputValueType: ChainValueType.Int,
   socketNames: {
@@ -25,7 +25,7 @@ export const chainVariableSetSocketSpec = makeChainNodeSpec({
 export class ChainVariableSet extends FlowNode {
   public static Description = (smartContractActions: IChainGraph) =>
     new NodeDescription(
-      chainVariableSetSocketSpec.socketTypeName,
+      chainVariableSetSocketSpec.nodeTypeName,
       'Flow',
       'Set On Chain Int Value',
       (description, graph) => new ChainVariableSet(description, graph, smartContractActions)

@@ -14,19 +14,19 @@ import { publicUrl } from '../hooks/useSaveAndLoad';
 export type LoadModalProps = {
   open?: boolean;
   onClose: () => void;
-  graphJson: GraphJSON | undefined;
+  graphJson: GraphJSON;
   modelFile: File | undefined;
 };
 
 export const PublishModal: FC<LoadModalProps> = ({ open = false, onClose, graphJson, modelFile }) => {
   const { cid, saveSceneToIpfs, saving: savingToIpfs } = useSaveSceneToIpfs({ modelFile, behaviorGraph: graphJson });
 
-  const [graphJsonString, setGraphJsonString] = useState<string | null>(null);
+  // const [graphJsonString, setGraphJsonString] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!graphJson) return;
-    setGraphJsonString(JSON.stringify(graphJson, null, 2));
-  }, [graphJson]);
+  // useEffect(() => {
+  //   if (!graphJson) return;
+  //   setGraphJsonString(JSON.stringify(graphJson, null, 2));
+  // }, [graphJson]);
 
   const [startMinting, setStartMinting] = useState(false);
 

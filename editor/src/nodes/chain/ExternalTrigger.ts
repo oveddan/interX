@@ -11,7 +11,7 @@ import { getSocketIndex, makeChainNodeSpec } from './socketGeneration';
 
 export const externalTriggerSocketSpec = makeChainNodeSpec({
   socketIndecesForType: ({ externalTrigger }) => externalTrigger,
-  socketTypeName: 'chain/externalTrigger',
+  nodeTypeName: 'chain/externalTrigger',
   nodeType: ChainNodeTypes.ExternalTrigger,
   inputValueType: ChainValueType.NotAVariable,
   socketNames: {
@@ -24,7 +24,7 @@ export const externalTriggerSocketSpec = makeChainNodeSpec({
 export class ExternalTrigger extends FlowNode {
   public static Description = (smartContractActions: IChainGraph) =>
     new NodeDescription(
-      externalTriggerSocketSpec.socketTypeName,
+      externalTriggerSocketSpec.nodeTypeName,
       'Flow',
       'Invoke Smart Contract Action',
       (description, graph) => new ExternalTrigger(description, graph, smartContractActions)

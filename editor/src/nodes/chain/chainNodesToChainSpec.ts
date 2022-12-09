@@ -89,6 +89,8 @@ const chainNodesToChainSpec = (
       edgeDefinitions: [],
     };
 
+  debugger;
+
   const chainNodeSpecs = makeChainNodeSpecs(socketIndecesByNodeType);
 
   const chainNodes = nodes
@@ -113,6 +115,8 @@ const chainNodesToChainSpec = (
   const edgeDefinitions = nodes
     .map((node) => getEdges(node, nodes, chainNodeSpecs))
     .reduce((acc: ChainEdgeNodeDefinition[], edges) => [...acc, ...edges], []);
+
+  debugger;
 
   return {
     nodeDefinitions,
