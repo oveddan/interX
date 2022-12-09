@@ -20,9 +20,9 @@ struct Int2Out1SocketIndeces {
 }
 
 struct CounterSocketIndeces {
-  uint8 input;
+  uint8 inputFlow;
   uint8 outputCount;
-  uint8 flow;
+  uint8 outputFlow;
 }
 
 struct GateSocketIndeces {
@@ -58,7 +58,7 @@ contract SocketsIndexedByName {
     // and unique values
     _socketIndecesByNodeType = SocketIndecesByNodeType({
       externalTrigger: ExternalTriggerIndeces({ outputFlowSocket: 0 }),
-      counter: CounterSocketIndeces({ input: 0, outputCount: 1, flow: 2 }),
+      counter: CounterSocketIndeces({ inputFlow: 0, outputCount: 1, outputFlow: 2 }),
       add: Int2Out1SocketIndeces({ input1: 0, input2: 1, result: 2 }),
       variableSet: VariableSetIndeces({ inputFlow: 0, inputVal: 1, variableName: 2 }),
       gate: GateSocketIndeces({ inputFlow: 0, outputGateTrue: 1, outputGateFalse: 2 })

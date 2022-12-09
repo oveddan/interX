@@ -192,7 +192,7 @@ contract BehaviorGraph is ERC721, ERC721URIStorage, Ownable, NodeState, HasVaria
     // write the count to the output
     _writeToIntOutput(tokenId, _nodeId, socketIndeces.counter.outputCount, newStateVal);
     // trigger the flow edge
-    _triggerEdge(tokenId, _nodeId, socketIndeces.counter.flow);
+    _triggerEdge(tokenId, _nodeId, socketIndeces.counter.outputFlow);
   }
 
   function _triggerGate(uint16 tokenId, uint16 _nodeId, uint8 _triggeringSocketIndex) private {

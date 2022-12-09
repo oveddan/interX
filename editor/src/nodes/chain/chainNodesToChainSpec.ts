@@ -1,15 +1,11 @@
-import { GraphJSON, NodeJSON } from '@behave-graph/core';
+import { GraphJSON, NodeJSON, NodeParameterJSON, NodeParameterValueJSON } from '@behave-graph/core';
 import {
-  ChainNodeDefinition,
   ChainEdgeNodeDefinition,
-  IChainNode,
   ChainNodeDefinitionAndValues,
   ChainnInitialValues,
+  SocketIndecesByNodeType,
 } from './IChainNode';
-
-function isChainNode(node: any): node is IChainNode {
-  return typeof node.chainNodeType !== undefined && typeof node.id !== undefined;
-}
+import { makeChainNodeSpecs, NodeSocketIO } from './profile';
 
 function appendInitialValue<T>(
   value: T,
@@ -19,16 +15,30 @@ function appendInitialValue<T>(
   return [...values, { value, socket: index }];
 }
 
-const extractInitialValues = (node: IChainNode): ChainnInitialValues => {
+function isNodeParameterValueJSON(node: NodeParameterJSON): node is NodeParameterValueJSON {
+  // @ts-ignore
+  return typeof node.value !== undefined;
+}
+
+const extractInitialValues = (node: NodeJSON, nodes: NodeSocketIO): ChainnInitialValues => {
   // for each input socket, get value from socket and append it to list of values
-  return node.inputSockets.reduce(
-    ({ booleans, integers, strings }: ChainnInitialValues, socket, index): ChainnInitialValues => {
+  return Object.entries(node.parameters || {}).reduce(
+    (acc: ChainnInitialValues, [key, param]): ChainnInitialValues => {
+      if (!isNodeParameterValueJSON(param)) return acc;
+
+      const input = nodes[node.type].getInput(key);
+      if (!input) return acc;
+
+      const { index, valueTypeName } = input;
+
+      const { booleans, integers, strings } = acc;
       return {
         booleans:
-          socket.valueTypeName === 'boolean' ? appendInitialValue<boolean>(socket.value, index, booleans) : booleans,
+          valueTypeName === 'boolean' ? appendInitialValue<boolean>(param.value as boolean, index, booleans) : booleans,
         integers:
-          socket.valueTypeName === 'integer' ? appendInitialValue<bigint>(socket.value, index, integers) : integers,
-        strings: socket.valueTypeName === 'string' ? appendInitialValue<string>(socket.value, index, strings) : strings,
+          valueTypeName === 'integer' ? appendInitialValue<bigint>(BigInt(param.value), index, integers) : integers,
+        strings:
+          valueTypeName === 'string' ? appendInitialValue<string>(param.value as string, index, strings) : strings,
       };
     },
     {
@@ -39,54 +49,69 @@ const extractInitialValues = (node: IChainNode): ChainnInitialValues => {
   );
 };
 
-const getEdges = (nodeJSON: NodeJSON, nodeIndeces: { [id: string]: bigint }): ChainEdgeNodeDefinition[] => {
-  return Object.entries(nodeJSON.flows || {}).map(
-    ([inputKey, link]): ChainEdgeNodeDefinition => ({
-      fromNode: nodeIndeces[nodeJSON.id],
-      fromSocket: inputKey,
-      // sourceHandle: inputKey,
-      toNode: nodeIndeces[link.nodeId],
-      toSocket: link.socket,
+const getEdges = (nodeJSON: NodeJSON, otherNodes: NodeJSON[], nodeSockets: NodeSocketIO): ChainEdgeNodeDefinition[] => {
+  const fromNodeType = nodeJSON.type;
+  const result = Object.entries(nodeJSON.flows || {})
+    .map(([inputKey, link]): ChainEdgeNodeDefinition | undefined => {
+      const fromNodeSocket = nodeSockets[fromNodeType]?.getInput(inputKey);
+      if (!fromNodeSocket) return undefined;
+
+      const toNode = otherNodes.find((x) => x.id === link.nodeId);
+
+      const toSocket = toNode ? nodeSockets[toNode.type]?.getOutput(link.socket) : undefined;
+
+      if (!toSocket) return;
+
+      return {
+        fromNode: nodeJSON.id,
+        fromSocket: fromNodeSocket.index,
+        // sourceHandle: inputKey,
+        toNode: link.nodeId,
+        toSocket: toSocket.index,
+      };
     })
-  );
+    .filter((x): x is ChainEdgeNodeDefinition => !!x);
+
+  return result;
 };
 
 const chainNodesToChainSpec = (
-  graph: GraphJSON
+  graph: GraphJSON,
+  socketIndecesByNodeType: SocketIndecesByNodeType
 ): {
   nodeDefinitions: ChainNodeDefinitionAndValues[];
   edgeDefinitions: ChainEdgeNodeDefinition[];
 } => {
-  if (!graph.nodes)
+  const nodes = graph.nodes;
+  if (!nodes)
     return {
       nodeDefinitions: [],
       edgeDefinitions: [],
     };
 
-  const chainNodes = graph.nodes.filter((x) => isChainNode(x)) as (IChainNode & NodeJSON)[];
+  const chainNodeSpecs = makeChainNodeSpecs(socketIndecesByNodeType);
 
-  const chainNodeIndecesAndIds = chainNodes
-    .map(({ id }, index) => ({ id, index }))
-    .reduce((acc: { [key: string]: bigint }, { id, index }) => {
-      return {
-        ...acc,
-        [id]: BigInt(index),
-      };
-    }, {});
+  const chainNodes = nodes
+    .filter((x) => !!chainNodeSpecs[x.type])
+    .map((node) => ({
+      node,
+      spec: chainNodeSpecs[node.type],
+    }));
 
   const nodeDefinitions: ChainNodeDefinitionAndValues[] = chainNodes.map(
-    (x): ChainNodeDefinitionAndValues => ({
+    ({ node: x, spec }): ChainNodeDefinitionAndValues => ({
       definition: {
-        id: chainNodeIndecesAndIds[x.id],
+        id: x.id,
         defined: true,
-        ...x.toNodeDefinition(),
+        inputValueType: spec.inputValueType,
+        nodeType: spec.nodeType,
       },
-      initialValues: extractInitialValues(x),
+      initialValues: extractInitialValues(x, chainNodeSpecs),
     })
   );
 
-  const edgeDefinitions = graph.nodes
-    .map(getEdges)
+  const edgeDefinitions = nodes
+    .map((node) => getEdges(node, nodes, chainNodeSpecs))
     .reduce((acc: ChainEdgeNodeDefinition[], edges) => [...acc, ...edges], []);
 
   return {

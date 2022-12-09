@@ -1,39 +1,39 @@
 import { Graph, Socket, Engine, Assert, FlowNode } from '@behave-graph/core';
-import { EventNode, NodeDescription } from '@behave-graph/core';
+import { NodeDescription } from '@behave-graph/core';
 import { IChainGraph } from '../../abstractions';
-import { flowSocketName } from './ExternalTrigger';
-import { ChainNodeSpec, ChainNodeTypes, ChainValueType, IChainNode } from './IChainNode';
+import { ChainNodeTypes, ChainValueType } from './IChainNode';
+import { makeChainNodeSpec } from './socketGeneration';
 
-const smartActionInvokedTypeName = 'chain/intVariableSet';
-export const variableNameSocket = 'variableName';
-export const valueSocketName = 'value';
+export const chainVariableSetSocketSpec = makeChainNodeSpec({
+  socketIndecesForType: ({ variableSet }) => variableSet,
+  socketTypeName: 'chain/intVariableSet',
+  nodeType: ChainNodeTypes.VariableSet,
+  inputValueType: ChainValueType.Int,
+  socketNames: {
+    inputFlow: 'flow',
+    inputVal: 'value',
+    variableName: 'variableName',
+  },
+  inputSockets: (socketNames) => [
+    new Socket('string', socketNames.variableName),
+    new Socket('flow', socketNames.inputFlow),
+    new Socket('integer', socketNames.inputVal),
+  ],
+  outputSockets: () => [],
+});
 
-export class ChainVariableSet extends FlowNode implements IChainNode {
+export class ChainVariableSet extends FlowNode {
   public static Description = (smartContractActions: IChainGraph) =>
     new NodeDescription(
-      smartActionInvokedTypeName,
+      chainVariableSetSocketSpec.socketTypeName,
       'Flow',
       'Set On Chain Int Value',
       (description, graph) => new ChainVariableSet(description, graph, smartContractActions)
     );
 
   constructor(description: NodeDescription, graph: Graph, private readonly smartContractActions: IChainGraph) {
-    super(
-      description,
-      graph,
-      [
-        new Socket('string', variableNameSocket),
-        new Socket('flow', flowSocketName),
-        new Socket('integer', valueSocketName),
-      ],
-      []
-    );
+    super(description, graph, chainVariableSetSocketSpec.inputSockets(), chainVariableSetSocketSpec.outputSockets());
   }
-
-  toNodeDefinition = (): ChainNodeSpec => ({
-    nodeType: ChainNodeTypes.VariableSet,
-    inputValueType: ChainValueType.Int,
-  });
 
   private handleValueUpdated: ((count: bigint) => void) | undefined = undefined;
 

@@ -1,29 +1,40 @@
 import { FlowNode, NodeDescription, Socket, Graph, Engine, Assert } from '@behave-graph/core';
 import { IChainGraph } from '../../abstractions';
-import { ChainNodeDefinition, ChainNodeSpec, ChainNodeTypes, ChainValueType, IChainNode } from './IChainNode';
+import {
+  ChainNodeDefinition,
+  ChainNodeSpec,
+  ChainNodeTypes,
+  ChainValueType,
+  SocketIndecesByNodeType,
+} from './IChainNode';
+import { getSocketIndex, makeChainNodeSpec } from './socketGeneration';
 
-const actionName = 'chain/externalTrigger';
-export const flowSocketName = 'flow';
+export const externalTriggerSocketSpec = makeChainNodeSpec({
+  socketIndecesForType: ({ externalTrigger }) => externalTrigger,
+  socketTypeName: 'chain/externalTrigger',
+  nodeType: ChainNodeTypes.ExternalTrigger,
+  inputValueType: ChainValueType.NotAVariable,
+  socketNames: {
+    outputFlowSocket: 'flow',
+  },
+  inputSockets: (socketNames) => [new Socket('flow', socketNames.outputFlowSocket)],
+  outputSockets: (socketNames) => [new Socket('flow', socketNames.outputFlowSocket)],
+});
 
-export class ExternalTrigger extends FlowNode implements IChainNode {
+export class ExternalTrigger extends FlowNode {
   public static Description = (smartContractActions: IChainGraph) =>
     new NodeDescription(
-      actionName,
+      externalTriggerSocketSpec.socketTypeName,
       'Flow',
       'Invoke Smart Contract Action',
       (description, graph) => new ExternalTrigger(description, graph, smartContractActions)
     );
 
-  toNodeDefinition = (): ChainNodeSpec => ({
-    nodeType: ChainNodeTypes.ExternalTrigger,
-    inputValueType: ChainValueType.NotAVariable,
-  });
-
   constructor(description: NodeDescription, graph: Graph, private smartContractActions: IChainGraph) {
-    super(description, graph, [new Socket('flow', flowSocketName)], [new Socket('flow', flowSocketName)]);
+    super(description, graph, externalTriggerSocketSpec.inputSockets(), externalTriggerSocketSpec.outputSockets());
   }
 
   triggered() {
-    this.smartContractActions.trigger(this.id, flowSocketName);
+    this.smartContractActions.trigger(this.id, externalTriggerSocketSpec.inputSockets()[0].name);
   }
 }

@@ -14,6 +14,9 @@ export type ChainnInitialValues = ChainNodeDefinitionAndValues['initialValues'];
 
 export type ChainNodeSpec = Pick<ChainNodeDefinition, 'nodeType' | 'inputValueType'>;
 
+type SocketIndecesByNodeTypeFunction = ExtractAbiFunction<typeof abi, 'getSocketIndecesByNodeType'>;
+export type SocketIndecesByNodeType = AbiParametersToPrimitiveTypes<SocketIndecesByNodeTypeFunction['outputs']>[0];
+
 export enum ChainNodeTypes {
   ExternalTrigger = 0,
   Counter = 1,
@@ -28,9 +31,8 @@ export enum ChainValueType {
   NotAVariable = 2,
 }
 
-export interface IChainNode {
-  id: string;
-  toNodeDefinition: () => ChainNodeSpec;
-  readonly inputSockets: Socket[];
-  readonly outputSockets: Socket[];
+export class SocketWithChainIndex extends Socket {
+  constructor(valueType: string, name: string, public readonly chainIndex: number) {
+    super(valueType, name, chainIndex);
+  }
 }

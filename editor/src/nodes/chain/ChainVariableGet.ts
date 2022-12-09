@@ -1,11 +1,12 @@
 import { Graph, Socket, Engine, Assert, FlowNode } from '@behave-graph/core';
 import { EventNode, NodeDescription } from '@behave-graph/core';
 import { IChainGraph } from '../../abstractions';
-import { flowSocketName } from './ExternalTrigger';
+import { externalTriggerSocketSpec } from './ExternalTrigger';
 
 const smartActionInvokedTypeName = 'chain/intVariableGet';
 export const variableNameSocket = 'variableName';
 export const valueSocketName = 'value';
+const flowSocketName = 'flow';
 
 // this doesnt need to go on chain, because it is just fetching
 export class ChainVariableGet extends EventNode {

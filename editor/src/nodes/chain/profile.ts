@@ -1,9 +1,11 @@
-import { Registry } from '@behave-graph/core';
+import { Registry, Socket } from '@behave-graph/core';
 import { IChainGraph } from '../../abstractions';
-import { ChainCounter } from './ChainCounter';
+import { chainCointerSocketSpec, ChainCounter } from './ChainCounter';
 import { ChainVariableGet } from './ChainVariableGet';
-import { ChainVariableSet } from './ChainVariableSet';
-import { ExternalTrigger } from './ExternalTrigger';
+import { ChainVariableSet, chainVariableSetSocketSpec } from './ChainVariableSet';
+import { ExternalTrigger, externalTriggerSocketSpec } from './ExternalTrigger';
+import { ChainNodeTypes, ChainValueType, SocketIndecesByNodeType } from './IChainNode';
+import { generateInputOutputSocketMappings, SocketIO } from './socketGeneration';
 
 export function registerChainGraphProfile(registry: Registry, actions: IChainGraph) {
   const { nodes } = registry;
@@ -13,3 +15,30 @@ export function registerChainGraphProfile(registry: Registry, actions: IChainGra
   nodes.register(ChainVariableGet.Description(actions));
   nodes.register(ExternalTrigger.Description(actions));
 }
+
+export type NodeSocketIO = Record<
+  string,
+  SocketIO & {
+    nodeType: ChainNodeTypes;
+    inputValueType: ChainValueType;
+  }
+>;
+
+export const makeChainNodeSpecs = (socketIndeces: SocketIndecesByNodeType): NodeSocketIO =>
+  [chainCointerSocketSpec, chainVariableSetSocketSpec, externalTriggerSocketSpec].reduce((acc: NodeSocketIO, x) => {
+    return {
+      ...acc,
+      [x.nodeType]: {
+        nodeType: x.nodeType,
+        inputValueType: x.inputValueType,
+        ...generateInputOutputSocketMappings(
+          {
+            inputSockets: x.inputSockets(),
+            outputSockets: x.outputSockets(),
+          },
+          x.socketNames,
+          x.socketIndecesForType(socketIndeces)
+        ),
+      },
+    };
+  }, {});

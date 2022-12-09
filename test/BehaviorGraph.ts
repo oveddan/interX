@@ -163,7 +163,7 @@ describe('BehaviorGraph', function () {
             a: nodeDefinitions.externalTrigger.definition,
             b: nodeDefinitions.counter.definition,
             fromSocket: socketIndeces.externalTrigger.outputFlowSocket,
-            toSocket: socketIndeces.counter.input,
+            toSocket: socketIndeces.counter.inputFlow,
           }),
           // edge from output value of counter to the variable
           connectEdge({
@@ -203,7 +203,7 @@ describe('BehaviorGraph', function () {
             a: nodeDefinitions.externalTrigger.definition,
             b: nodeDefinitions.counter.definition,
             fromSocket: socketIndeces.externalTrigger.outputFlowSocket,
-            toSocket: socketIndeces.counter.input,
+            toSocket: socketIndeces.counter.inputFlow,
           }),
           // edge from output value of counter to the variable
           connectEdge({
@@ -216,7 +216,7 @@ describe('BehaviorGraph', function () {
           connectEdge({
             a: nodeDefinitions.counter.definition,
             b: nodeDefinitions.variable.definition,
-            fromSocket: socketIndeces.counter.flow,
+            fromSocket: socketIndeces.counter.outputFlow,
             toSocket: socketIndeces.variableSet.inputFlow,
           }),
         ];
