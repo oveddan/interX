@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import { GraphJSON, Registry } from '@behave-graph/core';
 import { useGLTF } from '@react-three/drei';
-import useMockSmartContractActions from '../onChainWorld/useMockSmartContractActions';
 import Scene from './Scene';
 import { dataUrlFromFile } from '../hooks/useSaveAndLoad';
-import useRegisterChainGraphProfile from '../onChainWorld/useRegisterChainGraphProfile';
+import { useMockSmartContractActions, useRegisterChainGraphProfile } from '@blocktopia/core';
 import useSceneModifier from './useSceneModifier';
 import { useEngine, useRegistry } from '../hooks';
 

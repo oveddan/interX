@@ -4,13 +4,13 @@ import useLoadOnChainWorld from '../hooks/useLoadOnChainWorld';
 import Web3Login from '../web3/Web3Login';
 import Scene from '../scene/Scene';
 import useTokenContractAddress from '../web3/useTokenContractAddress';
-import useChainGraph from './useChainGraph';
+import useChainGraph from '@blocktopia/core/src/hooks/useChainGraph';
 import { IChainGraph } from '../../../packages/core/src/abstractions';
 import { useGLTF } from '@react-three/drei';
 import useSceneModifier from '../scene/useSceneModifier';
 import { useCallback } from 'react';
 import { useEngine, useRegistry } from '../hooks';
-import useRegisterChainGraphProfile from './useRegisterChainGraphProfile';
+import { useRegisterChainGraphProfile } from '@blocktopia/core';
 
 const OnChainWorld = ({
   graphJson,

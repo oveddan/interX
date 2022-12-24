@@ -1,18 +1,18 @@
 import { useCallback, useMemo, useRef } from 'react';
-import { IChainGraph } from '@blocktopia/core';
+import { IChainGraph } from '../abstractions';
 
 type hn = { [id: string]: (count: bigint) => void };
 
-const useMockSmartContractActions = () => {
+export const useMockSmartContractActions = () => {
   const actionExecutedHandlers = useRef<hn>({});
 
   const mockCounts = useRef<{ [id: string]: number }>({});
 
-  const registerTriggerHandler = useCallback((id: string, cb: (count: bigint) => void) => {
+  const registerIntVariableValueListener = useCallback((id: string, cb: (count: bigint) => void) => {
     actionExecutedHandlers.current[id] = cb;
   }, []);
 
-  const unRegisterTriggerHandler = useCallback((id: string, cb: (count: bigint) => void) => {
+  const unRegisterIntVariableValueListener = useCallback((id: string, cb: (count: bigint) => void) => {
     delete actionExecutedHandlers.current[id];
   }, []);
 
@@ -26,17 +26,17 @@ const useMockSmartContractActions = () => {
     }
   }, []);
 
+  const trigger = useCallback(() => {}, []);
+
   const smartContractAction = useMemo(() => {
     const result: IChainGraph = {
-      invoke,
-      registerIntVariableValueListener: registerTriggerHandler,
-      unRegisterTriggerHandler,
+      trigger,
+      registerIntVariableValueListener,
+      unRegisterIntVariableValueListener,
     };
 
     return result;
-  }, [invoke, registerTriggerHandler, unRegisterTriggerHandler]);
+  }, [invoke, registerIntVariableValueListener, unRegisterIntVariableValueListener]);
 
   return smartContractAction;
 };
-
-export default useMockSmartContractActions;

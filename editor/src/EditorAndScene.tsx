@@ -1,7 +1,6 @@
 import { Suspense, useCallback } from 'react';
 import Scene from './scene/Scene';
 import '@rainbow-me/rainbowkit/styles.css';
-import useMockSmartContractActions from './onChainWorld/useMockSmartContractActions';
 import './styles/resizer.css';
 import Controls from './flowEditor/components/Controls';
 import Nav from './nav/Nav';
@@ -16,7 +15,7 @@ import Flow from './flowEditor/FlowEditorApp';
 import SplitEditor from './SplitEditor';
 import { examplePairs } from './flowEditor/components/LoadModal';
 import { Registry } from '@behave-graph/core';
-import useRegisterChainGraphProfile from './onChainWorld/useRegisterChainGraphProfile';
+import { useMockSmartContractActions, useRegisterChainGraphProfile } from '@blocktopia/core';
 
 const [initialModelFile, initialBehaviorGraph] = examplePairs[0];
 

@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { chain } from 'wagmi';
 import { useAccount } from 'wagmi';
-import addresses from '../contracts/addresses.json';
+import { contractAddresses } from '@blocktopia/core';
 import { buildSkaleChain } from './client';
 
 const getContractAddress = (chainId: number): string => {
@@ -24,7 +24,7 @@ const getContractAddress = (chainId: number): string => {
     chainName = 'mumbai';
   }
 
-  const genericAddresses = addresses as { [address: string]: string };
+  const genericAddresses = contractAddresses as { [address: string]: string };
 
   if (!genericAddresses[chainName]) throw new Error(`contract not deployed for chain ${chainName}`);
 

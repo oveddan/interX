@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es6",
+    "target": "ESNext",
     "lib": ["es2019", "dom"],
     "module": "commonjs",
     "moduleResolution": "node",
@@ -14,7 +14,8 @@
     "emitDeclarationOnly": true,
     "resolveJsonModule": true,
     "noImplicitThis": false,
-    "baseUrl": "./"
+    "baseUrl": "./",
+    "types": ["mocha"]
   },
   "include": ["packages/**/*"],
   "exclude": ["node_modules", "dist"]

@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useContract, useContractEvent, useSigner } from 'wagmi';
-import { abi } from '../contracts/abi';
 import { BigNumber } from 'ethers';
-import { IChainGraph } from '@blocktopia/core';
+import { abi } from '../contracts/abi';
+import { IChainGraph } from '../abstractions';
 
 type hn = { [id: string]: (count: bigint) => void };
 

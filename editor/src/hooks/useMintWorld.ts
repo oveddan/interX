@@ -1,7 +1,7 @@
 import { GraphJSON } from '@behave-graph/core';
 import { useEffect, useState } from 'react';
 import { usePrepareContractWrite, useContractWrite, useContractEvent, useContractRead } from 'wagmi';
-import { abi } from '../contracts/abi';
+import { abi } from '@blocktopia/core/src/contracts/abi';
 import { SafeMintInputs, SocketIndecesByNodeType, extractOnChainNodesFromGraph } from '@blocktopia/core';
 
 const toMintArgs = (
