@@ -5,12 +5,12 @@ import NodeContainer from './NodeContainer';
 import OutputSocket from './OutputSocket';
 import { useChangeNodeData } from '../hooks/useChangeNodeData';
 import { isHandleConnected } from '../util/isHandleConnected';
-import { IScene } from '../../abstractions';
+import { ISceneWithQueries } from '@blocktopia/core';
 
 type NodeProps = FlowNodeProps & {
   spec: NodeSpecJSON;
   allSpecs: NodeSpecJSON[];
-} & Pick<IScene, 'getProperties'>;
+} & Pick<ISceneWithQueries, 'getProperties'>;
 
 const getTitle = (type: string) => {
   const tokens = type.split('/');

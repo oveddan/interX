@@ -5,7 +5,7 @@ import Web3Login from '../web3/Web3Login';
 import Scene from '../scene/Scene';
 import useTokenContractAddress from '../web3/useTokenContractAddress';
 import useChainGraph from './useChainGraph';
-import { IChainGraph } from '../abstractions';
+import { IChainGraph } from '../../../packages/core/src/abstractions';
 import { useGLTF } from '@react-three/drei';
 import useSceneModifier from '../scene/useSceneModifier';
 import { useCallback } from 'react';

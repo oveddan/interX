@@ -1,5 +1,5 @@
 {
-  "name": "@behavior-graph/monorepo",
+  "name": "@blocktopia/monorepo",
   "version": "0.0.1",
   "description": "On-chain metaverse behavior graph builder",
   "private": true,
@@ -8,15 +8,15 @@
     "graph",
     "flow"
   ],
-  "homepage": "http://github.com/bhouston/behave-graph",
+  "homepage": "http://github.com/oveddan/blocktopia",
   "author": "behave-graph authors",
   "bugs": {
-    "url": "https://github.com/bhouston/behave-graph/issues"
+    "url": "https://github.com/oveddan/blocktopia/issues"
   },
   "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "https://github.com/bhouston/behave-graph"
+    "url": "https://github.com/oveddan/blocktopia"
   },
   "devDependencies": {
     "@babel/core": "^7.17.10",
@@ -43,6 +43,9 @@
     "compile": "npx hardhat compile",
     "recompile": "rm -r cache && rm -r artifacts && rm -r typechain-types && yarn compile",
     "test": "npx hardhat test",
+    "build": "preconstruct build",
+    "dev": "preconstruct dev",
+    "postinstall": "preconstruct dev",
     "start": "yarn workspace @behavior-graph/editor dev",
     "lint": "npx eslint \"src/**/*.{ts,json}\"",
     "lint:fix": "npm run lint -- --fix",
@@ -59,7 +62,7 @@
   ],
   "preconstruct": {
     "packages": [
-      "editor"
+      "packages/core"
     ]
   }
 }

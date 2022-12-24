@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useRef } from 'react';
-import { IChainGraph } from '../abstractions';
+import { IChainGraph } from '@blocktopia/core';
 
 type hn = { [id: string]: (count: bigint) => void };
 

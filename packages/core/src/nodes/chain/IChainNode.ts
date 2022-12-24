@@ -1,6 +1,6 @@
 import { Socket } from '@behave-graph/core';
 import { ExtractAbiFunction, AbiParametersToPrimitiveTypes } from 'abitype';
-import { abi } from '../../contracts/abi';
+import { abi } from '../../../../../editor/src/contracts/abi';
 
 type SafeMintFunction = ExtractAbiFunction<typeof abi, 'safeMint'>;
 

@@ -75,7 +75,7 @@ const getEdges = (nodeJSON: NodeJSON, otherNodes: NodeJSON[], nodeSockets: NodeS
   return result;
 };
 
-const chainNodesToChainSpec = (
+export const extractOnChainNodesFromGraph = (
   graph: GraphJSON,
   socketIndecesByNodeType: SocketIndecesByNodeType
 ): {
@@ -88,8 +88,6 @@ const chainNodesToChainSpec = (
       nodeDefinitions: [],
       edgeDefinitions: [],
     };
-
-  debugger;
 
   const chainNodeSpecs = makeChainNodeSpecs(socketIndecesByNodeType);
 
@@ -123,5 +121,3 @@ const chainNodesToChainSpec = (
     edgeDefinitions,
   };
 };
-
-export default chainNodesToChainSpec;

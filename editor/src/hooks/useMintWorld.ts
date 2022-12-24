@@ -1,10 +1,8 @@
 import { GraphJSON } from '@behave-graph/core';
 import { useEffect, useState } from 'react';
-import { suspend } from 'suspend-react';
 import { usePrepareContractWrite, useContractWrite, useContractEvent, useContractRead } from 'wagmi';
 import { abi } from '../contracts/abi';
-import chainNodesToChainSpec from '../nodes/chain/chainNodesToChainSpec';
-import { SafeMintInputs, SocketIndecesByNodeType } from '../nodes/chain/IChainNode';
+import { SafeMintInputs, SocketIndecesByNodeType, extractOnChainNodesFromGraph } from '@blocktopia/core';
 
 const toMintArgs = (
   cid: string,
@@ -13,7 +11,7 @@ const toMintArgs = (
 ): SafeMintInputs => {
   // convert chain nodes to on chain node defininitions
   if (!socketIndecesByNodeType) return [cid, [], []];
-  const { nodeDefinitions, edgeDefinitions } = chainNodesToChainSpec(behaviorGraph, socketIndecesByNodeType);
+  const { nodeDefinitions, edgeDefinitions } = extractOnChainNodesFromGraph(behaviorGraph, socketIndecesByNodeType);
 
   const result: SafeMintInputs = [cid, nodeDefinitions, edgeDefinitions];
 

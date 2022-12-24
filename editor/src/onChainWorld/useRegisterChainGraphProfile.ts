@@ -1,7 +1,6 @@
 import { Registry } from '@behave-graph/core';
 import { useCallback } from 'react';
-import { IChainGraph } from '../abstractions';
-import { registerChainGraphProfile } from '../nodes/chain/profile';
+import { IChainGraph, registerChainGraphProfile } from '@blocktopia/core';
 
 const useRegisterChainGraphProfile = (actions: IChainGraph) => {
   const register = useCallback(

@@ -8,7 +8,7 @@ import { isValidConnection } from '../util/isValidConnection';
 import { AutoSizeInput } from './AutoSizeInput';
 import PathSelect from './PathSelect';
 import { useCallback } from 'react';
-import { IScene } from '../../abstractions';
+import { ISceneWithQueries } from '@blocktopia/core';
 
 export type InputSocketProps = {
   connected: boolean;
@@ -17,7 +17,7 @@ export type InputSocketProps = {
   allSpecs: NodeSpecJSON[];
   shortJsonPath: boolean;
 } & InputSocketSpecJSON &
-  Pick<IScene, 'getProperties'>;
+  Pick<ISceneWithQueries, 'getProperties'>;
 
 export default function InputSocket({
   connected,

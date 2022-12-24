@@ -18,8 +18,7 @@ import {
   IScene,
 } from '@behave-graph/core';
 import { registerSerializersForValueType } from '@behave-graph/core/src/Profiles/Core/registerSerializersForValueType';
-import { ISceneWithQueries } from '../abstractions';
-import { OnSceneNodeClick } from '../nodes/scene/OnSceneNodeClick';
+import { OnSceneNodeClick, ISceneWithQueries } from '@blocktopia/core';
 
 export function registerSharedSceneProfiles(registry: Registry, scene: IScene) {
   const { values, nodes } = registry;

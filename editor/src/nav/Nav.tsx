@@ -60,7 +60,10 @@ const Nav = ({ isWeb3Enabled }: { isWeb3Enabled?: boolean }) => {
         <div className="flex md:order-2">
           {isWeb3Enabled && <Web3Login />}
           <MenuButton />
-          <a href="https://github.com/oveddan/interX" className="inline-flex items-center ml-2 px-1 shadow rounded-2xl">
+          <a
+            href="https://github.com/oveddan/blocktopia"
+            className="inline-flex items-center ml-2 px-1 shadow rounded-2xl"
+          >
             <AiFillGithub className="h-8 w-8" />
           </a>
         </div>
