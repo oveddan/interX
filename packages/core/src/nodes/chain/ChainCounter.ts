@@ -22,7 +22,7 @@ export const chainCointerSocketSpec = makeChainNodeSpec({
 });
 
 export class ChainCounter extends FlowNode {
-  public static Description = (smartContractActions: IChainGraph) =>
+  public static Description = () =>
     new NodeDescription(
       chainCointerSocketSpec.nodeTypeName,
       'Flow',

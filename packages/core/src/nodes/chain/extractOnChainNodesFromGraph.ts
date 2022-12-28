@@ -49,16 +49,17 @@ const extractInitialValues = (node: NodeJSON, nodes: NodeSocketIO): ChainnInitia
   );
 };
 
-const getEdges = (nodeJSON: NodeJSON, otherNodes: NodeJSON[], nodeSockets: NodeSocketIO): ChainEdgeNodeDefinition[] => {
+export const getEdges = (nodeJSON: NodeJSON, otherNodes: NodeJSON[], nodeSockets: NodeSocketIO): ChainEdgeNodeDefinition[] => {
   const fromNodeType = nodeJSON.type;
   const result = Object.entries(nodeJSON.flows || {})
     .map(([inputKey, link]): ChainEdgeNodeDefinition | undefined => {
-      const fromNodeSocket = nodeSockets[fromNodeType]?.getInput(inputKey);
+      const fromNodeSocket = nodeSockets[fromNodeType]?.getOutput(inputKey);
+      console.log({ fromNodeSocket, inputKey, fromNodeType, socketSpec: nodeSockets[fromNodeType] });
       if (!fromNodeSocket) return undefined;
 
       const toNode = otherNodes.find((x) => x.id === link.nodeId);
 
-      const toSocket = toNode ? nodeSockets[toNode.type]?.getOutput(link.socket) : undefined;
+      const toSocket = toNode ? nodeSockets[toNode.type]?.getInput(link.socket) : undefined;
 
       if (!toSocket) return;
 

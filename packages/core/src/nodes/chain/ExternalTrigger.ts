@@ -1,13 +1,9 @@
 import { FlowNode, NodeDescription, Socket, Graph, Engine, Assert } from '@behave-graph/core';
 import { IChainGraph } from '../../abstractions';
-import {
-  ChainNodeDefinition,
-  ChainNodeSpec,
-  ChainNodeTypes,
-  ChainValueType,
-  SocketIndecesByNodeType,
-} from './IChainNode';
-import { getSocketIndex, makeChainNodeSpec } from './socketGeneration';
+import { ChainNodeTypes, ChainValueType } from './IChainNode';
+import { makeChainNodeSpec } from './socketGeneration';
+
+export const externalTriggerNodeTypeName = 'chain/externalTrigger';
 
 export const externalTriggerSocketSpec = makeChainNodeSpec({
   socketIndecesForType: ({ externalTrigger }) => externalTrigger,

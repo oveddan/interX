@@ -3,6 +3,12 @@ import { IChainGraph } from '../abstractions';
 
 type hn = { [id: string]: (count: bigint) => void };
 
+export const makeEmptySmartContractActions = (): IChainGraph => ({
+  trigger: () => { },
+  registerIntVariableValueListener: () => { },
+  unRegisterIntVariableValueListener: () => { }
+});
+
 export const useMockSmartContractActions = () => {
   const actionExecutedHandlers = useRef<hn>({});
 
