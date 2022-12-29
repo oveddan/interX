@@ -62,7 +62,7 @@ describe('BehaviorGraph', function () {
     // Contracts are deployed using the first signer/account by default
     const [owner, otherAccount, anotherAccount] = await ethers.getSigners();
 
-    const BehaviorGraph = (await ethers.getContractFactory('BehaviorGraph')) as BehaviorGraph__factory;
+    const BehaviorGraph = (await ethers.getContractFactory('BehaviorGraphToken')) as BehaviorGraph__factory;
     const behaviorGraph = await BehaviorGraph.deploy();
 
     const socketIndeces = await behaviorGraph.getSocketIndecesByNodeType();

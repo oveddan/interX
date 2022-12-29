@@ -29,7 +29,7 @@ async function main() {
 
   console.log('Account balance:', (await deployer.getBalance()).toString());
 
-  const contractFactory = await ethers.getContractFactory('BehaviorGraph');
+  const contractFactory = await ethers.getContractFactory('BehaviorGraphContract');
   const deployedContract = await contractFactory.deploy();
   await deployedContract.deployed();
 

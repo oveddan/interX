@@ -15,13 +15,11 @@ contract BehaviorGraphToken is ERC721, ERC721URIStorage, Ownable {
 
   Counters.Counter private _tokenIdCounter;
 
-  BehaviorGraph private _behaviorGraph;
+  mapping(uint256 => BehaviorGraph) private _behaviorGraphs;
 
   event SafeMint(uint256 tokenId, address toNode, string uri, NodeDefinitionAndValues[] nodes);
 
-  constructor() ERC721('MyToken', 'MTK') {
-    _behaviorGraph = new BehaviorGraph();
-  }
+  constructor() ERC721('MyToken', 'MTK') {}
 
   function _baseURI() internal pure override returns (string memory) {
     return 'ipfs://';
@@ -47,7 +45,9 @@ contract BehaviorGraphToken is ERC721, ERC721URIStorage, Ownable {
     _safeMint(to, tokenId);
     _setTokenURI(tokenId, sceneUri);
     // todo - fix overflow with uint16
-    _behaviorGraph.createNodes(uint16(tokenId), _nodes, _edges);
+    BehaviorGraph _behaviorGraph = new BehaviorGraph(_nodes, _edges);
+    _behaviorGraphs[tokenId] = _behaviorGraph;
+
     emit SafeMint(tokenId, to, sceneUri, _nodes);
 
     return tokenId;
