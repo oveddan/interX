@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import './IndexedNodes.sol';
+// import './IndexedNodes.sol';
 
 struct BooleanValueAndLabel {
   bool value;
@@ -48,7 +48,7 @@ contract NodeState {
 
   constructor() {}
 
-  function getIntInputVal(uint16 tokenId, uint16 _nodeId, uint8 _socketName) public view returns (int256) {
+  function _getIntInputVal(uint16 tokenId, uint16 _nodeId, uint8 _socketName) internal view returns (int256) {
     // uint16 val = uint16(_nodeInputIntVals[tokenId][_nodeId][_socketName]);
     // console.log("get int input val %s %s: %i",_nodeId,  _socketName, val);
 
@@ -63,7 +63,7 @@ contract NodeState {
     _nodeInputIntVals[tokenId][_nodeId][_socketName] = IntValue(val, true);
   }
 
-  function getBoolInputVal(uint16 tokenId, uint16 _nodeId, uint8 _socketName) public view returns (bool) {
+  function _getBoolInputVal(uint16 tokenId, uint16 _nodeId, uint8 _socketName) internal view returns (bool) {
     BoolValue memory val = _nodeBoolInputVals[tokenId][_nodeId][_socketName];
 
     if (val.set) return val.value;
@@ -74,7 +74,7 @@ contract NodeState {
     _nodeBoolInputVals[tokenId][_nodeId][_socketName] = BoolValue(val, true);
   }
 
-  function getStringInputVal(uint16 tokenId, uint16 _nodeId, uint8 _socketName) public view returns (string memory) {
+  function _getStringInputVal(uint16 tokenId, uint16 _nodeId, uint8 _socketName) internal view returns (string memory) {
     StringValue memory val = _nodeInputStringVals[tokenId][_nodeId][_socketName];
 
     if (val.set) return val.value;
@@ -90,7 +90,7 @@ contract NodeState {
     _nodeIntStateVals[tokenId][_nodeId][_stateVar] = IntValue(val, true);
   }
 
-  function getNodeStateVal(uint16 tokenId, uint16 _nodeId, string memory _stateVar) public view returns (int256) {
+  function _getNodeStateVal(uint16 tokenId, uint16 _nodeId, string memory _stateVar) internal view returns (int256) {
     IntValue memory val = _nodeIntStateVals[tokenId][_nodeId][_stateVar];
 
     if (val.set) return val.value;
@@ -129,13 +129,13 @@ contract HasVariables {
 
   constructor() {}
 
-  function setVariable(uint16 tokenId, string memory _variableName, int256 val) internal {
+  function _setVariable(uint16 tokenId, string memory _variableName, int256 val) internal {
     // uint8 _variableId = _getOrSetVariable(tokenId, _variableName);
     // _intVarVals[tokenId][_variableId] = val;
     emit IntVariableUpdated(msg.sender, tokenId, _variableName, val);
   }
 
-  function setVariable(uint16 tokenId, string memory _variableName, bool val) internal {
+  function _setVariable(uint16 tokenId, string memory _variableName, bool val) internal {
     // uint8 _variableId = _getOrSetVariable(tokenId, _variableName);
     // _boolVarVals[tokenId][_variableId] = val;
     emit BoolVariableUpdated(msg.sender, tokenId, _variableName, val);

@@ -19,17 +19,17 @@ struct Int2Out1SocketIndeces {
   uint8 result;
 }
 
-struct CounterSocketIndeces {
-  uint8 inputFlow;
-  uint8 outputCount;
-  uint8 outputFlow;
-}
+// struct CounterSocketIndeces {
+//   uint8 inputFlow;
+//   uint8 outputCount;
+//   uint8 outputFlow;
+// }
 
-struct GateSocketIndeces {
-  uint8 inputFlow;
-  uint8 outputGateTrue;
-  uint8 outputGateFalse;
-}
+// struct GateSocketIndeces {
+//   uint8 inputFlow;
+//   uint8 outputGateTrue;
+//   uint8 outputGateFalse;
+// }
 
 struct VariableSetIndeces {
   uint8 inputFlow;
@@ -39,10 +39,10 @@ struct VariableSetIndeces {
 
 struct SocketIndecesByNodeType {
   ExternalTriggerIndeces externalTrigger;
-  CounterSocketIndeces counter;
+  // CounterSocketIndeces counter;
   Int2Out1SocketIndeces add;
   VariableSetIndeces variableSet;
-  GateSocketIndeces gate;
+  // GateSocketIndeces gate;
 }
 
 contract SocketsIndexedByName {
@@ -58,10 +58,10 @@ contract SocketsIndexedByName {
     // and unique values
     _socketIndecesByNodeType = SocketIndecesByNodeType({
       externalTrigger: ExternalTriggerIndeces({ outputFlowSocket: 0 }),
-      counter: CounterSocketIndeces({ inputFlow: 0, outputCount: 1, outputFlow: 2 }),
+      // counter: CounterSocketIndeces({ inputFlow: 0, outputCount: 1, outputFlow: 2 }),
       add: Int2Out1SocketIndeces({ input1: 0, input2: 1, result: 2 }),
-      variableSet: VariableSetIndeces({ inputFlow: 0, inputVal: 1, variableName: 2 }),
-      gate: GateSocketIndeces({ inputFlow: 0, outputGateTrue: 1, outputGateFalse: 2 })
+      variableSet: VariableSetIndeces({ inputFlow: 0, inputVal: 1, variableName: 2 })
+      // gate: GateSocketIndeces({ inputFlow: 0, outputGateTrue: 1, outputGateFalse: 2 })
     });
   }
 
