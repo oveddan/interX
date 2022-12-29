@@ -1,4 +1,4 @@
-import { Node, Socket } from '@behave-graph/core';
+import { Node, Socket } from '@oveddan-behave-graph/core';
 import { ChainNodeTypes, ChainValueType, SocketIndecesByNodeType } from './IChainNode';
 
 export type SocketIO = {

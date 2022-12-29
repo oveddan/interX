@@ -1,51 +1,58 @@
-import { Graph, Socket, Engine, Assert, FlowNode } from '@behave-graph/core';
-import { EventNode, NodeDescription } from '@behave-graph/core';
+import { makeEventNodeDefinition, NodeCategory, Variable } from '@oveddan-behave-graph/core';
 import { IChainGraph } from '../../abstractions';
-import { externalTriggerSocketSpec } from './ExternalTrigger';
+import { ChainNodeTypes, ChainValueType, makeChainNodeDefinition } from './IChainNode';
 
 const smartActionInvokedTypeName = 'chain/intVariableGet';
 export const variableNameSocket = 'variableName';
 export const valueSocketName = 'value';
 const flowSocketName = 'flow';
 
+type State = {
+  handleValueUpdated?: (count: bigint) => void;
+  variableId?: string;
+};
+
+const makeInitialState = (): State => ({});
+
 // this doesnt need to go on chain, because it is just fetching
-export class ChainVariableGet extends EventNode {
-  public static Description = (smartContractActions: IChainGraph) =>
-    new NodeDescription(
-      smartActionInvokedTypeName,
-      'Event',
-      'Get On Chain Int Value',
-      (description, graph) => new ChainVariableGet(description, graph, smartContractActions)
-    );
+export const ChainVariableGet = (smartContractActions: IChainGraph) =>
+  makeEventNodeDefinition({
+    typeName: smartActionInvokedTypeName,
+    category: NodeCategory.Variable,
+    label: 'Get On Chain Int Value',
+    configuration: {
+      variableId: {
+        valueType: 'number',
+      },
+    },
+    initialState: makeInitialState(),
+    init: ({ write, commit, configuration, graph: { variables } }) => {
+      const variable = variables[configuration.variableId] || new Variable('-1', 'undefined', 'string', '');
+      const variableId = variable.id;
 
-  constructor(description: NodeDescription, graph: Graph, private readonly smartContractActions: IChainGraph) {
-    super(
-      description,
-      graph,
-      [new Socket('string', variableNameSocket)],
-      [new Socket('flow', flowSocketName), new Socket('integer', valueSocketName)]
-    );
-  }
+      const handleValueUpdated = (count: bigint) => {
+        write(valueSocketName, count);
+        commit(flowSocketName);
+      };
+      smartContractActions.registerIntVariableValueListener(variableId, handleValueUpdated);
 
-  private handleValueUpdated: ((count: bigint) => void) | undefined = undefined;
+      return {
+        handleValueUpdated,
+        variableId,
+      };
+    },
+    dispose: ({ state }) => {
+      if (state.handleValueUpdated && state.variableId) {
+        smartContractActions.unRegisterIntVariableValueListener(state.variableId, state.handleValueUpdated);
+      }
 
-  init(engine: Engine) {
-    Assert.mustBeTrue(this.handleValueUpdated === undefined);
-
-    this.handleValueUpdated = (count: bigint) => {
-      this.writeOutput(valueSocketName, count);
-      engine.commitToNewFiber(this, flowSocketName);
-    };
-
-    const smartContractActions = this.smartContractActions;
-    smartContractActions.registerIntVariableValueListener(this.id, this.handleValueUpdated);
-  }
-
-  dispose(engine: Engine) {
-    Assert.mustBeTrue(this.handleValueUpdated !== undefined);
-
-    if (!this.handleValueUpdated) return;
-
-    this.smartContractActions.unRegisterIntVariableValueListener(this.id, this.handleValueUpdated);
-  }
-}
+      return {};
+    },
+    in: {
+      [variableNameSocket]: 'string',
+    },
+    out: {
+      [flowSocketName]: 'flow',
+      [valueSocketName]: 'integer',
+    },
+  });

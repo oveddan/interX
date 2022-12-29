@@ -1,19 +1,19 @@
-import { Registry, Socket } from '@behave-graph/core';
+import { Registry, Socket } from '@oveddan-behave-graph/core';
 import { IChainGraph } from '../../abstractions';
-import { chainCointerSocketSpec, ChainCounter } from './ChainCounter';
+import { ChainCounter } from './ChainCounter';
 import { ChainVariableGet } from './ChainVariableGet';
-import { ChainVariableSet, chainVariableSetSocketSpec } from './ChainVariableSet';
-import { ExternalTrigger, externalTriggerSocketSpec } from './ExternalTrigger';
+import { ChainVariableSet } from './ChainVariableSet';
+import { ExternalTrigger } from './ExternalTrigger';
 import { ChainNodeTypes, ChainValueType, SocketIndecesByNodeType } from './IChainNode';
 import { generateInputOutputSocketMappings, SocketIO } from './socketGeneration';
 
 export function registerChainGraphProfile(registry: Registry, actions: IChainGraph) {
   const { nodes } = registry;
 
-  nodes.register(ChainCounter.Description());
-  nodes.register(ChainVariableSet.Description(actions));
-  nodes.register(ChainVariableGet.Description(actions));
-  nodes.register(ExternalTrigger.Description(actions));
+  nodes.register(ChainCounter);
+  nodes.register(ChainVariableSet);
+  nodes.register(ChainVariableGet(actions));
+  nodes.register(ExternalTrigger(actions));
 }
 
 export type NodeSocketIO = Record<

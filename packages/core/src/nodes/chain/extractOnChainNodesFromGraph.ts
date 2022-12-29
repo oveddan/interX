@@ -1,4 +1,4 @@
-import { GraphJSON, NodeJSON, NodeParameterJSON, NodeParameterValueJSON } from '@behave-graph/core';
+import { GraphJSON, NodeJSON, NodeParameterJSON, NodeParameterValueJSON } from '@oveddan-behave-graph/core';
 import {
   ChainEdgeNodeDefinition,
   ChainNodeDefinitionAndValues,
@@ -49,7 +49,11 @@ const extractInitialValues = (node: NodeJSON, nodes: NodeSocketIO): ChainnInitia
   );
 };
 
-export const getEdges = (nodeJSON: NodeJSON, otherNodes: NodeJSON[], nodeSockets: NodeSocketIO): ChainEdgeNodeDefinition[] => {
+export const getEdges = (
+  nodeJSON: NodeJSON,
+  otherNodes: NodeJSON[],
+  nodeSockets: NodeSocketIO
+): ChainEdgeNodeDefinition[] => {
   const fromNodeType = nodeJSON.type;
   const result = Object.entries(nodeJSON.flows || {})
     .map(([inputKey, link]): ChainEdgeNodeDefinition | undefined => {

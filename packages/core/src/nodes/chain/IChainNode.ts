@@ -1,4 +1,12 @@
-import { Socket } from '@behave-graph/core';
+import {
+  IFlowNodeDefinition,
+  IHasTriggered,
+  makeFlowNodeDefinition,
+  NodeConfigurationDescription,
+  Socket,
+  SocketNames,
+  SocketsDefinition,
+} from '@oveddan-behave-graph/core';
 import { ExtractAbiFunction, AbiParametersToPrimitiveTypes } from 'abitype';
 import { abi } from '../../contracts/abi';
 
@@ -30,6 +38,32 @@ export enum ChainValueType {
   Bool = 1,
   NotAVariable = 2,
 }
+
+export interface ICorrespondsToOnChainNode<TInput extends SocketsDefinition, TOutput extends SocketsDefinition> {
+  nodeType: ChainNodeTypes;
+  inputValueType: ChainValueType;
+  inSocketIds: {
+    [key in SocketNames<TInput>]: number;
+  };
+  outSocketIds: {
+    [key in SocketNames<TOutput>]: number;
+  };
+}
+
+export const makeChainNodeDefinition = <TInput extends SocketsDefinition, TOutput extends SocketsDefinition>(
+  definition: {
+    in: TInput;
+    out: TOutput;
+  },
+  chainDef: ICorrespondsToOnChainNode<TInput, TOutput>
+) => definition;
+
+export interface IHasOnChainTrigger<TInput extends SocketsDefinition, TOutput extends SocketsDefinition, TState>
+  extends IHasTriggered<TInput, TOutput, TState> {}
+
+export type ChainNodeDefinitions = {
+  [key in ChainNodeTypes]: {};
+};
 
 export class SocketWithChainIndex extends Socket {
   constructor(valueType: string, name: string, public readonly chainIndex: number) {

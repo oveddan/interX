@@ -17,7 +17,7 @@
     "test-watch": "yarn test --watch"
   },
   "dependencies": {
-    "@behave-graph/core": "^0.9.11",
+    "@oveddan-behave-graph/core": "file:.yalc/@oveddan-behave-graph/core",
     "react": "^18.2.0"
   },
   "author": "",

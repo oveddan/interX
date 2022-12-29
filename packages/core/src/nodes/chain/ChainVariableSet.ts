@@ -1,51 +1,33 @@
-import { Graph, Socket, Engine, Assert, FlowNode } from '@behave-graph/core';
-import { NodeDescription } from '@behave-graph/core';
-import { IChainGraph } from '../../abstractions';
-import { ChainNodeTypes, ChainValueType } from './IChainNode';
-import { makeChainNodeSpec } from './socketGeneration';
+import { makeFlowNodeDefinition, NodeCategory } from '@oveddan-behave-graph/core';
+import { ChainNodeTypes, ChainValueType, makeChainNodeDefinition } from './IChainNode';
 
-export const chainVariableSetSocketSpec = makeChainNodeSpec({
-  socketIndecesForType: ({ variableSet }) => variableSet,
-  nodeTypeName: 'chain/intVariableSet',
-  nodeType: ChainNodeTypes.VariableSet,
-  inputValueType: ChainValueType.Int,
-  socketNames: {
-    inputFlow: 'flow',
-    inputVal: 'value',
-    variableName: 'variableName',
+export const ChainVariableSet = makeFlowNodeDefinition({
+  typeName: 'chain/intVariableSet',
+  category: NodeCategory.Variable,
+  label: 'Set On Chain Int Value',
+  configuration: {
+    variableId: {
+      valueType: 'number',
+    },
   },
-  inputSockets: (socketNames) => [
-    new Socket('string', socketNames.variableName),
-    new Socket('flow', socketNames.inputFlow),
-    new Socket('integer', socketNames.inputVal),
-  ],
-  outputSockets: () => [],
+  initialState: undefined,
+  in: {
+    flow: 'flow',
+    value: 'integer',
+  },
+  out: {},
+  triggered: () => {
+    // doesnt actually do anything underneath, just triggers the flow on chain
+    return undefined;
+  },
 });
 
-export class ChainVariableSet extends FlowNode {
-  public static Description = (smartContractActions: IChainGraph) =>
-    new NodeDescription(
-      chainVariableSetSocketSpec.nodeTypeName,
-      'Flow',
-      'Set On Chain Int Value',
-      (description, graph) => new ChainVariableSet(description, graph, smartContractActions)
-    );
-
-  constructor(description: NodeDescription, graph: Graph, private readonly smartContractActions: IChainGraph) {
-    super(description, graph, chainVariableSetSocketSpec.inputSockets(), chainVariableSetSocketSpec.outputSockets());
-  }
-
-  private handleValueUpdated: ((count: bigint) => void) | undefined = undefined;
-
-  triggered() {
-    // TODO: if fake smart contract, trigger somewhere?
-  }
-
-  dispose(engine: Engine) {
-    Assert.mustBeTrue(this.handleValueUpdated !== undefined);
-
-    if (!this.handleValueUpdated) return;
-
-    this.smartContractActions.unRegisterIntVariableValueListener(this.id, this.handleValueUpdated);
-  }
-}
+export const onChainDefinition = makeChainNodeDefinition(ChainVariableSet, {
+  nodeType: ChainNodeTypes.VariableSet,
+  inputValueType: ChainValueType.Int,
+  inSocketIds: {
+    flow: 0,
+    value: 1,
+  },
+  outSocketIds: {},
+});

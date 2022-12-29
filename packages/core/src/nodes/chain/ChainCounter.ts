@@ -1,40 +1,31 @@
-import { FlowNode, Graph, NodeDescription, Socket } from '@behave-graph/core';
+import { makeFlowNodeDefinition, NodeCategory } from '@oveddan-behave-graph/core';
+import { ChainNodeTypes, ChainValueType, makeChainNodeDefinition } from './IChainNode';
 
-import { IChainGraph } from '../../abstractions';
-import { ChainNodeTypes, ChainValueType } from './IChainNode';
-import { makeChainNodeSpec } from './socketGeneration';
-
-export const chainCointerSocketSpec = makeChainNodeSpec({
-  socketIndecesForType: ({ counter }) => counter,
-  nodeTypeName: 'chain/counter',
-  nodeType: ChainNodeTypes.Counter,
-  inputValueType: ChainValueType.NotAVariable,
-  socketNames: {
-    inputFlow: 'flow',
-    outputFlow: 'flow',
-    outputCount: 'count',
+export const ChainCounter = makeFlowNodeDefinition({
+  typeName: 'chain/counter',
+  category: NodeCategory.Flow,
+  label: 'Chain Counter',
+  initialState: undefined,
+  in: {
+    flow: 'flow',
   },
-  inputSockets: (socketNames) => [new Socket('flow', socketNames.inputFlow)],
-  outputSockets: (socketNames) => [
-    new Socket('flow', socketNames.outputFlow),
-    new Socket('integer', socketNames.outputCount),
-  ],
+  out: {
+    flow: 'flow',
+    count: 'integer',
+  },
+  triggered: () => {
+    return undefined;
+  },
 });
 
-export class ChainCounter extends FlowNode {
-  public static Description = () =>
-    new NodeDescription(
-      chainCointerSocketSpec.nodeTypeName,
-      'Flow',
-      'Chain Counter',
-      (description, graph) => new ChainCounter(description, graph)
-    );
-
-  constructor(description: NodeDescription, graph: Graph) {
-    super(description, graph, chainCointerSocketSpec.inputSockets(), chainCointerSocketSpec.outputSockets());
-  }
-
-  triggered() {
-    // TODO: if fake - do something
-  }
-}
+export const onChainDefinition = makeChainNodeDefinition(ChainCounter, {
+  nodeType: ChainNodeTypes.Counter,
+  inputValueType: ChainValueType.Int,
+  inSocketIds: {
+    flow: 0,
+  },
+  outSocketIds: {
+    flow: 1,
+    count: 2,
+  },
+});

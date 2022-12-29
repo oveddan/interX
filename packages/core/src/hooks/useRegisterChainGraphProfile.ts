@@ -1,4 +1,4 @@
-import { Registry } from '@behave-graph/core';
+import { Registry } from '@oveddan-behave-graph/core';
 import { useCallback } from 'react';
 import { IChainGraph, registerChainGraphProfile } from '@blocktopia/core';
 

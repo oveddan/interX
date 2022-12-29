@@ -1,36 +1,42 @@
-import { FlowNode, NodeDescription, Socket, Graph, Engine, Assert } from '@behave-graph/core';
+import { makeFlowNodeDefinition, NodeCategory } from '@oveddan-behave-graph/core';
 import { IChainGraph } from '../../abstractions';
-import { ChainNodeTypes, ChainValueType } from './IChainNode';
-import { makeChainNodeSpec } from './socketGeneration';
+import { ChainNodeTypes, ChainValueType, makeChainNodeDefinition } from './IChainNode';
 
 export const externalTriggerNodeTypeName = 'chain/externalTrigger';
 
-export const externalTriggerSocketSpec = makeChainNodeSpec({
-  socketIndecesForType: ({ externalTrigger }) => externalTrigger,
-  nodeTypeName: 'chain/externalTrigger',
-  nodeType: ChainNodeTypes.ExternalTrigger,
-  inputValueType: ChainValueType.NotAVariable,
-  socketNames: {
-    outputFlowSocket: 'flow',
-  },
-  inputSockets: (socketNames) => [new Socket('flow', socketNames.outputFlowSocket)],
-  outputSockets: (socketNames) => [new Socket('flow', socketNames.outputFlowSocket)],
-});
+export const ExternalTrigger = (chainGraph: IChainGraph) =>
+  makeFlowNodeDefinition({
+    typeName: externalTriggerNodeTypeName,
+    category: NodeCategory.Flow,
+    label: 'External Trigger',
+    configuration: {
+      triggerId: {
+        valueType: 'string',
+      },
+    },
+    initialState: undefined,
+    in: {
+      flow: 'flow',
+    },
+    out: {
+      flow: 'flow',
+    },
+    triggered: ({ configuration }) => {
+      // todo: how do we handle needing a node id?
+      chainGraph.trigger(configuration.triggerId);
 
-export class ExternalTrigger extends FlowNode {
-  public static Description = (smartContractActions: IChainGraph) =>
-    new NodeDescription(
-      externalTriggerSocketSpec.nodeTypeName,
-      'Flow',
-      'Invoke Smart Contract Action',
-      (description, graph) => new ExternalTrigger(description, graph, smartContractActions)
-    );
+      return undefined;
+    },
+  });
 
-  constructor(description: NodeDescription, graph: Graph, private smartContractActions: IChainGraph) {
-    super(description, graph, externalTriggerSocketSpec.inputSockets(), externalTriggerSocketSpec.outputSockets());
-  }
-
-  triggered() {
-    this.smartContractActions.trigger(this.id, externalTriggerSocketSpec.inputSockets()[0].name);
-  }
-}
+export const onChainDefinition = (chainGraph: IChainGraph) =>
+  makeChainNodeDefinition(ExternalTrigger(chainGraph), {
+    nodeType: ChainNodeTypes.ExternalTrigger,
+    inputValueType: ChainValueType.NotAVariable,
+    inSocketIds: {
+      flow: 0,
+    },
+    outSocketIds: {
+      flow: 1,
+    },
+  });
