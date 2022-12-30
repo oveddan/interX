@@ -19,7 +19,11 @@ contract BehaviorGraphToken is ERC721, ERC721URIStorage, Ownable {
 
   event SafeMint(uint256 tokenId, address toNode, string uri, NodeDefinitionAndValues[] nodes);
 
-  constructor() ERC721('MyToken', 'MTK') {}
+  SocketIndecesByNodeType private _socketIndecesByNodeType;
+
+  constructor(SocketIndecesByNodeType memory socketIndecesByNodeType) ERC721('MyToken', 'MTK') {
+    _socketIndecesByNodeType = socketIndecesByNodeType;
+  }
 
   function _baseURI() internal pure override returns (string memory) {
     return 'ipfs://';
@@ -45,11 +49,28 @@ contract BehaviorGraphToken is ERC721, ERC721URIStorage, Ownable {
     _safeMint(to, tokenId);
     _setTokenURI(tokenId, sceneUri);
     // todo - fix overflow with uint16
-    BehaviorGraph _behaviorGraph = new BehaviorGraph(_nodes, _edges);
+    BehaviorGraph _behaviorGraph = new BehaviorGraph(tokenId, _nodes, _edges, _socketIndecesByNodeType);
     _behaviorGraphs[tokenId] = _behaviorGraph;
 
     emit SafeMint(tokenId, to, sceneUri, _nodes);
 
     return tokenId;
+  }
+
+  event IntVariableUpdated(address executor, uint256 _tokenId, uint8 _variableId, int256 value);
+  event BoolVariableUpdated(address executor, uint256 _tokenId, uint8 _variableId, bool value);
+
+  function invoke(uint256 tokenId, uint8 invocationName) public {
+    BehaviorGraph behaviorGraph = _behaviorGraphs[tokenId];
+    GraphUpdate[] memory graphUpdates = behaviorGraph.invoke(invocationName);
+
+    for (uint16 i = 0; i < graphUpdates.length; i++) {
+      GraphUpdate memory update = graphUpdates[i];
+      if (update.updateType == UpdateType.IntVariableUpdated) {
+        emit IntVariableUpdated(msg.sender, tokenId, update.variableId, update.intValue);
+      } else if (update.updateType == UpdateType.BoolVariableUpdated) {
+        emit BoolVariableUpdated(msg.sender, tokenId, update.variableId, update.boolValue);
+      }
+    }
   }
 }

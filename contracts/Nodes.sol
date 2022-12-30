@@ -25,7 +25,6 @@ struct GateSocketIndeces {
 struct VariableSetIndeces {
   uint8 inputFlow;
   uint8 inputVal;
-  uint8 variableName;
 }
 
 struct Int2Out1SocketIndeces {
@@ -37,74 +36,116 @@ struct Int2Out1SocketIndeces {
 contract Counter is Node, ITriggerNode {
   uint256 public count;
 
-  // constructor(IBehaviorGraph behaviorGraph) Node(behaviorGraph) {}
+  CounterSocketIndeces private _socketIndeces;
 
-  function getSocketIndeces() public pure returns (CounterSocketIndeces memory) {
-    return CounterSocketIndeces({ inputFlow: 0, outputCount: 1, outputFlow: 2 });
+  constructor(CounterSocketIndeces memory socketIndeces) {
+    _socketIndeces = socketIndeces;
   }
 
-  function trigger(IBehaviorGraph _behaviorGraph, uint16 _nodeId, uint8 _triggeringSocketIndex) external {
+  function trigger(
+    IBehaviorGraph _behaviorGraph,
+    uint16 _nodeId,
+    uint8 _triggeringSocketIndex
+  ) external returns (GraphUpdate[] memory) {
     // update state to increment counter
     // this is internal, so we dont need to store it in constant
     int256 newStateVal = _behaviorGraph.getNodeStateVal(_nodeId, 'count') + 1;
     _behaviorGraph.setNodeIntStateVal(_nodeId, 'count', newStateVal);
 
-    CounterSocketIndeces memory socketIndeces = getSocketIndeces();
     // write the count to the output
-    _behaviorGraph.writeToOutput(_nodeId, socketIndeces.outputCount, newStateVal);
+    _behaviorGraph.writeToOutput(_nodeId, _socketIndeces.outputCount, newStateVal);
     // trigger the flow edge
-    _behaviorGraph.triggerEdge(_nodeId, socketIndeces.outputFlow);
+    return _behaviorGraph.triggerEdge(_nodeId, _socketIndeces.outputFlow);
   }
 }
 
 contract Gate is Node, ITriggerNode {
-  function getSocketIndeces() public pure returns (GateSocketIndeces memory) {
-    return GateSocketIndeces({ inputFlow: 0, outputGateTrue: 1, outputGateFalse: 2 });
+  GateSocketIndeces private _socketIndeces;
+
+  constructor(GateSocketIndeces memory socketIndeces) {
+    _socketIndeces = socketIndeces;
   }
 
-  function trigger(IBehaviorGraph _behaviorGraph, uint16 _nodeId, uint8 _triggeringSocketIndex) external {
-    GateSocketIndeces memory socketIndeces = getSocketIndeces();
+  function trigger(
+    IBehaviorGraph _behaviorGraph,
+    uint16 _nodeId,
+    uint8 _triggeringSocketIndex
+  ) external returns (GraphUpdate[] memory) {
     // get the socket to trigger
     uint8 toTrigger = _behaviorGraph.getBoolInputVal(_nodeId, _triggeringSocketIndex)
-      ? socketIndeces.outputGateTrue
-      : socketIndeces.outputGateFalse;
+      ? _socketIndeces.outputGateTrue
+      : _socketIndeces.outputGateFalse;
     // trigger the flow edge along that socket
-    _behaviorGraph.triggerEdge(_nodeId, toTrigger);
+    return _behaviorGraph.triggerEdge(_nodeId, toTrigger);
   }
 }
 
 contract VariableSet is Node, ITriggerNode {
-  function getSocketIndeces() public pure returns (VariableSetIndeces memory) {
-    return VariableSetIndeces({ inputFlow: 0, inputVal: 1, variableName: 2 });
+  VariableSetIndeces private _socketIndeces;
+
+  uint8 private _variableId;
+
+  constructor(VariableSetIndeces memory socketIndeces, uint8 variableId) {
+    _socketIndeces = socketIndeces;
+    _variableId = variableId;
   }
 
-  function trigger(IBehaviorGraph _behaviorGraph, uint16 _nodeId, uint8 _triggeringSocketIndex) external {
-    VariableSetIndeces memory socketIndeces = getSocketIndeces();
-    string memory variableSocketName = _behaviorGraph.getStringInputVal(_nodeId, socketIndeces.variableName);
-
+  function trigger(
+    IBehaviorGraph _behaviorGraph,
+    uint16 _nodeId,
+    uint8 _triggeringSocketIndex
+  ) external returns (GraphUpdate[] memory) {
     // determine what type of value is stored
     ValueType _inputValueType = _behaviorGraph.getInputValueType(_nodeId);
 
+    GraphUpdate[] memory updates = new GraphUpdate[](1);
+
+    updates[0].variableId = _variableId;
+
     // if it is an int variable
     if (_inputValueType == ValueType.Int) {
-      _behaviorGraph.setVariable(variableSocketName, _behaviorGraph.getIntInputVal(_nodeId, socketIndeces.inputVal));
+      updates[0].updateType = UpdateType.IntVariableUpdated;
+      updates[0].intValue = _behaviorGraph.getIntInputVal(_nodeId, _socketIndeces.inputVal);
     } else {
-      _behaviorGraph.setVariable(variableSocketName, _behaviorGraph.getBoolInputVal(_nodeId, socketIndeces.inputVal));
+      updates[0].updateType = UpdateType.BoolVariableUpdated;
+      updates[0].boolValue = _behaviorGraph.getBoolInputVal(_nodeId, _socketIndeces.inputVal);
     }
+
+    return updates;
+  }
+}
+
+struct ExternalInvokeIndeces {
+  uint8 outputFlowSocket;
+}
+
+contract ExternalInvoke is Node, ITriggerNode {
+  ExternalInvokeIndeces private _socketIndeces;
+
+  constructor(ExternalInvokeIndeces memory socketIndeces) {
+    _socketIndeces = socketIndeces;
+  }
+
+  function trigger(
+    IBehaviorGraph _behaviorGraph,
+    uint16 _nodeId,
+    uint8 _triggeringSocketIndex
+  ) external returns (GraphUpdate[] memory) {
+    return _behaviorGraph.triggerEdge(_nodeId, _socketIndeces.outputFlowSocket);
   }
 }
 
 contract Add is Node, IFunctionNode {
-  function getSocketIneces() public pure returns (Int2Out1SocketIndeces memory) {
-    return Int2Out1SocketIndeces({ input1: 0, input2: 1, result: 2 });
+  Int2Out1SocketIndeces private _socketIndeces;
+
+  constructor(Int2Out1SocketIndeces memory socketIndeces) {
+    _socketIndeces = socketIndeces;
   }
 
   function execute(IBehaviorGraph _behaviorGraph, uint16 _nodeId) external {
-    Int2Out1SocketIndeces memory socketIndeces = getSocketIneces();
+    int256 val = _behaviorGraph.getIntInputVal(_nodeId, _socketIndeces.input1) +
+      _behaviorGraph.getIntInputVal(_nodeId, _socketIndeces.input2);
 
-    int256 val = _behaviorGraph.getIntInputVal(_nodeId, socketIndeces.input1) +
-      _behaviorGraph.getIntInputVal(_nodeId, socketIndeces.input2);
-
-    _behaviorGraph.writeToOutput(_nodeId, socketIndeces.result, val);
+    _behaviorGraph.writeToOutput(_nodeId, _socketIndeces.result, val);
   }
 }

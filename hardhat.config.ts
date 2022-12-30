@@ -6,7 +6,11 @@ config({ path: __dirname + '/.env' });
 
 const { ALCHEMY_API_KEY, GOERLI_PRIVATE_KEY, MUMBAI_PRIVATE_KEY, SKALE_PRIVATE_KEY } = process.env;
 
-let networks = {};
+let networks: any = {
+  hardhat: {
+    allowUnlimitedContractSize: true,
+  },
+};
 
 if (SKALE_PRIVATE_KEY) {
   networks = {

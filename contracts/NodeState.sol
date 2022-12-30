@@ -124,20 +124,20 @@ struct VariableIdAndSet {
 }
 
 contract HasVariables {
-  event IntVariableUpdated(address executor, string variableName, int256 value);
-  event BoolVariableUpdated(address executor, string variableName, bool value);
+  event IntVariableUpdated(address executor, uint8 _variableId, int256 value);
+  event BoolVariableUpdated(address executor, uint8 _variableId, bool value);
 
   constructor() {}
 
-  function _setVariable(string memory _variableName, int256 val) internal {
+  function _setVariable(uint8 _variableId, int256 val) internal {
     // uint8 _variableId = _getOrSetVariable(tokenId, _variableName);
     // _intVarVals[_variableId] = val;
-    emit IntVariableUpdated(msg.sender, _variableName, val);
+    emit IntVariableUpdated(msg.sender, _variableId, val);
   }
 
-  function _setVariable(string memory _variableName, bool val) internal {
+  function _setVariable(uint8 _variableId, bool val) internal {
     // uint8 _variableId = _getOrSetVariable(tokenId, _variableName);
     // _boolVarVals[_variableId] = val;
-    emit BoolVariableUpdated(msg.sender, _variableName, val);
+    emit BoolVariableUpdated(msg.sender, _variableId, val);
   }
 }

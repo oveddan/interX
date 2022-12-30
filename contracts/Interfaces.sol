@@ -7,6 +7,18 @@ enum ValueType {
   NotAVariable
 }
 
+enum UpdateType {
+  IntVariableUpdated,
+  BoolVariableUpdated
+}
+
+struct GraphUpdate {
+  UpdateType updateType;
+  uint8 variableId;
+  int256 intValue;
+  bool boolValue;
+}
+
 interface IBehaviorGraph {
   function getNodeStateVal(uint16 _nodeId, string memory _stateVar) external view returns (int256);
 
@@ -14,7 +26,7 @@ interface IBehaviorGraph {
 
   function writeToOutput(uint16 _nodeId, uint8 _socketId, int256 val) external;
 
-  function triggerEdge(uint16 _nodeId, uint8 _socketIndex) external;
+  function triggerEdge(uint16 _nodeId, uint8 _socketIndex) external returns (GraphUpdate[] memory);
 
   function getBoolInputVal(uint16 _nodeId, uint8 _socketName) external view returns (bool);
 
@@ -24,13 +36,17 @@ interface IBehaviorGraph {
 
   function getIntInputVal(uint16 _nodeId, uint8 _socketName) external view returns (int256);
 
-  function setVariable(string memory socketName, int256 val) external;
+  // function setVariable(uint8 _variableId, int256 val) external;
 
-  function setVariable(string memory socketName, bool val) external;
+  // function setVariable(uint8 _variableId, bool val) external;
 }
 
 interface ITriggerNode {
-  function trigger(IBehaviorGraph _behaviorGraph, uint16 _nodeId, uint8 _triggeringSocketIndex) external;
+  function trigger(
+    IBehaviorGraph _behaviorGraph,
+    uint16 _nodeId,
+    uint8 _triggeringSocketIndex
+  ) external returns (GraphUpdate[] memory);
 }
 
 interface IFunctionNode {

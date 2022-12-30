@@ -2,14 +2,17 @@ import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import '@nomicfoundation/hardhat-chai-matchers';
 import { expect } from 'chai';
 import '@nomiclabs/hardhat-ethers';
-import { BehaviorGraph__factory } from '../typechain-types';
+import { BehaviorGraphToken__factory, BehaviorGraph__factory } from '../typechain-types';
 import { ethers } from 'hardhat';
 import {
   NodeDefinitionStruct,
   EdgeDefinitionStruct,
   NodeDefinitionAndValuesStruct,
   InitialValuesStruct,
+  SocketIndecesByNodeTypeStruct,
+  NodeConfigStruct,
 } from '../typechain-types/contracts/BehaviorGraph';
+import { PromiseOrValue } from '../typechain-types/common';
 
 enum VariableType {
   Int = 0,
@@ -54,6 +57,38 @@ const emptyInitialValues = (): InitialValuesStruct => ({
 
 const VARIABLE_NAME_SOCKET = 6;
 
+const socketIndeces: SocketIndecesByNodeTypeStruct = {
+  add: {
+    input1: 0,
+    input2: 1,
+    result: 2,
+  },
+  counter: {
+    inputFlow: 0,
+    outputCount: 1,
+    outputFlow: 2,
+  },
+  gate: {
+    inputFlow: 0,
+    outputGateFalse: 1,
+    outputGateTrue: 2,
+  },
+  variableSet: {
+    inputFlow: 0,
+    inputVal: 1,
+  },
+  externalInvoke: {
+    outputFlowSocket: 0,
+  },
+};
+
+const emptyConfig: NodeConfigStruct = {
+  invocationId: 0,
+  invocationNameDefined: false,
+  variableId: 0,
+  variableIdDefined: false,
+};
+
 describe('BehaviorGraph', function () {
   // We define a fixture to reuse the same setup in every test.
   // We use loadFixture to run this setup once, snapshot that state,
@@ -62,12 +97,12 @@ describe('BehaviorGraph', function () {
     // Contracts are deployed using the first signer/account by default
     const [owner, otherAccount, anotherAccount] = await ethers.getSigners();
 
-    const BehaviorGraph = (await ethers.getContractFactory('BehaviorGraphToken')) as BehaviorGraph__factory;
-    const behaviorGraph = await BehaviorGraph.deploy();
+    const BehaviorGraph = (await ethers.getContractFactory('BehaviorGraphToken')) as BehaviorGraphToken__factory;
+    const behaviorGraph = await BehaviorGraph.deploy(socketIndeces);
 
-    const socketIndeces = await behaviorGraph.getSocketIndecesByNodeType();
+    // const socketIndeces = await behaviorGraph.getSocketIndecesByNodeType();
 
-    return { behaviorGraph, owner, otherAccount, anotherAccount, socketIndeces };
+    return { behaviorGraph, owner, otherAccount, anotherAccount };
   }
 
   describe('safeMint', () => {
@@ -88,7 +123,8 @@ describe('BehaviorGraph', function () {
       const externalTriggerNodeId = 'external';
       const counterNodeId = 'a';
       const variableNodeId = 'b';
-      const variableName = 'counterOutput';
+      const variableId = 1;
+      const invocationId = 1;
       const nodeDefinitions: { [key: string]: NodeDefinitionAndValuesStruct } = {
         externalTrigger: {
           definition: {
@@ -98,6 +134,11 @@ describe('BehaviorGraph', function () {
             inputValueType: VariableType.NotAVariable,
           },
           initialValues: emptyInitialValues(),
+          config: {
+            ...emptyConfig,
+            invocationNameDefined: true,
+            invocationId,
+          },
         },
         counter: {
           definition: {
@@ -107,6 +148,7 @@ describe('BehaviorGraph', function () {
             inputValueType: VariableType.NotAVariable,
           },
           initialValues: emptyInitialValues(),
+          config: emptyConfig,
         },
         variable: {
           definition: {
@@ -115,20 +157,17 @@ describe('BehaviorGraph', function () {
             nodeType: NodeType.VariableSet,
             inputValueType: VariableType.Int,
           },
-          initialValues: {
-            ...emptyInitialValues(),
-            strings: [
-              {
-                socket: 2, // socketIndeces.variableSet.variableName,
-                value: variableName,
-              },
-            ],
+          initialValues: emptyInitialValues(),
+          config: {
+            ...emptyConfig,
+            variableIdDefined: true,
+            variableId,
           },
         },
       };
 
       it('should raise an error if the counter is triggered directly', async () => {
-        const { behaviorGraph, socketIndeces } = await loadFixture(deployFixture);
+        const { behaviorGraph } = await loadFixture(deployFixture);
 
         const nodes = [nodeDefinitions.counter, nodeDefinitions.variable];
 
@@ -137,8 +176,8 @@ describe('BehaviorGraph', function () {
           connectEdge({
             a: { id: counterNodeId },
             b: { id: variableNodeId },
-            fromSocket: socketIndeces.counter.outputCount.valueOf(),
-            toSocket: socketIndeces.variableSet.inputVal.valueOf(),
+            fromSocket: socketIndeces.counter.outputCount as number,
+            toSocket: socketIndeces.variableSet.inputVal as number,
           }),
         ];
 
@@ -149,11 +188,11 @@ describe('BehaviorGraph', function () {
 
         const tokenId = 0;
 
-        await expect(behaviorGraph.trigger(tokenId, counterNodeId)).to.be.rejected;
+        await expect(behaviorGraph.invoke(tokenId, invocationId)).to.be.rejected;
       });
 
       it('should not trigger an action when there is no flow connection to a variable', async () => {
-        const { behaviorGraph, socketIndeces } = await loadFixture(deployFixture);
+        const { behaviorGraph } = await loadFixture(deployFixture);
 
         const nodes = [nodeDefinitions.externalTrigger, nodeDefinitions.counter, nodeDefinitions.variable];
 
@@ -162,15 +201,15 @@ describe('BehaviorGraph', function () {
           connectEdge({
             a: nodeDefinitions.externalTrigger.definition,
             b: nodeDefinitions.counter.definition,
-            fromSocket: socketIndeces.externalTrigger.outputFlowSocket,
-            toSocket: socketIndeces.counter.inputFlow,
+            fromSocket: socketIndeces.externalInvoke.outputFlowSocket as number,
+            toSocket: socketIndeces.counter.inputFlow as number,
           }),
           // edge from output value of counter to the variable
           connectEdge({
             a: nodeDefinitions.counter.definition,
             b: nodeDefinitions.variable.definition,
-            fromSocket: socketIndeces.counter.outputCount,
-            toSocket: socketIndeces.variableSet.inputVal,
+            fromSocket: socketIndeces.counter.outputCount as number,
+            toSocket: socketIndeces.variableSet.inputVal as number,
           }),
         ];
 
@@ -181,19 +220,13 @@ describe('BehaviorGraph', function () {
 
         const tokenId = 0;
 
-        await expect(behaviorGraph.trigger(tokenId, externalTriggerNodeId)).to.not.emit(
-          behaviorGraph,
-          'IntVariableUpdated'
-        );
+        await expect(behaviorGraph.invoke(tokenId, invocationId)).to.not.emit(behaviorGraph, 'IntVariableUpdated');
 
-        await expect(behaviorGraph.trigger(tokenId, externalTriggerNodeId)).to.not.emit(
-          behaviorGraph,
-          'IntVariableUpdated'
-        );
+        await expect(behaviorGraph.invoke(tokenId, invocationId)).to.not.emit(behaviorGraph, 'IntVariableUpdated');
       });
 
       it('should emit that a variable is updated when a flow is connected to the variable input', async () => {
-        const { behaviorGraph, owner, socketIndeces } = await loadFixture(deployFixture);
+        const { behaviorGraph, owner } = await loadFixture(deployFixture);
 
         const nodes = [nodeDefinitions.externalTrigger, nodeDefinitions.counter, nodeDefinitions.variable];
 
@@ -202,22 +235,22 @@ describe('BehaviorGraph', function () {
           connectEdge({
             a: nodeDefinitions.externalTrigger.definition,
             b: nodeDefinitions.counter.definition,
-            fromSocket: socketIndeces.externalTrigger.outputFlowSocket,
-            toSocket: socketIndeces.counter.inputFlow,
+            fromSocket: socketIndeces.externalInvoke.outputFlowSocket as number,
+            toSocket: socketIndeces.counter.inputFlow as number,
           }),
           // edge from output value of counter to the variable
           connectEdge({
             a: nodeDefinitions.counter.definition,
             b: nodeDefinitions.variable.definition,
-            fromSocket: socketIndeces.counter.outputCount,
-            toSocket: socketIndeces.variableSet.inputVal,
+            fromSocket: socketIndeces.counter.outputCount as number,
+            toSocket: socketIndeces.variableSet.inputVal as number,
           }),
           // edge from flow of counter to flow of variable
           connectEdge({
             a: nodeDefinitions.counter.definition,
             b: nodeDefinitions.variable.definition,
-            fromSocket: socketIndeces.counter.outputFlow,
-            toSocket: socketIndeces.variableSet.inputFlow,
+            fromSocket: socketIndeces.counter.outputFlow as number,
+            toSocket: socketIndeces.variableSet.inputFlow as number,
           }),
         ];
 
@@ -228,15 +261,11 @@ describe('BehaviorGraph', function () {
 
         const tokenId = 0;
 
-        await expect(behaviorGraph.trigger(tokenId, externalTriggerNodeId))
+        await expect(behaviorGraph.invoke(tokenId, invocationId))
           .to.emit(behaviorGraph, 'IntVariableUpdated')
-          .withArgs(await owner.getAddress(), tokenId, variableName, 1);
+          .withArgs(await owner.getAddress(), tokenId, variableId, 1);
 
-        await expect(behaviorGraph.trigger(tokenId, externalTriggerNodeId)).to.emit(
-          behaviorGraph,
-          'IntVariableUpdated'
-        );
-        // .withArgs(await owner.getAddress(), tokenId, variableName, 2);
+        await expect(behaviorGraph.invoke(tokenId, invocationId)).to.emit(behaviorGraph, 'IntVariableUpdated');
       });
     });
   });

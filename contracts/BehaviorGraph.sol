@@ -23,9 +23,17 @@ struct NodeDefinition {
   ValueType inputValueType;
 }
 
+struct NodeConfig {
+  uint8 variableId;
+  uint8 invocationId;
+  bool invocationNameDefined;
+  bool variableIdDefined;
+}
+
 struct NodeDefinitionAndValues {
   NodeDefinition definition;
   InitialValues initialValues;
+  NodeConfig config;
 }
 
 struct EdgeDefinition {
@@ -41,7 +49,16 @@ struct EdgeToNode {
   bool set;
 }
 
+struct SocketIndecesByNodeType {
+  CounterSocketIndeces counter;
+  Int2Out1SocketIndeces add;
+  VariableSetIndeces variableSet;
+  GateSocketIndeces gate;
+  ExternalInvokeIndeces externalInvoke;
+}
+
 contract BehaviorGraph is NodeState, HasVariables, IBehaviorGraph {
+  uint256 private _id;
   mapping(string => uint16) private _nodeIndeces;
   // edges between nodes, indexed by token id, node index, and socket index
   mapping(uint16 => mapping(uint8 => EdgeToNode)) private _tokenEdges;
@@ -49,20 +66,35 @@ contract BehaviorGraph is NodeState, HasVariables, IBehaviorGraph {
   // node node definition, mapped by node index and token id
   mapping(uint16 => NodeType) private _nodeTypes;
   mapping(uint16 => ValueType) private _inputValueTypes;
+  mapping(uint16 => uint8) private _nodeVariableIds;
+  mapping(uint8 => uint16) private _invocationNodes;
 
   error InvalidActionId(uint16 nodeId);
   error CannotTriggerExternally(uint16 nodeId);
 
-  constructor(NodeDefinitionAndValues[] memory _nodes, EdgeDefinition[] memory _edges) {
+  SocketIndecesByNodeType private _socketIndecesByNodeType;
+
+  constructor(
+    uint256 id,
+    NodeDefinitionAndValues[] memory _nodes,
+    EdgeDefinition[] memory _edges,
+    SocketIndecesByNodeType memory socketIndecesByNodeType
+  ) {
+    _socketIndecesByNodeType = socketIndecesByNodeType;
+    _id = id;
+
     // for each node definition and values, create a node and set the initial values
     for (uint16 nodeIndex = 0; nodeIndex < _nodes.length; nodeIndex++) {
       NodeDefinitionAndValues memory nodeAndValues = _nodes[nodeIndex];
       NodeDefinition memory node = nodeAndValues.definition;
       NodeType nodeType = node.nodeType;
+      NodeConfig memory nodeConfig = nodeAndValues.config;
 
       _nodeIndeces[node.id] = nodeIndex;
       _nodeTypes[nodeIndex] = nodeType;
       _inputValueTypes[nodeIndex] = node.inputValueType;
+      if (nodeConfig.variableIdDefined) _nodeVariableIds[nodeIndex] = nodeConfig.variableId;
+      if (nodeConfig.invocationNameDefined) _invocationNodes[nodeConfig.invocationId] = nodeIndex;
 
       _setInitialValues(nodeIndex, nodeAndValues.initialValues);
 
@@ -119,12 +151,12 @@ contract BehaviorGraph is NodeState, HasVariables, IBehaviorGraph {
     return _getIntInputVal(_nodeId, _socketName);
   }
 
-  function setVariable(string memory socketName, int256 val) external {
-    _setVariable(socketName, val);
+  function setVariable(uint8 variableId, int256 val) external {
+    _setVariable(variableId, val);
   }
 
-  function setVariable(string memory socketName, bool val) external {
-    _setVariable(socketName, val);
+  function setVariable(uint8 variableId, bool val) external {
+    _setVariable(variableId, val);
   }
 
   // function getSocketNames() public pure returns(SocketNames memory) {
@@ -136,16 +168,18 @@ contract BehaviorGraph is NodeState, HasVariables, IBehaviorGraph {
     return edge;
   }
 
-  function triggerEdge(uint16 _nodeId, uint8 _socketIndex) external override {
-    _triggerEdge(_nodeId, _socketIndex);
+  function triggerEdge(uint16 _nodeId, uint8 _socketIndex) external override returns (GraphUpdate[] memory) {
+    return _triggerEdge(_nodeId, _socketIndex);
   }
 
-  function _triggerEdge(uint16 _nodeId, uint8 _socketIndex) private {
+  function _triggerEdge(uint16 _nodeId, uint8 _socketIndex) private returns (GraphUpdate[] memory) {
     EdgeToNode memory edge = _getEdge(_nodeId, _socketIndex);
     // console.log("triggering edge to node: %i %i %b", edge.toNode, edge.toSocket, edge.set);
     if (edge.set) {
-      _triggerNode(edge.toNode, edge.toSocket);
+      return _triggerNode(edge.toNode, edge.toSocket);
     }
+
+    return new GraphUpdate[](0);
   }
 
   function _writeToIntOutput(uint16 _nodeId, uint8 _socketId, int256 val) private {
@@ -166,7 +200,7 @@ contract BehaviorGraph is NodeState, HasVariables, IBehaviorGraph {
     NodeType nodeType = _getNodeType(_nodeId);
     if (nodeType == NodeType.Add) {
       // get the value from input a and input b
-      (new Add()).execute(this, _nodeId);
+      (new Add(_socketIndecesByNodeType.add)).execute(this, _nodeId);
     }
   }
 
@@ -175,23 +209,32 @@ contract BehaviorGraph is NodeState, HasVariables, IBehaviorGraph {
     return nodeType == NodeType.Add;
   }
 
-  function _triggerNode(uint16 _nodeId, uint8 _triggeringSocketIndex) internal {
+  function _triggerNode(uint16 _nodeId, uint8 _triggeringSocketIndex) internal returns (GraphUpdate[] memory) {
     // get the node type
     NodeType nodeType = _getNodeType(_nodeId);
 
+    GraphUpdate[] memory updates;
+
     if (nodeType == NodeType.Counter) {
-      (new Counter()).trigger(this, _nodeId, _triggeringSocketIndex);
+      updates = (new Counter(_socketIndecesByNodeType.counter)).trigger(this, _nodeId, _triggeringSocketIndex);
     } else if (nodeType == NodeType.Gate) {
-      (new Gate()).trigger(this, _nodeId, _triggeringSocketIndex);
+      updates = (new Gate(_socketIndecesByNodeType.gate)).trigger(this, _nodeId, _triggeringSocketIndex);
     } else if (nodeType == NodeType.VariableSet) {
-      (new VariableSet()).trigger(this, _nodeId, _triggeringSocketIndex);
+      uint8 variableId = _nodeVariableIds[_nodeId];
+      updates = (new VariableSet(_socketIndecesByNodeType.variableSet, variableId)).trigger(
+        this,
+        _nodeId,
+        _triggeringSocketIndex
+      );
     } else {
       revert InvalidActionId(_nodeId);
     }
+
+    return updates;
   }
 
-  function trigger(string memory _nodeId) public {
-    uint16 _nodeIndex = _getNodeIndex(_nodeId);
+  function invoke(uint8 _invocationId) public returns (GraphUpdate[] memory) {
+    uint16 _nodeIndex = _invocationNodes[_invocationId];
     NodeType _nodeType = _getNodeType(_nodeIndex);
 
     // console.log("node id %s %i %i ",_nodeId, _nodeIndex, uint8(_nodeType));
@@ -200,6 +243,6 @@ contract BehaviorGraph is NodeState, HasVariables, IBehaviorGraph {
     }
 
     // todo: rethink
-    _triggerEdge(_nodeIndex, 0);
+    return (new ExternalInvoke(_socketIndecesByNodeType.externalInvoke)).trigger(this, _nodeIndex, 0);
   }
 }
