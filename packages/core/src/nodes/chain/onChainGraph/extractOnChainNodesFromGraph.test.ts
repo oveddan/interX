@@ -1,8 +1,8 @@
 import { ExpectTrue, GraphJSON, NodeJSON } from '@oveddan-behave-graph/core';
-import { extractOnChainNodesFromGraph } from './onChainGraph/extractOnChainNodesFromGraph';
-import { SocketIndecesByNodeType } from './IChainNode';
+import { extractOnChainNodesFromGraph } from '../onChainGraph/extractOnChainNodesFromGraph';
+import { SocketIndecesByNodeType } from '../IChainNode';
 import { expect } from 'chai';
-import { ChainCounter } from './ChainCounter';
+import { ChainCounter } from '../ChainCounter';
 
 // describe('extractOnChainNodesFromGraph', () => {
 //   const variableName = 'myVar';

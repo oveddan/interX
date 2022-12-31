@@ -1,4 +1,10 @@
-import { GraphJSON, NodeJSON, NodeParameterJSON, NodeParameterValueJSON, SocketsDefinition } from '@oveddan-behave-graph/core';
+import {
+  GraphJSON,
+  NodeJSON,
+  NodeParameterJSON,
+  NodeParameterValueJSON,
+  SocketsDefinition,
+} from '@oveddan-behave-graph/core';
 import { BigNumberish } from 'ethers';
 import { PromiseOrValue } from 'typechain-types/common';
 import { IChainGraph } from '../../../abstractions';
@@ -87,8 +93,6 @@ const extractInitialValues = (node: NodeJSON, spec: IHasOnChainDefinition['chain
 //   return result;
 // };
 
-
-
 export const extractOnChainNodesFromGraph = (
   graph: GraphJSON,
   socketIndecesByNodeType: SocketIndecesByNodeType,
@@ -123,14 +127,15 @@ export const extractOnChainNodesFromGraph = (
       },
       config: {
         ...emptyNodeConfig,
-        ...spec.getConfig?(x.configuration)
+        ...(spec.getConfig ? spec.getConfig(x.configuration) : {}),
       },
       initialValues: extractInitialValues(x, spec),
     })
   );
 
-  const edgeDefinitions = chainNodes 
-    .flatMap(({ node }) => getOnChainEdges(node, nodes, chainNodeSpecs, socketIndecesByNodeType))
+  const edgeDefinitions = chainNodes.flatMap(({ node }) =>
+    getOnChainEdges(node, nodes, chainNodeSpecs, socketIndecesByNodeType)
+  );
 
   debugger;
 
@@ -139,5 +144,3 @@ export const extractOnChainNodesFromGraph = (
     edgeDefinitions,
   };
 };
-
-

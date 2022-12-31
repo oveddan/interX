@@ -1,14 +1,12 @@
 import { FlowsJSON, NodeJSON, SocketNames, SocketsDefinition } from '@oveddan-behave-graph/core';
 import { expect } from 'chai';
 import { IChainGraph } from 'packages/core/src/abstractions';
-import { EdgeDefinitionStruct } from 'typechain-types/contracts/BehaviorGraphToken';
+import { EdgeDefinitionStruct as EdgeDefinition } from 'typechain-types/contracts/BehaviorGraphToken';
 import { ChainCounter } from '../ChainCounter';
 import { ChainVariableSet } from '../ChainVariableSet';
 import { SocketIndecesByNodeType } from '../IChainNode';
 import { makeChainNodeSpecs } from '../profile';
 import { getOnChainEdges } from './getOnChainEdges';
-
-type VariableSetSocketIns = SocketNames<typeof ChainVariableSet.in>;
 
 const makeFlowsNodeJson = <TOutSockets extends SocketsDefinition, TInSockets extends SocketsDefinition>({
   flows,
@@ -60,30 +58,21 @@ const socketIndeces: SocketIndecesByNodeType = {
   },
 };
 
+const x: IChainGraph | undefined = undefined;
+
+// @ts-ignore
+const chainNodeSpecs = makeChainNodeSpecs(x);
+
 describe('getOnChainEdges', () => {
   it('should return an empty array if there are no edges', () => {
-    // const node: NodeJSON = {
-    //   id: 'a',
-    //   type: 'counter',
-    //   flows: {},
-    // };
-    // const spec: IChainNodeSpecForNode = {
-    //   nodeType: 'counter',
-    //   inputValueType: 'number',
-    //   outputValueType: 'number',
-    //   getConfig: () => ({
-    //     initialValue: 0,
-    //   }),
-    //   getInitialValues: () => ({
-    //     output: 0,
-    //   }),
-    // };
-    // const nodes: NodeJSON[] = [node];
-    // const chainNodeSpecs: Record<string, IChainNodeSpecForNode> = {
-    //   counter: spec,
-    // };
-    // const result = getOnChainEdges(node, spec, nodes, chainNodeSpecs);
-    // expect(result).toEqual([]);
+    const chainNodeJson: NodeJSON = {
+      id: '0',
+      type: ChainCounter.typeName,
+    };
+
+    const edges = getOnChainEdges(chainNodeJson, [chainNodeJson], chainNodeSpecs, socketIndeces);
+
+    expect(edges).to.have.lengthOf(0);
   });
 
   it('should return an edge with node and edge ids corresponding to node ids and edge indeces based on the spec', () => {
@@ -118,23 +107,18 @@ describe('getOnChainEdges', () => {
       type: ChainVariableSet.typeName,
     };
 
-    const x: IChainGraph | undefined = undefined;
-
-    // @ts-ignore
-    const chainNodeSpecs = makeChainNodeSpecs(x);
-
     const edges = getOnChainEdges(chainNodeJson, [chainNodeJson, variableSetNodeJson], chainNodeSpecs, socketIndeces);
 
     expect(edges).to.have.lengthOf(2);
 
-    const expectedFirstEdge: EdgeDefinitionStruct = {
+    const expectedFirstEdge: EdgeDefinition = {
       fromNode: countNodeId,
       fromSocket: socketIndeces.counter.outputFlow,
       toNode: variableSetNodeId,
       toSocket: socketIndeces.variableSet.inputFlow,
     };
 
-    const expetedSecondEdge: EdgeDefinitionStruct = {
+    const expetedSecondEdge: EdgeDefinition = {
       fromNode: countNodeId,
       fromSocket: socketIndeces.counter.outputCount,
       toNode: variableSetNodeId,
