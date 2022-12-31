@@ -10,7 +10,7 @@ import '@openzeppelin/contracts/utils/Counters.sol';
 
 import './BehaviorGraph.sol';
 
-contract BehaviorGraphToken is ERC721, ERC721URIStorage, Ownable {
+contract BehaviorGraphToken is ERC721, ERC721URIStorage, Ownable, SocketsIndexedByName {
   using Counters for Counters.Counter;
 
   Counters.Counter private _tokenIdCounter;
@@ -19,11 +19,7 @@ contract BehaviorGraphToken is ERC721, ERC721URIStorage, Ownable {
 
   event SafeMint(uint256 tokenId, address toNode, string uri, NodeDefinitionAndValues[] nodes);
 
-  SocketIndecesByNodeType private _socketIndecesByNodeType;
-
-  constructor(SocketIndecesByNodeType memory socketIndecesByNodeType) ERC721('MyToken', 'MTK') {
-    _socketIndecesByNodeType = socketIndecesByNodeType;
-  }
+  constructor() ERC721('MyToken', 'MTK') {}
 
   function _baseURI() internal pure override returns (string memory) {
     return 'ipfs://';

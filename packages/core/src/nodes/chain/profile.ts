@@ -3,17 +3,18 @@ import { IChainGraph } from '../../abstractions';
 import { ChainCounter } from './ChainCounter';
 import { ChainVariableGet } from './ChainVariableGet';
 import { ChainVariableSet } from './ChainVariableSet';
-import { ExternalTrigger } from './ExternalTrigger';
-import { ChainNodeTypes, ChainValueType, SocketIndecesByNodeType } from './IChainNode';
-import { generateInputOutputSocketMappings, SocketIO } from './socketGeneration';
+import { ExternalInvoke } from './ExternalInvoke';
+import { ChainNodeTypes, ChainValueType, IHasOnChainDefinition } from './IChainNode';
+import { SocketIO } from './socketGeneration';
+
+const getChainDefinitions = (actions: IChainGraph) => [ChainCounter, ChainVariableSet, ExternalInvoke(actions)];
 
 export function registerChainGraphProfile(registry: Registry, actions: IChainGraph) {
   const { nodes } = registry;
 
-  nodes.register(ChainCounter);
-  nodes.register(ChainVariableSet);
+  getChainDefinitions(actions).forEach((x) => nodes.register(x));
+
   nodes.register(ChainVariableGet(actions));
-  nodes.register(ExternalTrigger(actions));
 }
 
 export type NodeSocketIO = Record<
@@ -24,26 +25,15 @@ export type NodeSocketIO = Record<
   }
 >;
 
-export const makeChainNodeSpecs = (socketIndeces: SocketIndecesByNodeType): NodeSocketIO =>
-  [chainCointerSocketSpec, chainVariableSetSocketSpec, externalTriggerSocketSpec].reduce((acc: NodeSocketIO, x) => {
-    const { nodeType, nodeTypeName, inputValueType, inputSockets, outputSockets, socketNames, socketIndecesForType } =
-      x;
-    const { getInput, getOutput } = generateInputOutputSocketMappings(
-      {
-        inputSockets: inputSockets(),
-        outputSockets: outputSockets(),
-      },
-      socketNames,
-      socketIndecesForType(socketIndeces)
-    );
+export const makeChainNodeSpecs = (actions: IChainGraph): Record<string, IHasOnChainDefinition['chain']> => {
+  const chainDefinitions = getChainDefinitions(actions);
 
+  return chainDefinitions.reduce((acc: Record<string, IHasOnChainDefinition['chain']>, def) => {
+    const chain = def.chain;
+    if (!chain) throw new Error(`Chain definition for ${def.typeName} is missing!`);
     return {
       ...acc,
-      [nodeTypeName]: {
-        nodeType: nodeType,
-        inputValueType: inputValueType,
-        getInput,
-        getOutput,
-      },
+      [def.typeName]: chain,
     };
   }, {});
+};

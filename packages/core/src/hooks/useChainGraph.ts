@@ -100,7 +100,7 @@ const useChainGraph = (contractAddress: string, tokenId: number) => {
   const smartContractAction = useMemo(() => {
     if (!connectedContract) return;
     const result: IChainGraph = {
-      trigger: (nodeId: string, socketId: string) => {
+      invoke: (nodeId: string, socketId: string) => {
         if (!connectedContract) return;
         trigger(nodeId, connectedContract);
       },

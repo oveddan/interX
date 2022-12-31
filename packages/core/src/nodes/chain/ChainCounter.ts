@@ -1,7 +1,7 @@
 import { makeFlowNodeDefinition, NodeCategory } from '@oveddan-behave-graph/core';
-import { ChainNodeTypes, ChainValueType, makeChainNodeDefinition } from './IChainNode';
+import { ChainNodeTypes, ChainValueType, makeChainSocketMapping } from './IChainNode';
 
-export const ChainCounter = makeFlowNodeDefinition({
+const chainCounterLocal = makeFlowNodeDefinition({
   typeName: 'chain/counter',
   category: NodeCategory.Flow,
   label: 'Chain Counter',
@@ -18,14 +18,17 @@ export const ChainCounter = makeFlowNodeDefinition({
   },
 });
 
-export const onChainDefinition = makeChainNodeDefinition(ChainCounter, {
+export const ChainCounter = makeChainSocketMapping(chainCounterLocal, {
   nodeType: ChainNodeTypes.Counter,
   inputValueType: ChainValueType.Int,
-  inSocketIds: {
-    flow: 0,
-  },
-  outSocketIds: {
-    flow: 1,
-    count: 2,
+  socketIdKey: 'counter',
+  socketMappings: {
+    in: {
+      flow: 'inputFlow',
+    },
+    out: {
+      flow: 'outputFlow',
+      count: 'outputCount',
+    },
   },
 });

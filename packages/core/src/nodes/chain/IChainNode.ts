@@ -1,13 +1,22 @@
 import {
   IFlowNodeDefinition,
   IHasTriggered,
+  INodeDefinition,
   makeFlowNodeDefinition,
+  NodeConfiguration,
   NodeConfigurationDescription,
+  NodeJSON,
   Socket,
   SocketNames,
   SocketsDefinition,
 } from '@oveddan-behave-graph/core';
 import { ExtractAbiFunction, AbiParametersToPrimitiveTypes } from 'abitype';
+import { PromiseOrValue } from 'typechain-types/common';
+import {
+  CounterSocketIndecesStruct,
+  NodeConfigStruct,
+  SocketIndecesByNodeTypeStruct,
+} from 'typechain-types/contracts/BehaviorGraphToken';
 import { abi } from '../../contracts/abi';
 
 type SafeMintFunction = ExtractAbiFunction<typeof abi, 'safeMint'>;
@@ -26,7 +35,7 @@ type SocketIndecesByNodeTypeFunction = ExtractAbiFunction<typeof abi, 'getSocket
 export type SocketIndecesByNodeType = AbiParametersToPrimitiveTypes<SocketIndecesByNodeTypeFunction['outputs']>[0];
 
 export enum ChainNodeTypes {
-  ExternalTrigger = 0,
+  ExternalInvoke = 0,
   Counter = 1,
   Add = 2,
   Gate = 3,
@@ -39,24 +48,61 @@ export enum ChainValueType {
   NotAVariable = 2,
 }
 
-export interface ICorrespondsToOnChainNode<TInput extends SocketsDefinition, TOutput extends SocketsDefinition> {
+export type ChainNodeConfig = ChainNodeDefinitionAndValues['config'];
+
+export const emptyNodeConfig: ChainNodeConfig = {
+  invocationId: 0,
+  invocationNameDefined: false,
+  variableId: 0,
+  variableIdDefined: false,
+};
+
+export type SocketMappings<
+  TSockets extends SocketsDefinition,
+  TSocketIdKey extends keyof SocketIndecesByNodeTypeStruct
+> = {
+  [key in SocketNames<TSockets>]?: keyof SocketIndecesByNodeType[TSocketIdKey];
+};
+
+export interface IChainNodeSpecForNode<
+  TInput extends SocketsDefinition = SocketsDefinition,
+  TOutput extends SocketsDefinition = SocketsDefinition,
+  TSocketIdKey extends keyof SocketIndecesByNodeTypeStruct = 'externalInvoke'
+> {
   nodeType: ChainNodeTypes;
   inputValueType: ChainValueType;
-  inSocketIds: {
-    [key in SocketNames<TInput>]: number;
-  };
-  outSocketIds: {
-    [key in SocketNames<TOutput>]: number;
+  socketIdKey: TSocketIdKey;
+  getConfig?: (config: NodeConfiguration | undefined) => Partial<ChainNodeConfig>;
+  socketMappings: {
+    out?: SocketMappings<TOutput, TSocketIdKey>;
+    in?: SocketMappings<TInput, TSocketIdKey>;
   };
 }
 
-export const makeChainNodeDefinition = <TInput extends SocketsDefinition, TOutput extends SocketsDefinition>(
-  definition: {
-    in: TInput;
-    out: TOutput;
-  },
-  chainDef: ICorrespondsToOnChainNode<TInput, TOutput>
-) => definition;
+type SocketIdValue = CounterSocketIndecesStruct['inputFlow'];
+
+export type SocketIds = Record<string, SocketIdValue>;
+
+export interface IHasOnChainDefinition<
+  TInput extends SocketsDefinition = SocketsDefinition,
+  TOutput extends SocketsDefinition = SocketsDefinition,
+  TSocketIdKey extends keyof SocketIndecesByNodeTypeStruct = any
+> {
+  chain: IChainNodeSpecForNode<TInput, TOutput, TSocketIdKey>;
+}
+
+export const makeChainSocketMapping = <
+  TInput extends SocketsDefinition,
+  TOutput extends SocketsDefinition,
+  TConfig extends NodeConfigurationDescription,
+  TSocketIdKey extends keyof SocketIndecesByNodeTypeStruct
+>(
+  definition: INodeDefinition<TInput, TOutput, TConfig>,
+  chain: IChainNodeSpecForNode<TInput, TOutput, TSocketIdKey>
+) => ({
+  ...definition,
+  chain,
+});
 
 export interface IHasOnChainTrigger<TInput extends SocketsDefinition, TOutput extends SocketsDefinition, TState>
   extends IHasTriggered<TInput, TOutput, TState> {}

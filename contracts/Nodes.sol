@@ -10,29 +10,6 @@ contract Node {
   // }
 }
 
-struct CounterSocketIndeces {
-  uint8 inputFlow;
-  uint8 outputCount;
-  uint8 outputFlow;
-}
-
-struct GateSocketIndeces {
-  uint8 inputFlow;
-  uint8 outputGateTrue;
-  uint8 outputGateFalse;
-}
-
-struct VariableSetIndeces {
-  uint8 inputFlow;
-  uint8 inputVal;
-}
-
-struct Int2Out1SocketIndeces {
-  uint8 input1;
-  uint8 input2;
-  uint8 result;
-}
-
 contract Counter is Node, ITriggerNode {
   uint256 public count;
 
@@ -115,10 +92,6 @@ contract VariableSet is Node, ITriggerNode {
   }
 }
 
-struct ExternalInvokeIndeces {
-  uint8 outputFlowSocket;
-}
-
 contract ExternalInvoke is Node, ITriggerNode {
   ExternalInvokeIndeces private _socketIndeces;
 
@@ -147,5 +120,60 @@ contract Add is Node, IFunctionNode {
       _behaviorGraph.getIntInputVal(_nodeId, _socketIndeces.input2);
 
     _behaviorGraph.writeToOutput(_nodeId, _socketIndeces.result, val);
+  }
+}
+
+struct ExternalInvokeIndeces {
+  uint8 outputFlowSocket;
+}
+
+struct Int2Out1SocketIndeces {
+  uint8 input1;
+  uint8 input2;
+  uint8 result;
+}
+
+struct CounterSocketIndeces {
+  uint8 inputFlow;
+  uint8 outputCount;
+  uint8 outputFlow;
+}
+
+struct GateSocketIndeces {
+  uint8 inputFlow;
+  uint8 outputGateTrue;
+  uint8 outputGateFalse;
+}
+
+struct VariableSetIndeces {
+  uint8 inputFlow;
+  uint8 inputVal;
+}
+
+struct SocketIndecesByNodeType {
+  ExternalInvokeIndeces externalInvoke;
+  CounterSocketIndeces counter;
+  Int2Out1SocketIndeces add;
+  VariableSetIndeces variableSet;
+  GateSocketIndeces gate;
+}
+
+contract SocketsIndexedByName {
+  SocketIndecesByNodeType internal _socketIndecesByNodeType;
+
+  constructor() {
+    // initialize socket indeces by node type with incremeting
+    // and unique values
+    _socketIndecesByNodeType = SocketIndecesByNodeType({
+      externalInvoke: ExternalInvokeIndeces({ outputFlowSocket: 0 }),
+      counter: CounterSocketIndeces({ inputFlow: 0, outputCount: 1, outputFlow: 2 }),
+      add: Int2Out1SocketIndeces({ input1: 0, input2: 1, result: 2 }),
+      variableSet: VariableSetIndeces({ inputFlow: 0, inputVal: 1 }),
+      gate: GateSocketIndeces({ inputFlow: 0, outputGateTrue: 1, outputGateFalse: 2 })
+    });
+  }
+
+  function getSocketIndecesByNodeType() public view returns (SocketIndecesByNodeType memory) {
+    return _socketIndecesByNodeType;
   }
 }

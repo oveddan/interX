@@ -4,9 +4,9 @@ import { IChainGraph } from '../abstractions';
 type hn = { [id: string]: (count: bigint) => void };
 
 export const makeEmptySmartContractActions = (): IChainGraph => ({
-  trigger: () => { },
-  registerIntVariableValueListener: () => { },
-  unRegisterIntVariableValueListener: () => { }
+  invoke: () => {},
+  registerIntVariableValueListener: () => {},
+  unRegisterIntVariableValueListener: () => {},
 });
 
 export const useMockSmartContractActions = () => {
@@ -36,7 +36,7 @@ export const useMockSmartContractActions = () => {
 
   const smartContractAction = useMemo(() => {
     const result: IChainGraph = {
-      trigger,
+      invoke: trigger,
       registerIntVariableValueListener,
       unRegisterIntVariableValueListener,
     };

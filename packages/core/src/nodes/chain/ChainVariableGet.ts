@@ -1,6 +1,6 @@
 import { makeEventNodeDefinition, NodeCategory, Variable } from '@oveddan-behave-graph/core';
 import { IChainGraph } from '../../abstractions';
-import { ChainNodeTypes, ChainValueType, makeChainNodeDefinition } from './IChainNode';
+import { ChainNodeTypes, ChainValueType, makeChainSocketMapping } from './IChainNode';
 
 const smartActionInvokedTypeName = 'chain/intVariableGet';
 export const variableNameSocket = 'variableName';

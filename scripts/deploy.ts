@@ -29,7 +29,7 @@ async function main() {
 
   console.log('Account balance:', (await deployer.getBalance()).toString());
 
-  const contractFactory = await ethers.getContractFactory('BehaviorGraphContract');
+  const contractFactory = await ethers.getContractFactory('BehaviorGraphToken');
   const deployedContract = await contractFactory.deploy();
   await deployedContract.deployed();
 
@@ -42,7 +42,7 @@ async function main() {
 const contractsDir = path.join(__dirname, '..', 'packages', 'core', 'src', 'contracts');
 
 async function writeAbi() {
-  const ContractArtifact = await artifacts.readArtifact('BehaviorGraph');
+  const ContractArtifact = await artifacts.readArtifact('BehaviorGraphToken');
 
   const abiTs = `export const abi = ${JSON.stringify(ContractArtifact.abi, null, 2)} as const;`;
 

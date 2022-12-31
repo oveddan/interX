@@ -8,7 +8,7 @@ import './Nodes.sol';
 import './NodeState.sol';
 
 enum NodeType {
-  ExternalTrigger,
+  ExternalInvoke,
   Counter,
   Add,
   Gate,
@@ -47,14 +47,6 @@ struct EdgeToNode {
   uint16 toNode;
   uint8 toSocket;
   bool set;
-}
-
-struct SocketIndecesByNodeType {
-  CounterSocketIndeces counter;
-  Int2Out1SocketIndeces add;
-  VariableSetIndeces variableSet;
-  GateSocketIndeces gate;
-  ExternalInvokeIndeces externalInvoke;
 }
 
 contract BehaviorGraph is NodeState, HasVariables, IBehaviorGraph {
@@ -213,24 +205,20 @@ contract BehaviorGraph is NodeState, HasVariables, IBehaviorGraph {
     // get the node type
     NodeType nodeType = _getNodeType(_nodeId);
 
-    GraphUpdate[] memory updates;
+    ITriggerNode triggerNode;
 
     if (nodeType == NodeType.Counter) {
-      updates = (new Counter(_socketIndecesByNodeType.counter)).trigger(this, _nodeId, _triggeringSocketIndex);
+      triggerNode = new Counter(_socketIndecesByNodeType.counter);
     } else if (nodeType == NodeType.Gate) {
-      updates = (new Gate(_socketIndecesByNodeType.gate)).trigger(this, _nodeId, _triggeringSocketIndex);
+      triggerNode = new Gate(_socketIndecesByNodeType.gate);
     } else if (nodeType == NodeType.VariableSet) {
       uint8 variableId = _nodeVariableIds[_nodeId];
-      updates = (new VariableSet(_socketIndecesByNodeType.variableSet, variableId)).trigger(
-        this,
-        _nodeId,
-        _triggeringSocketIndex
-      );
+      triggerNode = new VariableSet(_socketIndecesByNodeType.variableSet, variableId);
     } else {
       revert InvalidActionId(_nodeId);
     }
 
-    return updates;
+    return triggerNode.trigger(this, _nodeId, _triggeringSocketIndex);
   }
 
   function invoke(uint8 _invocationId) public returns (GraphUpdate[] memory) {
@@ -238,7 +226,7 @@ contract BehaviorGraph is NodeState, HasVariables, IBehaviorGraph {
     NodeType _nodeType = _getNodeType(_nodeIndex);
 
     // console.log("node id %s %i %i ",_nodeId, _nodeIndex, uint8(_nodeType));
-    if (_nodeType != NodeType.ExternalTrigger) {
+    if (_nodeType != NodeType.ExternalInvoke) {
       revert CannotTriggerExternally(_nodeIndex);
     }
 

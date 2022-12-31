@@ -1,7 +1,7 @@
 import { makeFlowNodeDefinition, NodeCategory } from '@oveddan-behave-graph/core';
-import { ChainNodeTypes, ChainValueType, makeChainNodeDefinition } from './IChainNode';
+import { ChainNodeTypes, ChainValueType, makeChainSocketMapping } from './IChainNode';
 
-export const ChainVariableSet = makeFlowNodeDefinition({
+export const chainVariableSet = makeFlowNodeDefinition({
   typeName: 'chain/intVariableSet',
   category: NodeCategory.Variable,
   label: 'Set On Chain Int Value',
@@ -22,12 +22,18 @@ export const ChainVariableSet = makeFlowNodeDefinition({
   },
 });
 
-export const onChainDefinition = makeChainNodeDefinition(ChainVariableSet, {
+export const ChainVariableSet = makeChainSocketMapping(chainVariableSet, {
   nodeType: ChainNodeTypes.VariableSet,
   inputValueType: ChainValueType.Int,
-  inSocketIds: {
-    flow: 0,
-    value: 1,
+  getConfig: (configuration) => ({
+    variableId: configuration?.variableId || 1,
+    variableIdDefined: true,
+  }),
+  socketIdKey: 'variableSet',
+  socketMappings: {
+    in: {
+      flow: 'inputFlow',
+      value: 'inputVal',
+    },
   },
-  outSocketIds: {},
 });

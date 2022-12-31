@@ -5,44 +5,6 @@ export const abi = [
     "type": "constructor"
   },
   {
-    "inputs": [
-      {
-        "internalType": "uint16",
-        "name": "nodeId",
-        "type": "uint16"
-      }
-    ],
-    "name": "CannotTriggerExternally",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint16",
-        "name": "nodeId",
-        "type": "uint16"
-      }
-    ],
-    "name": "InvalidActionId",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "string",
-        "name": "nodeId",
-        "type": "string"
-      },
-      {
-        "internalType": "address",
-        "name": "tokenAddress",
-        "type": "address"
-      }
-    ],
-    "name": "MissingTokens",
-    "type": "error"
-  },
-  {
     "anonymous": false,
     "inputs": [
       {
@@ -103,15 +65,15 @@ export const abi = [
       },
       {
         "indexed": false,
-        "internalType": "uint16",
-        "name": "tokenId",
-        "type": "uint16"
+        "internalType": "uint256",
+        "name": "_tokenId",
+        "type": "uint256"
       },
       {
         "indexed": false,
-        "internalType": "string",
-        "name": "variableName",
-        "type": "string"
+        "internalType": "uint8",
+        "name": "_variableId",
+        "type": "uint8"
       },
       {
         "indexed": false,
@@ -134,15 +96,15 @@ export const abi = [
       },
       {
         "indexed": false,
-        "internalType": "uint16",
-        "name": "tokenId",
-        "type": "uint16"
+        "internalType": "uint256",
+        "name": "_tokenId",
+        "type": "uint256"
       },
       {
         "indexed": false,
-        "internalType": "string",
-        "name": "variableName",
-        "type": "string"
+        "internalType": "uint8",
+        "name": "_variableId",
+        "type": "uint8"
       },
       {
         "indexed": false,
@@ -280,6 +242,33 @@ export const abi = [
             "internalType": "struct InitialValues",
             "name": "initialValues",
             "type": "tuple"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint8",
+                "name": "variableId",
+                "type": "uint8"
+              },
+              {
+                "internalType": "uint8",
+                "name": "invocationId",
+                "type": "uint8"
+              },
+              {
+                "internalType": "bool",
+                "name": "invocationNameDefined",
+                "type": "bool"
+              },
+              {
+                "internalType": "bool",
+                "name": "variableIdDefined",
+                "type": "bool"
+              }
+            ],
+            "internalType": "struct NodeConfig",
+            "name": "config",
+            "type": "tuple"
           }
         ],
         "indexed": false,
@@ -373,93 +362,6 @@ export const abi = [
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "uint16",
-        "name": "tokenId",
-        "type": "uint16"
-      },
-      {
-        "internalType": "uint16",
-        "name": "_nodeId",
-        "type": "uint16"
-      },
-      {
-        "internalType": "uint8",
-        "name": "_socketName",
-        "type": "uint8"
-      }
-    ],
-    "name": "getBoolInputVal",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint16",
-        "name": "tokenId",
-        "type": "uint16"
-      },
-      {
-        "internalType": "uint16",
-        "name": "_nodeId",
-        "type": "uint16"
-      },
-      {
-        "internalType": "uint8",
-        "name": "_socketName",
-        "type": "uint8"
-      }
-    ],
-    "name": "getIntInputVal",
-    "outputs": [
-      {
-        "internalType": "int256",
-        "name": "",
-        "type": "int256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint16",
-        "name": "tokenId",
-        "type": "uint16"
-      },
-      {
-        "internalType": "uint16",
-        "name": "_nodeId",
-        "type": "uint16"
-      },
-      {
-        "internalType": "string",
-        "name": "_stateVar",
-        "type": "string"
-      }
-    ],
-    "name": "getNodeStateVal",
-    "outputs": [
-      {
-        "internalType": "int256",
-        "name": "",
-        "type": "int256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [],
     "name": "getSocketIndecesByNodeType",
     "outputs": [
@@ -473,8 +375,8 @@ export const abi = [
                 "type": "uint8"
               }
             ],
-            "internalType": "struct ExternalTriggerIndeces",
-            "name": "externalTrigger",
+            "internalType": "struct ExternalInvokeIndeces",
+            "name": "externalInvoke",
             "type": "tuple"
           },
           {
@@ -577,30 +479,19 @@ export const abi = [
   {
     "inputs": [
       {
-        "internalType": "uint16",
+        "internalType": "uint256",
         "name": "tokenId",
-        "type": "uint16"
-      },
-      {
-        "internalType": "uint16",
-        "name": "_nodeId",
-        "type": "uint16"
+        "type": "uint256"
       },
       {
         "internalType": "uint8",
-        "name": "_socketName",
+        "name": "invocationName",
         "type": "uint8"
       }
     ],
-    "name": "getStringInputVal",
-    "outputs": [
-      {
-        "internalType": "string",
-        "name": "",
-        "type": "string"
-      }
-    ],
-    "stateMutability": "view",
+    "name": "invoke",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -771,6 +662,33 @@ export const abi = [
             ],
             "internalType": "struct InitialValues",
             "name": "initialValues",
+            "type": "tuple"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint8",
+                "name": "variableId",
+                "type": "uint8"
+              },
+              {
+                "internalType": "uint8",
+                "name": "invocationId",
+                "type": "uint8"
+              },
+              {
+                "internalType": "bool",
+                "name": "invocationNameDefined",
+                "type": "bool"
+              },
+              {
+                "internalType": "bool",
+                "name": "variableIdDefined",
+                "type": "bool"
+              }
+            ],
+            "internalType": "struct NodeConfig",
+            "name": "config",
             "type": "tuple"
           }
         ],
@@ -969,24 +887,6 @@ export const abi = [
       }
     ],
     "name": "transferOwnership",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint16",
-        "name": "_tokenId",
-        "type": "uint16"
-      },
-      {
-        "internalType": "string",
-        "name": "_nodeId",
-        "type": "string"
-      }
-    ],
-    "name": "trigger",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

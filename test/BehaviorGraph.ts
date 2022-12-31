@@ -57,31 +57,6 @@ const emptyInitialValues = (): InitialValuesStruct => ({
 
 const VARIABLE_NAME_SOCKET = 6;
 
-const socketIndeces: SocketIndecesByNodeTypeStruct = {
-  add: {
-    input1: 0,
-    input2: 1,
-    result: 2,
-  },
-  counter: {
-    inputFlow: 0,
-    outputCount: 1,
-    outputFlow: 2,
-  },
-  gate: {
-    inputFlow: 0,
-    outputGateFalse: 1,
-    outputGateTrue: 2,
-  },
-  variableSet: {
-    inputFlow: 0,
-    inputVal: 1,
-  },
-  externalInvoke: {
-    outputFlowSocket: 0,
-  },
-};
-
 const emptyConfig: NodeConfigStruct = {
   invocationId: 0,
   invocationNameDefined: false,
@@ -98,11 +73,11 @@ describe('BehaviorGraph', function () {
     const [owner, otherAccount, anotherAccount] = await ethers.getSigners();
 
     const BehaviorGraph = (await ethers.getContractFactory('BehaviorGraphToken')) as BehaviorGraphToken__factory;
-    const behaviorGraph = await BehaviorGraph.deploy(socketIndeces);
+    const behaviorGraph = await BehaviorGraph.deploy();
 
-    // const socketIndeces = await behaviorGraph.getSocketIndecesByNodeType();
+    const socketIndeces = await behaviorGraph.getSocketIndecesByNodeType();
 
-    return { behaviorGraph, owner, otherAccount, anotherAccount };
+    return { behaviorGraph, owner, otherAccount, anotherAccount, socketIndeces };
   }
 
   describe('safeMint', () => {
@@ -167,7 +142,7 @@ describe('BehaviorGraph', function () {
       };
 
       it('should raise an error if the counter is triggered directly', async () => {
-        const { behaviorGraph } = await loadFixture(deployFixture);
+        const { behaviorGraph, socketIndeces } = await loadFixture(deployFixture);
 
         const nodes = [nodeDefinitions.counter, nodeDefinitions.variable];
 
@@ -192,7 +167,7 @@ describe('BehaviorGraph', function () {
       });
 
       it('should not trigger an action when there is no flow connection to a variable', async () => {
-        const { behaviorGraph } = await loadFixture(deployFixture);
+        const { behaviorGraph, socketIndeces } = await loadFixture(deployFixture);
 
         const nodes = [nodeDefinitions.externalTrigger, nodeDefinitions.counter, nodeDefinitions.variable];
 
@@ -226,7 +201,7 @@ describe('BehaviorGraph', function () {
       });
 
       it('should emit that a variable is updated when a flow is connected to the variable input', async () => {
-        const { behaviorGraph, owner } = await loadFixture(deployFixture);
+        const { behaviorGraph, owner, socketIndeces } = await loadFixture(deployFixture);
 
         const nodes = [nodeDefinitions.externalTrigger, nodeDefinitions.counter, nodeDefinitions.variable];
 
@@ -265,7 +240,9 @@ describe('BehaviorGraph', function () {
           .to.emit(behaviorGraph, 'IntVariableUpdated')
           .withArgs(await owner.getAddress(), tokenId, variableId, 1);
 
-        await expect(behaviorGraph.invoke(tokenId, invocationId)).to.emit(behaviorGraph, 'IntVariableUpdated');
+        await expect(behaviorGraph.invoke(tokenId, invocationId))
+          .to.emit(behaviorGraph, 'IntVariableUpdated')
+          .withArgs(await owner.getAddress(), tokenId, variableId, 2);
       });
     });
   });

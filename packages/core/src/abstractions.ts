@@ -3,7 +3,7 @@ import { IScene } from '@oveddan-behave-graph/core';
 type IntVariableHandler = (value: bigint) => void;
 
 export interface IChainGraph {
-  trigger: (nodeId: string, socketId: string) => void;
+  invoke: (invokeId: number) => void;
   registerIntVariableValueListener: (id: string, cb: IntVariableHandler) => void;
   unRegisterIntVariableValueListener: (id: string, cb: IntVariableHandler) => void;
 }
