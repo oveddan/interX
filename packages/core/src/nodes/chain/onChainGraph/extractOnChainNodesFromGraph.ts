@@ -1,7 +1,7 @@
 import { GraphJSON, NodeJSON, NodeParameterJSON, NodeParameterValueJSON, SocketsDefinition } from '@oveddan-behave-graph/core';
 import { BigNumberish } from 'ethers';
 import { PromiseOrValue } from 'typechain-types/common';
-import { IChainGraph } from '../../abstractions';
+import { IChainGraph } from '../../../abstractions';
 import {
   ChainEdgeNodeDefinition,
   ChainNodeDefinitionAndValues,
@@ -10,8 +10,9 @@ import {
   IHasOnChainDefinition,
   emptyNodeConfig,
   IChainNodeSpecForNode,
-} from './IChainNode';
-import { makeChainNodeSpecs, NodeSocketIO } from './profile';
+} from '../IChainNode';
+import { makeChainNodeSpecs, NodeSocketIO } from '../profile';
+import { getOnChainEdges } from './getOnChainEdges';
 
 function appendInitialValue<T>(
   value: T,
@@ -129,8 +130,7 @@ export const extractOnChainNodesFromGraph = (
   );
 
   const edgeDefinitions = chainNodes 
-    .map(({ node, spec }) => getOnChainEdges(node, spec, nodes, chainNodeSpecs))
-    .reduce((acc: ChainEdgeNodeDefinition[], edges) => [...acc, ...edges], []);
+    .flatMap(({ node }) => getOnChainEdges(node, nodes, chainNodeSpecs, socketIndecesByNodeType))
 
   debugger;
 

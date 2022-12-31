@@ -10,7 +10,7 @@ import { getOnChainEdges } from './getOnChainEdges';
 
 type VariableSetSocketIns = SocketNames<typeof ChainVariableSet.in>;
 
-const makeFlows = <TOutSockets extends SocketsDefinition, TInSockets extends SocketsDefinition>({
+const makeFlowsNodeJson = <TOutSockets extends SocketsDefinition, TInSockets extends SocketsDefinition>({
   flows,
   to: { nodeId },
 }: {
@@ -20,10 +20,11 @@ const makeFlows = <TOutSockets extends SocketsDefinition, TInSockets extends Soc
     sockets: TInSockets;
   };
   flows: {
-    [key in SocketNames<typeof ChainCounter.out>]?: SocketNames<TInSockets>;
-  };
+    from: SocketNames<typeof ChainCounter.out>;
+    to: SocketNames<TInSockets>;
+  }[];
 }): FlowsJSON =>
-  Object.entries(flows).reduce((acc, [key, socket]) => {
+  flows.reduce((acc, { from: key, to: socket }) => {
     return {
       ...acc,
       [key]: {
@@ -93,16 +94,22 @@ describe('getOnChainEdges', () => {
     const chainNodeJson: NodeJSON = {
       id: countNodeId,
       type: ChainCounter.typeName,
-      flows: makeFlows({
+      flows: makeFlowsNodeJson({
         from: ChainCounter.out,
         to: {
           nodeId: variableSetNodeId,
           sockets: ChainVariableSet.in,
         },
-        flows: {
-          flow: 'flow',
-          count: 'value',
-        },
+        flows: [
+          {
+            from: 'flow',
+            to: 'flow',
+          },
+          {
+            from: 'count',
+            to: 'value',
+          },
+        ],
       }),
     };
 
