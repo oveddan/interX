@@ -22,7 +22,10 @@ export const chainVariableSet = makeFlowNodeDefinition({
   },
 });
 
-export const ChainVariableSet = makeChainSocketMapping(chainVariableSet, {
+/**
+ * Sets an on-chain variable to a value.
+ */
+export const OnChainVariableSet = makeChainSocketMapping(chainVariableSet, {
   nodeType: ChainNodeTypes.VariableSet,
   inputValueType: ChainValueType.Int,
   getConfig: (configuration) => ({

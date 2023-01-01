@@ -1,11 +1,11 @@
 import { NodeJSON } from '@oveddan-behave-graph/core';
 import { SocketIndecesByNodeTypeStruct } from 'typechain-types/contracts/BehaviorGraphToken';
-import { ChainEdgeNodeDefinition, IChainNodeSpecForNode } from '../IChainNode';
+import { ChainEdgeNodeDefinition, ToOnChainDefinitionForNode } from '../IChainNode';
 
 export function getOnChainEdges(
   node: NodeJSON,
   nodes: NodeJSON[],
-  chainNodeSpecs: Record<string, IChainNodeSpecForNode>,
+  chainNodeSpecs: Record<string, ToOnChainDefinitionForNode>,
   socketIndeces: SocketIndecesByNodeTypeStruct
 ): ChainEdgeNodeDefinition[] {
   const edges: ChainEdgeNodeDefinition[] = [];

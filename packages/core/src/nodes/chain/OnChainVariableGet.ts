@@ -14,8 +14,14 @@ type State = {
 
 const makeInitialState = (): State => ({});
 
-// this doesnt need to go on chain, because it is just fetching
-export const ChainVariableGet = (smartContractActions: IChainGraph) =>
+/**
+ * Listens for chainges to an on-chain variable, and write the value to the output.
+ * Commits the flow on each change.
+ * This node isn't written tot he blockchain, as it just fetches the value via the subgraph.
+ * @param smartContractActions
+ * @returns
+ */
+export const OnChainVariableGet = (smartContractActions: IChainGraph) =>
   makeEventNodeDefinition({
     typeName: smartActionInvokedTypeName,
     category: NodeCategory.Variable,

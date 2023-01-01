@@ -4,6 +4,11 @@ import { ChainNodeTypes, ChainValueType, makeChainSocketMapping } from './IChain
 
 export const externalTriggerNodeTypeName = 'chain/externalTrigger';
 
+/**
+ * Interface to the outside world from the on-chain graph; Allows for invoking the graph from the outside.
+ * @param chainGraph
+ * @returns
+ */
 export const ExternalInvoke = (chainGraph: IChainGraph) => {
   const local = makeFlowNodeDefinition({
     typeName: externalTriggerNodeTypeName,

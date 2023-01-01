@@ -1,20 +1,15 @@
 import {
-  IFlowNodeDefinition,
   IHasTriggered,
   INodeDefinition,
-  makeFlowNodeDefinition,
   NodeConfiguration,
   NodeConfigurationDescription,
-  NodeJSON,
   Socket,
   SocketNames,
   SocketsDefinition,
 } from '@oveddan-behave-graph/core';
 import { ExtractAbiFunction, AbiParametersToPrimitiveTypes } from 'abitype';
-import { PromiseOrValue } from 'typechain-types/common';
 import {
   CounterSocketIndecesStruct,
-  NodeConfigStruct,
   SocketIndecesByNodeTypeStruct,
 } from 'typechain-types/contracts/BehaviorGraphToken';
 import { abi } from '../../contracts/abi';
@@ -64,11 +59,11 @@ export type SocketMappings<
   [key in SocketNames<TSockets>]?: keyof SocketIndecesByNodeType[TSocketIdKey];
 };
 
-export interface IChainNodeSpecForNode<
+export type ToOnChainDefinitionForNode<
   TInput extends SocketsDefinition = SocketsDefinition,
   TOutput extends SocketsDefinition = SocketsDefinition,
   TSocketIdKey extends keyof SocketIndecesByNodeTypeStruct = 'externalInvoke'
-> {
+> = {
   nodeType: ChainNodeTypes;
   inputValueType: ChainValueType;
   socketIdKey: TSocketIdKey;
@@ -77,7 +72,7 @@ export interface IChainNodeSpecForNode<
     out?: SocketMappings<TOutput, TSocketIdKey>;
     in?: SocketMappings<TInput, TSocketIdKey>;
   };
-}
+};
 
 type SocketIdValue = CounterSocketIndecesStruct['inputFlow'];
 
@@ -88,7 +83,7 @@ export interface IHasOnChainDefinition<
   TOutput extends SocketsDefinition = SocketsDefinition,
   TSocketIdKey extends keyof SocketIndecesByNodeTypeStruct = any
 > {
-  chain: IChainNodeSpecForNode<TInput, TOutput, TSocketIdKey>;
+  chain: ToOnChainDefinitionForNode<TInput, TOutput, TSocketIdKey>;
 }
 
 export const makeChainSocketMapping = <
@@ -98,7 +93,7 @@ export const makeChainSocketMapping = <
   TSocketIdKey extends keyof SocketIndecesByNodeTypeStruct
 >(
   definition: INodeDefinition<TInput, TOutput, TConfig>,
-  chain: IChainNodeSpecForNode<TInput, TOutput, TSocketIdKey>
+  chain: ToOnChainDefinitionForNode<TInput, TOutput, TSocketIdKey>
 ) => ({
   ...definition,
   chain,

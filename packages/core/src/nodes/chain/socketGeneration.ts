@@ -1,4 +1,4 @@
-import { Node, Socket } from '@oveddan-behave-graph/core';
+import { Socket } from '@oveddan-behave-graph/core';
 import { ChainNodeTypes, ChainValueType, SocketIndecesByNodeType } from './IChainNode';
 
 export type SocketIO = {
@@ -9,7 +9,7 @@ export type SocketIO = {
 type SocketIndeces = { [key: string]: number };
 export type SocketNames<TSocketIndeces extends SocketIndeces> = { [key in keyof TSocketIndeces]: string };
 
-export type ChainSocketSpecGenerator<
+type ChainSocketSpecGenerator<
   TSocketIndeces extends SocketIndeces,
   TSocketNames extends SocketNames<TSocketIndeces>
 > = {
@@ -22,10 +22,9 @@ export type ChainSocketSpecGenerator<
   outputSockets: (socketNames: TSocketNames) => Socket[];
 };
 
-export function makeChainNodeSpec<
-  TSocketIndeces extends SocketIndeces,
-  TSocketNames extends SocketNames<TSocketIndeces>
->(chainSocketSpec: ChainSocketSpecGenerator<TSocketIndeces, TSocketNames>) {
+function makeChainNodeSpec<TSocketIndeces extends SocketIndeces, TSocketNames extends SocketNames<TSocketIndeces>>(
+  chainSocketSpec: ChainSocketSpecGenerator<TSocketIndeces, TSocketNames>
+) {
   return {
     ...chainSocketSpec,
     inputSockets: () => chainSocketSpec.inputSockets(chainSocketSpec.socketNames),
@@ -33,7 +32,7 @@ export function makeChainNodeSpec<
   };
 }
 
-export const getSocketIndex = <TSocketIndeces extends { [key: string]: number }>(
+const getSocketIndex = <TSocketIndeces extends { [key: string]: number }>(
   sockets: Socket[],
   socketNames: SocketNames<TSocketIndeces>,
   indeces: TSocketIndeces
@@ -56,15 +55,4 @@ export const getSocketIndex = <TSocketIndeces extends { [key: string]: number }>
   );
 
   return (key: string) => socketMapping[key];
-};
-
-export const generateInputOutputSocketMappings = <TSocketIndeces extends { [key: string]: number }>(
-  { inputSockets, outputSockets }: Pick<Node, 'inputSockets' | 'outputSockets'>,
-  socketNames: SocketNames<TSocketIndeces>,
-  indeces: TSocketIndeces
-): SocketIO => {
-  return {
-    getInput: getSocketIndex(inputSockets, socketNames, indeces),
-    getOutput: getSocketIndex(outputSockets, socketNames, indeces),
-  };
 };

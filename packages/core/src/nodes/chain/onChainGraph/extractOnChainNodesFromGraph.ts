@@ -15,9 +15,9 @@ import {
   SocketIndecesByNodeType,
   IHasOnChainDefinition,
   emptyNodeConfig,
-  IChainNodeSpecForNode,
+  ToOnChainDefinitionForNode,
 } from '../IChainNode';
-import { makeChainNodeSpecs, NodeSocketIO } from '../profile';
+import { makeToOnChainNodeConverterters, NodeSocketIO } from '../profile';
 import { getOnChainEdges } from './getOnChainEdges';
 
 function appendInitialValue<T>(
@@ -93,11 +93,58 @@ const extractInitialValues = (node: NodeJSON, spec: IHasOnChainDefinition['chain
 //   return result;
 // };
 
-export const extractOnChainNodesFromGraph = (
-  graph: GraphJSON,
-  socketIndecesByNodeType: SocketIndecesByNodeType,
-  x: IChainGraph
-): {
+export function chainNodeToNodeDefinitionAndEdges({
+  node,
+  nodeSpec,
+  nodes,
+  socketIndecesByNodeType,
+  chainGraph,
+}: {
+  node: NodeJSON;
+  nodeSpec: ToOnChainDefinitionForNode;
+  nodes: NodeJSON[];
+  socketIndecesByNodeType: SocketIndecesByNodeType;
+  chainGraph: IChainGraph;
+}): {
+  nodeDefinition: ChainNodeDefinitionAndValues;
+  edgeDefinitions: ChainEdgeNodeDefinition[];
+} {
+  const nodeDefinition: ChainNodeDefinitionAndValues = {
+    definition: {
+      id: node.id,
+      defined: true,
+      inputValueType: nodeSpec.inputValueType,
+      nodeType: nodeSpec.nodeType,
+    },
+    config: {
+      ...emptyNodeConfig,
+      ...(nodeSpec.getConfig ? nodeSpec.getConfig(node.configuration) : {}),
+    },
+    initialValues: extractInitialValues(node, nodeSpec),
+  };
+
+  const edgeDefinitions = getOnChainEdges(
+    node,
+    nodes,
+    makeToOnChainNodeConverterters(chainGraph),
+    socketIndecesByNodeType
+  );
+
+  return {
+    nodeDefinition,
+    edgeDefinitions,
+  };
+}
+
+export const extractOnChainNodesFromGraph = ({
+  graph,
+  socketIndecesByNodeType,
+  chainGraph,
+}: {
+  graph: GraphJSON;
+  socketIndecesByNodeType: SocketIndecesByNodeType;
+  chainGraph: IChainGraph;
+}): {
   nodeDefinitions: ChainNodeDefinitionAndValues[];
   edgeDefinitions: ChainEdgeNodeDefinition[];
 } => {
@@ -108,8 +155,10 @@ export const extractOnChainNodesFromGraph = (
       edgeDefinitions: [],
     };
 
-  const chainNodeSpecs = makeChainNodeSpecs(x);
+  // using the graph, get the chain node specs for each node type
+  const chainNodeSpecs = makeToOnChainNodeConverterters(chainGraph);
 
+  // get chain node specs for each node
   const chainNodes = nodes
     .filter((x) => !!chainNodeSpecs[x.type])
     .map((node) => ({
@@ -117,27 +166,12 @@ export const extractOnChainNodesFromGraph = (
       spec: chainNodeSpecs[node.type],
     }));
 
-  const nodeDefinitions: ChainNodeDefinitionAndValues[] = chainNodes.map(
-    ({ node: x, spec }): ChainNodeDefinitionAndValues => ({
-      definition: {
-        id: x.id,
-        defined: true,
-        inputValueType: spec.inputValueType,
-        nodeType: spec.nodeType,
-      },
-      config: {
-        ...emptyNodeConfig,
-        ...(spec.getConfig ? spec.getConfig(x.configuration) : {}),
-      },
-      initialValues: extractInitialValues(x, spec),
-    })
+  const nodeAndEdgeDefinitions = chainNodes.map(({ node, spec }) =>
+    chainNodeToNodeDefinitionAndEdges({ node, nodeSpec: spec, nodes, socketIndecesByNodeType, chainGraph: chainGraph })
   );
 
-  const edgeDefinitions = chainNodes.flatMap(({ node }) =>
-    getOnChainEdges(node, nodes, chainNodeSpecs, socketIndecesByNodeType)
-  );
-
-  debugger;
+  const nodeDefinitions = nodeAndEdgeDefinitions.map(({ nodeDefinition }) => nodeDefinition);
+  const edgeDefinitions = nodeAndEdgeDefinitions.flatMap(({ edgeDefinitions }) => edgeDefinitions);
 
   return {
     nodeDefinitions,

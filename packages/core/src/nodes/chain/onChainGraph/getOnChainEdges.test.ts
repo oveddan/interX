@@ -2,10 +2,10 @@ import { FlowsJSON, NodeJSON, SocketNames, SocketsDefinition } from '@oveddan-be
 import { expect } from 'chai';
 import { IChainGraph } from 'packages/core/src/abstractions';
 import { EdgeDefinitionStruct as EdgeDefinition } from 'typechain-types/contracts/BehaviorGraphToken';
-import { ChainCounter } from '../ChainCounter';
-import { ChainVariableSet } from '../ChainVariableSet';
+import { OnChainCounter } from '../OnChainCounter';
+import { OnChainVariableSet } from '../OnChainVariableSet';
 import { SocketIndecesByNodeType } from '../IChainNode';
-import { makeChainNodeSpecs } from '../profile';
+import { makeToOnChainNodeConverterters } from '../profile';
 import { getOnChainEdges } from './getOnChainEdges';
 
 const makeFlowsNodeJson = <TOutSockets extends SocketsDefinition, TInSockets extends SocketsDefinition>({
@@ -18,7 +18,7 @@ const makeFlowsNodeJson = <TOutSockets extends SocketsDefinition, TInSockets ext
     sockets: TInSockets;
   };
   flows: {
-    from: SocketNames<typeof ChainCounter.out>;
+    from: SocketNames<typeof OnChainCounter.out>;
     to: SocketNames<TInSockets>;
   }[];
 }): FlowsJSON =>
@@ -61,13 +61,13 @@ const socketIndeces: SocketIndecesByNodeType = {
 const x: IChainGraph | undefined = undefined;
 
 // @ts-ignore
-const chainNodeSpecs = makeChainNodeSpecs(x);
+const chainNodeSpecs = makeToOnChainNodeConverterters(x);
 
 describe('getOnChainEdges', () => {
   it('should return an empty array if there are no edges', () => {
     const chainNodeJson: NodeJSON = {
       id: '0',
-      type: ChainCounter.typeName,
+      type: OnChainCounter.typeName,
     };
 
     const edges = getOnChainEdges(chainNodeJson, [chainNodeJson], chainNodeSpecs, socketIndeces);
@@ -82,12 +82,12 @@ describe('getOnChainEdges', () => {
 
     const chainNodeJson: NodeJSON = {
       id: countNodeId,
-      type: ChainCounter.typeName,
+      type: OnChainCounter.typeName,
       flows: makeFlowsNodeJson({
-        from: ChainCounter.out,
+        from: OnChainCounter.out,
         to: {
           nodeId: variableSetNodeId,
-          sockets: ChainVariableSet.in,
+          sockets: OnChainVariableSet.in,
         },
         flows: [
           {
@@ -104,7 +104,7 @@ describe('getOnChainEdges', () => {
 
     const variableSetNodeJson: NodeJSON = {
       id: variableSetNodeId,
-      type: ChainVariableSet.typeName,
+      type: OnChainVariableSet.typeName,
     };
 
     const edges = getOnChainEdges(chainNodeJson, [chainNodeJson, variableSetNodeJson], chainNodeSpecs, socketIndeces);

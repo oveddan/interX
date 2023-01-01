@@ -18,7 +18,10 @@ const chainCounterLocal = makeFlowNodeDefinition({
   },
 });
 
-export const ChainCounter = makeChainSocketMapping(chainCounterLocal, {
+/**
+ * An on-chain counter that increments on each flow.
+ */
+export const OnChainCounter = makeChainSocketMapping(chainCounterLocal, {
   nodeType: ChainNodeTypes.Counter,
   inputValueType: ChainValueType.Int,
   socketIdKey: 'counter',
