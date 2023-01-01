@@ -1,4 +1,4 @@
-import { Registry, Vec3, Vec4 } from '@behave-graph/core';
+import { Registry, Vec3, Vec4 } from '@oveddan-behave-graph/core';
 import { ObjectMap } from '@react-three/fiber';
 import { Dispatch, SetStateAction, useCallback, useEffect, useState } from 'react';
 import { Event, Material, MeshBasicMaterial, Object3D, Quaternion, Vector3, Vector4 } from 'three';

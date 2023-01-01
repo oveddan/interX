@@ -14,7 +14,7 @@ import useSceneModifier from './scene/useSceneModifier';
 import Flow from './flowEditor/FlowEditorApp';
 import SplitEditor from './SplitEditor';
 import { examplePairs } from './flowEditor/components/LoadModal';
-import { Registry } from '@behave-graph/core';
+import { Registry } from '@oveddan-behave-graph/core';
 import { useMockSmartContractActions, useRegisterChainGraphProfile } from '@blocktopia/core';
 
 const [initialModelFile, initialBehaviorGraph] = examplePairs[0];

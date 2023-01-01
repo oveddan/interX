@@ -1,4 +1,4 @@
-import { GraphJSON, Registry } from '@behave-graph/core';
+import { GraphJSON, Registry } from '@oveddan-behave-graph/core';
 import { useParams } from 'react-router-dom';
 import useLoadOnChainWorld from '../hooks/useLoadOnChainWorld';
 import Web3Login from '../web3/Web3Login';

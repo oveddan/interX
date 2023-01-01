@@ -70,7 +70,12 @@ describe('getOnChainEdges', () => {
       type: OnChainCounter.typeName,
     };
 
-    const edges = getOnChainEdges(chainNodeJson, [chainNodeJson], chainNodeSpecs, socketIndeces);
+    const edges = getOnChainEdges({
+      node: chainNodeJson,
+      nodes: [chainNodeJson],
+      toOnChainNodeDefinitions: chainNodeSpecs,
+      socketIndeces,
+    });
 
     expect(edges).to.have.lengthOf(0);
   });
@@ -107,7 +112,12 @@ describe('getOnChainEdges', () => {
       type: OnChainVariableSet.typeName,
     };
 
-    const edges = getOnChainEdges(chainNodeJson, [chainNodeJson, variableSetNodeJson], chainNodeSpecs, socketIndeces);
+    const edges = getOnChainEdges({
+      node: chainNodeJson,
+      nodes: [chainNodeJson, variableSetNodeJson],
+      toOnChainNodeDefinitions: chainNodeSpecs,
+      socketIndeces,
+    });
 
     expect(edges).to.have.lengthOf(2);
 

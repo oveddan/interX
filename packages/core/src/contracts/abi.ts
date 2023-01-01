@@ -434,11 +434,6 @@ export const abi = [
                 "internalType": "uint8",
                 "name": "inputVal",
                 "type": "uint8"
-              },
-              {
-                "internalType": "uint8",
-                "name": "variableName",
-                "type": "uint8"
               }
             ],
             "internalType": "struct VariableSetIndeces",

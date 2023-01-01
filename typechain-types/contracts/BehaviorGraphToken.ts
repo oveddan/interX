@@ -12,10 +12,20 @@ import type {
   PopulatedTransaction,
   Signer,
   utils,
-} from 'ethers';
-import type { FunctionFragment, Result, EventFragment } from '@ethersproject/abi';
-import type { Listener, Provider } from '@ethersproject/providers';
-import type { TypedEventFilter, TypedEvent, TypedListener, OnEvent, PromiseOrValue } from '../common';
+} from "ethers";
+import type {
+  FunctionFragment,
+  Result,
+  EventFragment,
+} from "@ethersproject/abi";
+import type { Listener, Provider } from "@ethersproject/providers";
+import type {
+  TypedEventFilter,
+  TypedEvent,
+  TypedListener,
+  OnEvent,
+  PromiseOrValue,
+} from "../common";
 
 export type NodeDefinitionStruct = {
   id: PromiseOrValue<string>;
@@ -144,10 +154,9 @@ export type VariableSetIndecesStruct = {
   inputVal: PromiseOrValue<BigNumberish>;
 };
 
-export type VariableSetIndecesStructOutput = [number, number, number] & {
+export type VariableSetIndecesStructOutput = [number, number] & {
   inputFlow: number;
   inputVal: number;
-  variableName: number;
 };
 
 export type GateSocketIndecesStruct = {
@@ -200,131 +209,202 @@ export type EdgeDefinitionStructOutput = [string, string, number, number] & {
 
 export interface BehaviorGraphTokenInterface extends utils.Interface {
   functions: {
-    'approve(address,uint256)': FunctionFragment;
-    'balanceOf(address)': FunctionFragment;
-    'getApproved(uint256)': FunctionFragment;
-    'getSocketIndecesByNodeType()': FunctionFragment;
-    'invoke(uint256,uint8)': FunctionFragment;
-    'isApprovedForAll(address,address)': FunctionFragment;
-    'name()': FunctionFragment;
-    'owner()': FunctionFragment;
-    'ownerOf(uint256)': FunctionFragment;
-    'renounceOwnership()': FunctionFragment;
-    'safeMint(string,((string,uint8,bool,uint8),((bool,uint8)[],(int256,uint8)[],(string,uint8)[]),(uint8,uint8,bool,bool))[],(string,string,uint8,uint8)[])': FunctionFragment;
-    'safeTransferFrom(address,address,uint256)': FunctionFragment;
-    'safeTransferFrom(address,address,uint256,bytes)': FunctionFragment;
-    'setApprovalForAll(address,bool)': FunctionFragment;
-    'supportsInterface(bytes4)': FunctionFragment;
-    'symbol()': FunctionFragment;
-    'tokenURI(uint256)': FunctionFragment;
-    'transferFrom(address,address,uint256)': FunctionFragment;
-    'transferOwnership(address)': FunctionFragment;
+    "approve(address,uint256)": FunctionFragment;
+    "balanceOf(address)": FunctionFragment;
+    "getApproved(uint256)": FunctionFragment;
+    "getSocketIndecesByNodeType()": FunctionFragment;
+    "invoke(uint256,uint8)": FunctionFragment;
+    "isApprovedForAll(address,address)": FunctionFragment;
+    "name()": FunctionFragment;
+    "owner()": FunctionFragment;
+    "ownerOf(uint256)": FunctionFragment;
+    "renounceOwnership()": FunctionFragment;
+    "safeMint(string,((string,uint8,bool,uint8),((bool,uint8)[],(int256,uint8)[],(string,uint8)[]),(uint8,uint8,bool,bool))[],(string,string,uint8,uint8)[])": FunctionFragment;
+    "safeTransferFrom(address,address,uint256)": FunctionFragment;
+    "safeTransferFrom(address,address,uint256,bytes)": FunctionFragment;
+    "setApprovalForAll(address,bool)": FunctionFragment;
+    "supportsInterface(bytes4)": FunctionFragment;
+    "symbol()": FunctionFragment;
+    "tokenURI(uint256)": FunctionFragment;
+    "transferFrom(address,address,uint256)": FunctionFragment;
+    "transferOwnership(address)": FunctionFragment;
   };
 
   getFunction(
     nameOrSignatureOrTopic:
-      | 'approve'
-      | 'balanceOf'
-      | 'getApproved'
-      | 'getSocketIndecesByNodeType'
-      | 'invoke'
-      | 'isApprovedForAll'
-      | 'name'
-      | 'owner'
-      | 'ownerOf'
-      | 'renounceOwnership'
-      | 'safeMint'
-      | 'safeTransferFrom(address,address,uint256)'
-      | 'safeTransferFrom(address,address,uint256,bytes)'
-      | 'setApprovalForAll'
-      | 'supportsInterface'
-      | 'symbol'
-      | 'tokenURI'
-      | 'transferFrom'
-      | 'transferOwnership'
+      | "approve"
+      | "balanceOf"
+      | "getApproved"
+      | "getSocketIndecesByNodeType"
+      | "invoke"
+      | "isApprovedForAll"
+      | "name"
+      | "owner"
+      | "ownerOf"
+      | "renounceOwnership"
+      | "safeMint"
+      | "safeTransferFrom(address,address,uint256)"
+      | "safeTransferFrom(address,address,uint256,bytes)"
+      | "setApprovalForAll"
+      | "supportsInterface"
+      | "symbol"
+      | "tokenURI"
+      | "transferFrom"
+      | "transferOwnership"
   ): FunctionFragment;
 
   encodeFunctionData(
-    functionFragment: 'approve',
+    functionFragment: "approve",
     values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]
   ): string;
-  encodeFunctionData(functionFragment: 'balanceOf', values: [PromiseOrValue<string>]): string;
-  encodeFunctionData(functionFragment: 'getApproved', values: [PromiseOrValue<BigNumberish>]): string;
-  encodeFunctionData(functionFragment: 'getSocketIndecesByNodeType', values?: undefined): string;
   encodeFunctionData(
-    functionFragment: 'invoke',
+    functionFragment: "balanceOf",
+    values: [PromiseOrValue<string>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getApproved",
+    values: [PromiseOrValue<BigNumberish>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getSocketIndecesByNodeType",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "invoke",
     values: [PromiseOrValue<BigNumberish>, PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
-    functionFragment: 'isApprovedForAll',
+    functionFragment: "isApprovedForAll",
     values: [PromiseOrValue<string>, PromiseOrValue<string>]
   ): string;
-  encodeFunctionData(functionFragment: 'name', values?: undefined): string;
-  encodeFunctionData(functionFragment: 'owner', values?: undefined): string;
-  encodeFunctionData(functionFragment: 'ownerOf', values: [PromiseOrValue<BigNumberish>]): string;
-  encodeFunctionData(functionFragment: 'renounceOwnership', values?: undefined): string;
+  encodeFunctionData(functionFragment: "name", values?: undefined): string;
+  encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: 'safeMint',
-    values: [PromiseOrValue<string>, NodeDefinitionAndValuesStruct[], EdgeDefinitionStruct[]]
+    functionFragment: "ownerOf",
+    values: [PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
-    functionFragment: 'safeTransferFrom(address,address,uint256)',
-    values: [PromiseOrValue<string>, PromiseOrValue<string>, PromiseOrValue<BigNumberish>]
+    functionFragment: "renounceOwnership",
+    values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: 'safeTransferFrom(address,address,uint256,bytes)',
-    values: [PromiseOrValue<string>, PromiseOrValue<string>, PromiseOrValue<BigNumberish>, PromiseOrValue<BytesLike>]
+    functionFragment: "safeMint",
+    values: [
+      PromiseOrValue<string>,
+      NodeDefinitionAndValuesStruct[],
+      EdgeDefinitionStruct[]
+    ]
   ): string;
   encodeFunctionData(
-    functionFragment: 'setApprovalForAll',
+    functionFragment: "safeTransferFrom(address,address,uint256)",
+    values: [
+      PromiseOrValue<string>,
+      PromiseOrValue<string>,
+      PromiseOrValue<BigNumberish>
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "safeTransferFrom(address,address,uint256,bytes)",
+    values: [
+      PromiseOrValue<string>,
+      PromiseOrValue<string>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BytesLike>
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setApprovalForAll",
     values: [PromiseOrValue<string>, PromiseOrValue<boolean>]
   ): string;
-  encodeFunctionData(functionFragment: 'supportsInterface', values: [PromiseOrValue<BytesLike>]): string;
-  encodeFunctionData(functionFragment: 'symbol', values?: undefined): string;
-  encodeFunctionData(functionFragment: 'tokenURI', values: [PromiseOrValue<BigNumberish>]): string;
   encodeFunctionData(
-    functionFragment: 'transferFrom',
-    values: [PromiseOrValue<string>, PromiseOrValue<string>, PromiseOrValue<BigNumberish>]
+    functionFragment: "supportsInterface",
+    values: [PromiseOrValue<BytesLike>]
   ): string;
-  encodeFunctionData(functionFragment: 'transferOwnership', values: [PromiseOrValue<string>]): string;
+  encodeFunctionData(functionFragment: "symbol", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "tokenURI",
+    values: [PromiseOrValue<BigNumberish>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "transferFrom",
+    values: [
+      PromiseOrValue<string>,
+      PromiseOrValue<string>,
+      PromiseOrValue<BigNumberish>
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "transferOwnership",
+    values: [PromiseOrValue<string>]
+  ): string;
 
-  decodeFunctionResult(functionFragment: 'approve', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'balanceOf', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'getApproved', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'getSocketIndecesByNodeType', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'invoke', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'isApprovedForAll', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'name', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'owner', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'ownerOf', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'renounceOwnership', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'safeMint', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'safeTransferFrom(address,address,uint256)', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'safeTransferFrom(address,address,uint256,bytes)', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'setApprovalForAll', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'supportsInterface', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'symbol', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'tokenURI', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'transferFrom', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'transferOwnership', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "approve", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "balanceOf", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "getApproved",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getSocketIndecesByNodeType",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "invoke", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "isApprovedForAll",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "name", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "ownerOf", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "renounceOwnership",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "safeMint", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "safeTransferFrom(address,address,uint256)",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "safeTransferFrom(address,address,uint256,bytes)",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setApprovalForAll",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "supportsInterface",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "symbol", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "tokenURI", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "transferFrom",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "transferOwnership",
+    data: BytesLike
+  ): Result;
 
   events: {
-    'Approval(address,address,uint256)': EventFragment;
-    'ApprovalForAll(address,address,bool)': EventFragment;
-    'BoolVariableUpdated(address,uint256,uint8,bool)': EventFragment;
-    'IntVariableUpdated(address,uint256,uint8,int256)': EventFragment;
-    'OwnershipTransferred(address,address)': EventFragment;
-    'SafeMint(uint256,address,string,tuple[])': EventFragment;
-    'Transfer(address,address,uint256)': EventFragment;
+    "Approval(address,address,uint256)": EventFragment;
+    "ApprovalForAll(address,address,bool)": EventFragment;
+    "BoolVariableUpdated(address,uint256,uint8,bool)": EventFragment;
+    "IntVariableUpdated(address,uint256,uint8,int256)": EventFragment;
+    "OwnershipTransferred(address,address)": EventFragment;
+    "SafeMint(uint256,address,string,tuple[])": EventFragment;
+    "Transfer(address,address,uint256)": EventFragment;
   };
 
-  getEvent(nameOrSignatureOrTopic: 'Approval'): EventFragment;
-  getEvent(nameOrSignatureOrTopic: 'ApprovalForAll'): EventFragment;
-  getEvent(nameOrSignatureOrTopic: 'BoolVariableUpdated'): EventFragment;
-  getEvent(nameOrSignatureOrTopic: 'IntVariableUpdated'): EventFragment;
-  getEvent(nameOrSignatureOrTopic: 'OwnershipTransferred'): EventFragment;
-  getEvent(nameOrSignatureOrTopic: 'SafeMint'): EventFragment;
-  getEvent(nameOrSignatureOrTopic: 'Transfer'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "Approval"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "ApprovalForAll"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "BoolVariableUpdated"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "IntVariableUpdated"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "SafeMint"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "Transfer"): EventFragment;
 }
 
 export interface ApprovalEventObject {
@@ -332,7 +412,10 @@ export interface ApprovalEventObject {
   approved: string;
   tokenId: BigNumber;
 }
-export type ApprovalEvent = TypedEvent<[string, string, BigNumber], ApprovalEventObject>;
+export type ApprovalEvent = TypedEvent<
+  [string, string, BigNumber],
+  ApprovalEventObject
+>;
 
 export type ApprovalEventFilter = TypedEventFilter<ApprovalEvent>;
 
@@ -341,7 +424,10 @@ export interface ApprovalForAllEventObject {
   operator: string;
   approved: boolean;
 }
-export type ApprovalForAllEvent = TypedEvent<[string, string, boolean], ApprovalForAllEventObject>;
+export type ApprovalForAllEvent = TypedEvent<
+  [string, string, boolean],
+  ApprovalForAllEventObject
+>;
 
 export type ApprovalForAllEventFilter = TypedEventFilter<ApprovalForAllEvent>;
 
@@ -351,9 +437,13 @@ export interface BoolVariableUpdatedEventObject {
   _variableId: number;
   value: boolean;
 }
-export type BoolVariableUpdatedEvent = TypedEvent<[string, BigNumber, number, boolean], BoolVariableUpdatedEventObject>;
+export type BoolVariableUpdatedEvent = TypedEvent<
+  [string, BigNumber, number, boolean],
+  BoolVariableUpdatedEventObject
+>;
 
-export type BoolVariableUpdatedEventFilter = TypedEventFilter<BoolVariableUpdatedEvent>;
+export type BoolVariableUpdatedEventFilter =
+  TypedEventFilter<BoolVariableUpdatedEvent>;
 
 export interface IntVariableUpdatedEventObject {
   executor: string;
@@ -361,17 +451,25 @@ export interface IntVariableUpdatedEventObject {
   _variableId: number;
   value: BigNumber;
 }
-export type IntVariableUpdatedEvent = TypedEvent<[string, BigNumber, number, BigNumber], IntVariableUpdatedEventObject>;
+export type IntVariableUpdatedEvent = TypedEvent<
+  [string, BigNumber, number, BigNumber],
+  IntVariableUpdatedEventObject
+>;
 
-export type IntVariableUpdatedEventFilter = TypedEventFilter<IntVariableUpdatedEvent>;
+export type IntVariableUpdatedEventFilter =
+  TypedEventFilter<IntVariableUpdatedEvent>;
 
 export interface OwnershipTransferredEventObject {
   previousOwner: string;
   newOwner: string;
 }
-export type OwnershipTransferredEvent = TypedEvent<[string, string], OwnershipTransferredEventObject>;
+export type OwnershipTransferredEvent = TypedEvent<
+  [string, string],
+  OwnershipTransferredEventObject
+>;
 
-export type OwnershipTransferredEventFilter = TypedEventFilter<OwnershipTransferredEvent>;
+export type OwnershipTransferredEventFilter =
+  TypedEventFilter<OwnershipTransferredEvent>;
 
 export interface SafeMintEventObject {
   tokenId: BigNumber;
@@ -391,7 +489,10 @@ export interface TransferEventObject {
   to: string;
   tokenId: BigNumber;
 }
-export type TransferEvent = TypedEvent<[string, string, BigNumber], TransferEventObject>;
+export type TransferEvent = TypedEvent<
+  [string, string, BigNumber],
+  TransferEventObject
+>;
 
 export type TransferEventFilter = TypedEventFilter<TransferEvent>;
 
@@ -408,9 +509,13 @@ export interface BehaviorGraphToken extends BaseContract {
     toBlock?: string | number | undefined
   ): Promise<Array<TEvent>>;
 
-  listeners<TEvent extends TypedEvent>(eventFilter?: TypedEventFilter<TEvent>): Array<TypedListener<TEvent>>;
+  listeners<TEvent extends TypedEvent>(
+    eventFilter?: TypedEventFilter<TEvent>
+  ): Array<TypedListener<TEvent>>;
   listeners(eventName?: string): Array<Listener>;
-  removeAllListeners<TEvent extends TypedEvent>(eventFilter: TypedEventFilter<TEvent>): this;
+  removeAllListeners<TEvent extends TypedEvent>(
+    eventFilter: TypedEventFilter<TEvent>
+  ): this;
   removeAllListeners(eventName?: string): this;
   off: OnEvent<this>;
   on: OnEvent<this>;
@@ -424,11 +529,19 @@ export interface BehaviorGraphToken extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    balanceOf(owner: PromiseOrValue<string>, overrides?: CallOverrides): Promise<[BigNumber]>;
+    balanceOf(
+      owner: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
 
-    getApproved(tokenId: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<[string]>;
+    getApproved(
+      tokenId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<[string]>;
 
-    getSocketIndecesByNodeType(overrides?: CallOverrides): Promise<[SocketIndecesByNodeTypeStructOutput]>;
+    getSocketIndecesByNodeType(
+      overrides?: CallOverrides
+    ): Promise<[SocketIndecesByNodeTypeStructOutput]>;
 
     invoke(
       tokenId: PromiseOrValue<BigNumberish>,
@@ -446,9 +559,14 @@ export interface BehaviorGraphToken extends BaseContract {
 
     owner(overrides?: CallOverrides): Promise<[string]>;
 
-    ownerOf(tokenId: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<[string]>;
+    ownerOf(
+      tokenId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<[string]>;
 
-    renounceOwnership(overrides?: Overrides & { from?: PromiseOrValue<string> }): Promise<ContractTransaction>;
+    renounceOwnership(
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
 
     safeMint(
       sceneUri: PromiseOrValue<string>,
@@ -457,14 +575,14 @@ export interface BehaviorGraphToken extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    'safeTransferFrom(address,address,uint256)'(
+    "safeTransferFrom(address,address,uint256)"(
       from: PromiseOrValue<string>,
       to: PromiseOrValue<string>,
       tokenId: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    'safeTransferFrom(address,address,uint256,bytes)'(
+    "safeTransferFrom(address,address,uint256,bytes)"(
       from: PromiseOrValue<string>,
       to: PromiseOrValue<string>,
       tokenId: PromiseOrValue<BigNumberish>,
@@ -478,11 +596,17 @@ export interface BehaviorGraphToken extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    supportsInterface(interfaceId: PromiseOrValue<BytesLike>, overrides?: CallOverrides): Promise<[boolean]>;
+    supportsInterface(
+      interfaceId: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<[boolean]>;
 
     symbol(overrides?: CallOverrides): Promise<[string]>;
 
-    tokenURI(tokenId: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<[string]>;
+    tokenURI(
+      tokenId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<[string]>;
 
     transferFrom(
       from: PromiseOrValue<string>,
@@ -503,11 +627,19 @@ export interface BehaviorGraphToken extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  balanceOf(owner: PromiseOrValue<string>, overrides?: CallOverrides): Promise<BigNumber>;
+  balanceOf(
+    owner: PromiseOrValue<string>,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
 
-  getApproved(tokenId: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<string>;
+  getApproved(
+    tokenId: PromiseOrValue<BigNumberish>,
+    overrides?: CallOverrides
+  ): Promise<string>;
 
-  getSocketIndecesByNodeType(overrides?: CallOverrides): Promise<SocketIndecesByNodeTypeStructOutput>;
+  getSocketIndecesByNodeType(
+    overrides?: CallOverrides
+  ): Promise<SocketIndecesByNodeTypeStructOutput>;
 
   invoke(
     tokenId: PromiseOrValue<BigNumberish>,
@@ -525,9 +657,14 @@ export interface BehaviorGraphToken extends BaseContract {
 
   owner(overrides?: CallOverrides): Promise<string>;
 
-  ownerOf(tokenId: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<string>;
+  ownerOf(
+    tokenId: PromiseOrValue<BigNumberish>,
+    overrides?: CallOverrides
+  ): Promise<string>;
 
-  renounceOwnership(overrides?: Overrides & { from?: PromiseOrValue<string> }): Promise<ContractTransaction>;
+  renounceOwnership(
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
 
   safeMint(
     sceneUri: PromiseOrValue<string>,
@@ -536,14 +673,14 @@ export interface BehaviorGraphToken extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  'safeTransferFrom(address,address,uint256)'(
+  "safeTransferFrom(address,address,uint256)"(
     from: PromiseOrValue<string>,
     to: PromiseOrValue<string>,
     tokenId: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  'safeTransferFrom(address,address,uint256,bytes)'(
+  "safeTransferFrom(address,address,uint256,bytes)"(
     from: PromiseOrValue<string>,
     to: PromiseOrValue<string>,
     tokenId: PromiseOrValue<BigNumberish>,
@@ -557,11 +694,17 @@ export interface BehaviorGraphToken extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  supportsInterface(interfaceId: PromiseOrValue<BytesLike>, overrides?: CallOverrides): Promise<boolean>;
+  supportsInterface(
+    interfaceId: PromiseOrValue<BytesLike>,
+    overrides?: CallOverrides
+  ): Promise<boolean>;
 
   symbol(overrides?: CallOverrides): Promise<string>;
 
-  tokenURI(tokenId: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<string>;
+  tokenURI(
+    tokenId: PromiseOrValue<BigNumberish>,
+    overrides?: CallOverrides
+  ): Promise<string>;
 
   transferFrom(
     from: PromiseOrValue<string>,
@@ -582,11 +725,19 @@ export interface BehaviorGraphToken extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    balanceOf(owner: PromiseOrValue<string>, overrides?: CallOverrides): Promise<BigNumber>;
+    balanceOf(
+      owner: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
-    getApproved(tokenId: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<string>;
+    getApproved(
+      tokenId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<string>;
 
-    getSocketIndecesByNodeType(overrides?: CallOverrides): Promise<SocketIndecesByNodeTypeStructOutput>;
+    getSocketIndecesByNodeType(
+      overrides?: CallOverrides
+    ): Promise<SocketIndecesByNodeTypeStructOutput>;
 
     invoke(
       tokenId: PromiseOrValue<BigNumberish>,
@@ -604,7 +755,10 @@ export interface BehaviorGraphToken extends BaseContract {
 
     owner(overrides?: CallOverrides): Promise<string>;
 
-    ownerOf(tokenId: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<string>;
+    ownerOf(
+      tokenId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<string>;
 
     renounceOwnership(overrides?: CallOverrides): Promise<void>;
 
@@ -615,14 +769,14 @@ export interface BehaviorGraphToken extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    'safeTransferFrom(address,address,uint256)'(
+    "safeTransferFrom(address,address,uint256)"(
       from: PromiseOrValue<string>,
       to: PromiseOrValue<string>,
       tokenId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<void>;
 
-    'safeTransferFrom(address,address,uint256,bytes)'(
+    "safeTransferFrom(address,address,uint256,bytes)"(
       from: PromiseOrValue<string>,
       to: PromiseOrValue<string>,
       tokenId: PromiseOrValue<BigNumberish>,
@@ -636,11 +790,17 @@ export interface BehaviorGraphToken extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    supportsInterface(interfaceId: PromiseOrValue<BytesLike>, overrides?: CallOverrides): Promise<boolean>;
+    supportsInterface(
+      interfaceId: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<boolean>;
 
     symbol(overrides?: CallOverrides): Promise<string>;
 
-    tokenURI(tokenId: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<string>;
+    tokenURI(
+      tokenId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<string>;
 
     transferFrom(
       from: PromiseOrValue<string>,
@@ -649,11 +809,14 @@ export interface BehaviorGraphToken extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    transferOwnership(newOwner: PromiseOrValue<string>, overrides?: CallOverrides): Promise<void>;
+    transferOwnership(
+      newOwner: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<void>;
   };
 
   filters: {
-    'Approval(address,address,uint256)'(
+    "Approval(address,address,uint256)"(
       owner?: PromiseOrValue<string> | null,
       approved?: PromiseOrValue<string> | null,
       tokenId?: PromiseOrValue<BigNumberish> | null
@@ -664,7 +827,7 @@ export interface BehaviorGraphToken extends BaseContract {
       tokenId?: PromiseOrValue<BigNumberish> | null
     ): ApprovalEventFilter;
 
-    'ApprovalForAll(address,address,bool)'(
+    "ApprovalForAll(address,address,bool)"(
       owner?: PromiseOrValue<string> | null,
       operator?: PromiseOrValue<string> | null,
       approved?: null
@@ -675,7 +838,7 @@ export interface BehaviorGraphToken extends BaseContract {
       approved?: null
     ): ApprovalForAllEventFilter;
 
-    'BoolVariableUpdated(address,uint256,uint8,bool)'(
+    "BoolVariableUpdated(address,uint256,uint8,bool)"(
       executor?: null,
       _tokenId?: null,
       _variableId?: null,
@@ -688,7 +851,7 @@ export interface BehaviorGraphToken extends BaseContract {
       value?: null
     ): BoolVariableUpdatedEventFilter;
 
-    'IntVariableUpdated(address,uint256,uint8,int256)'(
+    "IntVariableUpdated(address,uint256,uint8,int256)"(
       executor?: null,
       _tokenId?: null,
       _variableId?: null,
@@ -701,7 +864,7 @@ export interface BehaviorGraphToken extends BaseContract {
       value?: null
     ): IntVariableUpdatedEventFilter;
 
-    'OwnershipTransferred(address,address)'(
+    "OwnershipTransferred(address,address)"(
       previousOwner?: PromiseOrValue<string> | null,
       newOwner?: PromiseOrValue<string> | null
     ): OwnershipTransferredEventFilter;
@@ -710,15 +873,20 @@ export interface BehaviorGraphToken extends BaseContract {
       newOwner?: PromiseOrValue<string> | null
     ): OwnershipTransferredEventFilter;
 
-    'SafeMint(uint256,address,string,tuple[])'(
+    "SafeMint(uint256,address,string,tuple[])"(
       tokenId?: null,
       toNode?: null,
       uri?: null,
       nodes?: null
     ): SafeMintEventFilter;
-    SafeMint(tokenId?: null, toNode?: null, uri?: null, nodes?: null): SafeMintEventFilter;
+    SafeMint(
+      tokenId?: null,
+      toNode?: null,
+      uri?: null,
+      nodes?: null
+    ): SafeMintEventFilter;
 
-    'Transfer(address,address,uint256)'(
+    "Transfer(address,address,uint256)"(
       from?: PromiseOrValue<string> | null,
       to?: PromiseOrValue<string> | null,
       tokenId?: PromiseOrValue<BigNumberish> | null
@@ -737,9 +905,15 @@ export interface BehaviorGraphToken extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    balanceOf(owner: PromiseOrValue<string>, overrides?: CallOverrides): Promise<BigNumber>;
+    balanceOf(
+      owner: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
-    getApproved(tokenId: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<BigNumber>;
+    getApproved(
+      tokenId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
     getSocketIndecesByNodeType(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -759,9 +933,14 @@ export interface BehaviorGraphToken extends BaseContract {
 
     owner(overrides?: CallOverrides): Promise<BigNumber>;
 
-    ownerOf(tokenId: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<BigNumber>;
+    ownerOf(
+      tokenId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
-    renounceOwnership(overrides?: Overrides & { from?: PromiseOrValue<string> }): Promise<BigNumber>;
+    renounceOwnership(
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
 
     safeMint(
       sceneUri: PromiseOrValue<string>,
@@ -770,14 +949,14 @@ export interface BehaviorGraphToken extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    'safeTransferFrom(address,address,uint256)'(
+    "safeTransferFrom(address,address,uint256)"(
       from: PromiseOrValue<string>,
       to: PromiseOrValue<string>,
       tokenId: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    'safeTransferFrom(address,address,uint256,bytes)'(
+    "safeTransferFrom(address,address,uint256,bytes)"(
       from: PromiseOrValue<string>,
       to: PromiseOrValue<string>,
       tokenId: PromiseOrValue<BigNumberish>,
@@ -791,11 +970,17 @@ export interface BehaviorGraphToken extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    supportsInterface(interfaceId: PromiseOrValue<BytesLike>, overrides?: CallOverrides): Promise<BigNumber>;
+    supportsInterface(
+      interfaceId: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
     symbol(overrides?: CallOverrides): Promise<BigNumber>;
 
-    tokenURI(tokenId: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<BigNumber>;
+    tokenURI(
+      tokenId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
     transferFrom(
       from: PromiseOrValue<string>,
@@ -817,11 +1002,19 @@ export interface BehaviorGraphToken extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    balanceOf(owner: PromiseOrValue<string>, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    balanceOf(
+      owner: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
 
-    getApproved(tokenId: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    getApproved(
+      tokenId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
 
-    getSocketIndecesByNodeType(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    getSocketIndecesByNodeType(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
 
     invoke(
       tokenId: PromiseOrValue<BigNumberish>,
@@ -839,9 +1032,14 @@ export interface BehaviorGraphToken extends BaseContract {
 
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    ownerOf(tokenId: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    ownerOf(
+      tokenId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
 
-    renounceOwnership(overrides?: Overrides & { from?: PromiseOrValue<string> }): Promise<PopulatedTransaction>;
+    renounceOwnership(
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
 
     safeMint(
       sceneUri: PromiseOrValue<string>,
@@ -850,14 +1048,14 @@ export interface BehaviorGraphToken extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    'safeTransferFrom(address,address,uint256)'(
+    "safeTransferFrom(address,address,uint256)"(
       from: PromiseOrValue<string>,
       to: PromiseOrValue<string>,
       tokenId: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    'safeTransferFrom(address,address,uint256,bytes)'(
+    "safeTransferFrom(address,address,uint256,bytes)"(
       from: PromiseOrValue<string>,
       to: PromiseOrValue<string>,
       tokenId: PromiseOrValue<BigNumberish>,
@@ -871,11 +1069,17 @@ export interface BehaviorGraphToken extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    supportsInterface(interfaceId: PromiseOrValue<BytesLike>, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    supportsInterface(
+      interfaceId: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
 
     symbol(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    tokenURI(tokenId: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    tokenURI(
+      tokenId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
 
     transferFrom(
       from: PromiseOrValue<string>,

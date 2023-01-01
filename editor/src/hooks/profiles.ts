@@ -16,8 +16,8 @@ import {
   SetSceneProperty,
   GetSceneProperty,
   IScene,
-} from '@behave-graph/core';
-import { registerSerializersForValueType } from '@behave-graph/core/src/Profiles/Core/registerSerializersForValueType';
+} from '@oveddan-behave-graph/core';
+import { registerSerializersForValueType } from '@oveddan-behave-graph/core/src/Profiles/Core/registerSerializersForValueType';
 import { OnSceneNodeClick, ISceneWithQueries } from '@blocktopia/core';
 
 export function registerSharedSceneProfiles(registry: Registry, scene: IScene) {

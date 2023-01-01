@@ -1,4 +1,4 @@
-import { Registry, Socket } from '@oveddan-behave-graph/core';
+import { Registry } from '@oveddan-behave-graph/core';
 import { IChainGraph } from '../../abstractions';
 import { OnChainCounter } from './OnChainCounter';
 import { OnChainVariableGet } from './OnChainVariableGet';

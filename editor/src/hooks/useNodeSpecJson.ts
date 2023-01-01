@@ -1,4 +1,4 @@
-import { NodeSpecJSON, Registry, writeNodeSpecsToJSON } from '@behave-graph/core';
+import { NodeSpecJSON, Registry, writeNodeSpecsToJSON } from '@oveddan-behave-graph/core';
 import { useEffect, useState } from 'react';
 
 const useNodeSpecJson = (registry: Registry | undefined) => {

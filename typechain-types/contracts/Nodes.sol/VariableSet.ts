@@ -26,13 +26,11 @@ import type {
 export type VariableSetIndecesStruct = {
   inputFlow: PromiseOrValue<BigNumberish>;
   inputVal: PromiseOrValue<BigNumberish>;
-  variableName: PromiseOrValue<BigNumberish>;
 };
 
-export type VariableSetIndecesStructOutput = [number, number, number] & {
+export type VariableSetIndecesStructOutput = [number, number] & {
   inputFlow: number;
   inputVal: number;
-  variableName: number;
 };
 
 export type GraphUpdateStruct = {

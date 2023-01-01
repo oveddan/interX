@@ -1,17 +1,27 @@
-import { GraphJSON } from '@behave-graph/core';
+import { GraphJSON } from '@oveddan-behave-graph/core';
 import { useEffect, useState } from 'react';
 import { usePrepareContractWrite, useContractWrite, useContractEvent, useContractRead } from 'wagmi';
-import { abi } from '@blocktopia/core/src/contracts/abi';
-import { SafeMintInputs, SocketIndecesByNodeType, extractOnChainNodesFromGraph } from '@blocktopia/core';
+import { abi } from '@blocktopia/core';
+import { SafeMintInputs, SocketIndecesByNodeType, generateOnChainNodesFromGraph, IChainGraph } from '@blocktopia/core';
 
-const toMintArgs = (
-  cid: string,
-  behaviorGraph: GraphJSON,
-  socketIndecesByNodeType: SocketIndecesByNodeType | undefined
-): SafeMintInputs => {
+const toMintArgs = ({
+  cid,
+  behaviorGraph,
+  socketIndecesByNodeType,
+  chainGraph,
+}: {
+  cid: string;
+  behaviorGraph: GraphJSON;
+  socketIndecesByNodeType: SocketIndecesByNodeType | undefined;
+  chainGraph: IChainGraph;
+}): SafeMintInputs => {
   // convert chain nodes to on chain node defininitions
   if (!socketIndecesByNodeType) return [cid, [], []];
-  const { nodeDefinitions, edgeDefinitions } = extractOnChainNodesFromGraph(behaviorGraph, socketIndecesByNodeType);
+  const { nodeDefinitions, edgeDefinitions } = generateOnChainNodesFromGraph({
+    graph: behaviorGraph,
+    chainGraph,
+    socketIndecesByNodeType,
+  });
 
   const result: SafeMintInputs = [cid, nodeDefinitions, edgeDefinitions];
 
@@ -39,10 +49,12 @@ const useMintWorld = ({
   worldCid,
   contractAddress,
   behaviorGraph,
+  chainGraph,
 }: {
   contractAddress: string;
   worldCid: string;
   behaviorGraph: GraphJSON;
+  chainGraph: IChainGraph;
 }) => {
   const {
     data: socketIndecesByNodeType,
@@ -71,11 +83,22 @@ const useMintWorld = ({
   //   [socketIndecesByNodeTypeOptional]
   // );
 
-  const [args, setArgs] = useState(() => toMintArgs(worldCid, behaviorGraph, socketIndecesByNodeType));
+  const [args, setArgs] = useState(() =>
+    toMintArgs({
+      cid: worldCid,
+      behaviorGraph,
+      socketIndecesByNodeType,
+      chainGraph,
+    })
+  );
 
   useEffect(() => {
-    console.log({ socketIndecesByNodeType });
-    const args = toMintArgs(worldCid, behaviorGraph, socketIndecesByNodeType);
+    const args = toMintArgs({
+      cid: worldCid,
+      behaviorGraph,
+      socketIndecesByNodeType,
+      chainGraph,
+    });
     setArgs(args);
   }, [worldCid, behaviorGraph, socketIndecesByNodeType]);
 

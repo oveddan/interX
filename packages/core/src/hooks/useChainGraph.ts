@@ -6,7 +6,7 @@ import { IChainGraph } from '../abstractions';
 
 type hn = { [id: string]: (count: bigint) => void };
 
-const useChainGraph = (contractAddress: string, tokenId: number) => {
+const useChainGraph = (contractAddress: `0x${string}`, tokenId: number) => {
   const { data: signer } = useSigner();
 
   const contract = useContract({
@@ -32,7 +32,6 @@ const useChainGraph = (contractAddress: string, tokenId: number) => {
   useContractEvent({
     address: contractAddress,
     abi,
-    eventName: 'IntValueUpdated',
     listener: (executerAddress, actionTokenId, nodeId, value) => {
       if (tokenId !== actionTokenId.toNumber()) return;
 
@@ -88,9 +87,9 @@ const useChainGraph = (contractAddress: string, tokenId: number) => {
   }, []);
 
   const trigger = useCallback(
-    async (actionId: string, connectedContract: typeof contract) => {
+    async (invokeId: number, connectedContract: typeof contract) => {
       if (!connectedContract) return;
-      const transaction = await connectedContract.trigger(BigNumber.from(tokenId), actionId);
+      const transaction = await connectedContract.trigger(BigNumber.from(invokeId));
 
       await transaction.wait();
     },
@@ -100,9 +99,9 @@ const useChainGraph = (contractAddress: string, tokenId: number) => {
   const smartContractAction = useMemo(() => {
     if (!connectedContract) return;
     const result: IChainGraph = {
-      invoke: (nodeId: string, socketId: string) => {
+      invoke: (invokeId: number) => {
         if (!connectedContract) return;
-        trigger(nodeId, connectedContract);
+        trigger(invokeId, connectedContract);
       },
       registerIntVariableValueListener: registerTriggerHandler,
       unRegisterIntVariableValueListener: unRegisterTriggerHandler,

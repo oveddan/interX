@@ -1,4 +1,4 @@
-import { NodeSpecJSON } from '@behave-graph/core';
+import { NodeSpecJSON } from '@oveddan-behave-graph/core';
 import { useEffect, useState } from 'react';
 import { NodeTypes, Node, OnConnectStartParams } from 'reactflow';
 import { ISceneWithQueries } from '../../../../packages/core/src/abstractions';

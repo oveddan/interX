@@ -5,7 +5,7 @@ import {
   ManualLifecycleEventEmitter,
   registerCoreProfile,
   Registry,
-} from '@behave-graph/core';
+} from '@oveddan-behave-graph/core';
 import { useEffect, useState } from 'react';
 
 const useRegistry = ({ registerProfiles }: { registerProfiles: (registry: Registry) => void }) => {
