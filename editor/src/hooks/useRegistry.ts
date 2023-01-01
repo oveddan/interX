@@ -4,19 +4,14 @@ import {
   ILogger,
   ManualLifecycleEventEmitter,
   registerCoreProfile,
-  Registry
+  Registry,
 } from '@behave-graph/core';
 import { useEffect, useState } from 'react';
 
-const useRegistry = ({
-  registerProfiles
-}: {
-  registerProfiles: (registry: Registry) => void;
-}) => {
+const useRegistry = ({ registerProfiles }: { registerProfiles: (registry: Registry) => void }) => {
   const [registry, setRegistry] = useState<Registry>();
 
-  const [lifecyleEmitter, setLifecycleEmitter] =
-    useState<ILifecycleEventEmitter>(new ManualLifecycleEventEmitter());
+  const [lifecyleEmitter, setLifecycleEmitter] = useState<ILifecycleEventEmitter>(new ManualLifecycleEventEmitter());
   const [logger] = useState<ILogger>(new DefaultLogger());
 
   useEffect(() => {

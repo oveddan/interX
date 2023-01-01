@@ -4,7 +4,7 @@ import { Dispatch, SetStateAction, useCallback, useEffect, useState } from 'reac
 import { Event, Material, MeshBasicMaterial, Object3D, Quaternion, Vector3, Vector4 } from 'three';
 import { GLTF } from 'three-stdlib';
 
-import { ISceneWithQueries, Properties, ResourceTypes } from '../abstractions';
+import { ISceneWithQueries, Properties, ResourceTypes } from '../../../packages/core/src/abstractions';
 import { registerSharedSceneProfiles, registerSpecificSceneProfiles } from '../hooks/profiles';
 import { GLTFJson } from './GLTFJson';
 

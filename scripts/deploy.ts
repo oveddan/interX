@@ -29,7 +29,7 @@ async function main() {
 
   console.log('Account balance:', (await deployer.getBalance()).toString());
 
-  const contractFactory = await ethers.getContractFactory('BehaviorGraph');
+  const contractFactory = await ethers.getContractFactory('BehaviorGraphToken');
   const deployedContract = await contractFactory.deploy();
   await deployedContract.deployed();
 
@@ -39,12 +39,12 @@ async function main() {
   await saveFrontendFiles(deployedContract);
 }
 
-const contractsDir = path.join(__dirname, '..', 'editor', 'src', 'contracts');
+const contractsDir = path.join(__dirname, '..', 'packages', 'core', 'src', 'contracts');
 
 async function writeAbi() {
-  const ContractArtifact = await artifacts.readArtifact('BehaviorGraph');
+  const ContractArtifact = await artifacts.readArtifact('BehaviorGraphToken');
 
-  const abiTs = `export const abi = ${JSON.stringify(ContractArtifact.abi, null, 2)} as const`;
+  const abiTs = `export const abi = ${JSON.stringify(ContractArtifact.abi, null, 2)} as const;`;
 
   await writeFileAsync(path.join(contractsDir, 'abi.ts'), abiTs);
 }
@@ -74,6 +74,10 @@ async function writeContractAddress(contract: BaseContract) {
   };
 
   await writeFileAsync(contractAddressesFile, JSON.stringify(updatedAddresses, undefined, 2));
+
+  const addressesTs = `export const contractAddresses = ${JSON.stringify(updatedAddresses, null, 2)};`;
+
+  await writeFileAsync(path.join(contractsDir, 'contractAddresses.ts'), addressesTs);
 }
 
 async function saveFrontendFiles(contract: BaseContract) {

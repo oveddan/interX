@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useContractRead } from 'wagmi';
-import { abi } from '../contracts/abi';
+import { abi } from '@blocktopia/core/src/contracts/abi';
 import { BigNumber } from 'ethers';
 import { loadStoredSceneAndBehaviorGraphFromIpfs } from './ipfs/ipfsSceneLoader';
 import { ipfsUrlToCid } from './ipfs/ipfsUrlUtils';

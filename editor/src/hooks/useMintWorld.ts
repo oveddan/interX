@@ -1,66 +1,22 @@
-import { GraphJSON, NodeParametersJSON, NodeParameterValueJSON } from '@behave-graph/core';
+import { GraphJSON } from '@behave-graph/core';
 import { useEffect, useState } from 'react';
-import { usePrepareContractWrite, useContractWrite, useContractEvent } from 'wagmi';
-import { abi } from '../contracts/abi';
-import {
-  actionNameParamName,
-  smartContractInvokedActionName,
-  togenGatedAddressParamName,
-  tokenGatedParamName,
-} from '../nodes/smartContracts/TokenGatedActionInvoker';
+import { usePrepareContractWrite, useContractWrite, useContractEvent, useContractRead } from 'wagmi';
+import { abi } from '@blocktopia/core/src/contracts/abi';
+import { SafeMintInputs, SocketIndecesByNodeType, extractOnChainNodesFromGraph } from '@blocktopia/core';
 
-type TokenizedAction = {
-  nodeType: number;
-  id: string;
-  tokenGateRule: {
-    active: boolean;
-    tokenContract: `0x${string}`;
-  };
-};
+const toMintArgs = (
+  cid: string,
+  behaviorGraph: GraphJSON,
+  socketIndecesByNodeType: SocketIndecesByNodeType | undefined
+): SafeMintInputs => {
+  // convert chain nodes to on chain node defininitions
+  if (!socketIndecesByNodeType) return [cid, [], []];
+  const { nodeDefinitions, edgeDefinitions } = extractOnChainNodesFromGraph(behaviorGraph, socketIndecesByNodeType);
 
-export const tokenizableActionTypes: string[] = [smartContractInvokedActionName];
-
-const getParam = (x: NodeParametersJSON | undefined, paramName: string) => {
-  if (!x) return undefined;
-
-  const paramAndValue = x[paramName] as NodeParameterValueJSON | undefined;
-
-  return paramAndValue?.value;
-};
-
-const actionsToSmartContractActions = (behaviorGraph: GraphJSON, contractAddress: string): TokenizedAction[] => {
-  const validNodes = behaviorGraph.nodes?.filter((x) => tokenizableActionTypes.includes(x.type));
-
-  if (!validNodes) return [];
-
-  const result = validNodes.map((x): TokenizedAction => {
-    const parameters = x.parameters;
-    const actionName = getParam(parameters, actionNameParamName) as string | undefined;
-    const active = !!getParam(parameters, tokenGatedParamName);
-    const address = getParam(parameters, togenGatedAddressParamName) as `0x${string}` | undefined;
-
-    if (!actionName) throw new Error(`actionName: ${actionName}  must not be null`);
-
-    const inner: TokenizedAction = {
-      id: actionName,
-      nodeType: 0,
-      tokenGateRule: {
-        active,
-        tokenContract: address || (contractAddress as `0x${string}`),
-      },
-    };
-
-    return inner;
-  }) || [contractAddress];
+  const result: SafeMintInputs = [cid, nodeDefinitions, edgeDefinitions];
 
   return result;
 };
-
-const toMintArgs = (cid: string, behaviorGraph: GraphJSON, contractAddress: string): [string, TokenizedAction[]] => [
-  cid,
-  actionsToSmartContractActions(behaviorGraph, contractAddress),
-];
-
 const useWaitForMintedTokenWithContentUri = ({ contractAddress, cid }: { contractAddress: string; cid: string }) => {
   const [mintedTokenId, setMintedTokenId] = useState<number | null>(null);
 
@@ -88,12 +44,40 @@ const useMintWorld = ({
   worldCid: string;
   behaviorGraph: GraphJSON;
 }) => {
-  const [args, setArgs] = useState(() => toMintArgs(worldCid, behaviorGraph, contractAddress));
+  const {
+    data: socketIndecesByNodeType,
+    error: readError,
+    isLoading: readIsLoading,
+  } = useContractRead({
+    address: contractAddress,
+    abi,
+    functionName: 'getSocketIndecesByNodeType',
+  });
+
+  // console.log({ readError, socketIndecesByNodeTypeOptional, readIsLoading });
+
+  // const socketIndecesByNodeType = suspend(
+  //   (socketIndecesByNodeTypeOptional) => {
+  //     // if we have the socket indeces, we can return them
+  //     if (socketIndecesByNodeTypeOptional) {
+  //       console.log('return good');
+  //       return new Promise<SocketIndecesByNodeType>((resolve) => resolve(socketIndecesByNodeTypeOptional));
+  //     }
+
+  //     console.log('return empty promise');
+  //     // otherwise, return an empty promise that will never resolve
+  //     return new Promise<SocketIndecesByNodeType>((resolve) => {});
+  //   },
+  //   [socketIndecesByNodeTypeOptional]
+  // );
+
+  const [args, setArgs] = useState(() => toMintArgs(worldCid, behaviorGraph, socketIndecesByNodeType));
 
   useEffect(() => {
-    const args = toMintArgs(worldCid, behaviorGraph, contractAddress);
+    console.log({ socketIndecesByNodeType });
+    const args = toMintArgs(worldCid, behaviorGraph, socketIndecesByNodeType);
     setArgs(args);
-  }, [worldCid, behaviorGraph, contractAddress]);
+  }, [worldCid, behaviorGraph, socketIndecesByNodeType]);
 
   const { config, error, isError } = usePrepareContractWrite({
     address: contractAddress,

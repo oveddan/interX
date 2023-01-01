@@ -9,5 +9,7 @@ yarn-error.log
 # hardhat things
 cache
 artifacts
-typechain-types
 .env
+
+**/*/.yalc
+**/*/yalc.lock

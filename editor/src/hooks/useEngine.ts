@@ -1,17 +1,11 @@
-import {
-  Engine,
-  GraphJSON,
-  ILifecycleEventEmitter,
-  readGraphFromJSON,
-  Registry
-} from '@behave-graph/core';
+import { Engine, Graph, GraphJSON, ILifecycleEventEmitter, readGraphFromJSON, Registry } from '@behave-graph/core';
 import { useCallback, useEffect, useState } from 'react';
 
 const useEngine = ({
   graphJson,
   registry,
   eventEmitter,
-  autoRun = false
+  autoRun = false,
 }: {
   graphJson: GraphJSON | undefined;
   registry: Registry | undefined;
@@ -37,7 +31,13 @@ const useEngine = ({
   useEffect(() => {
     if (!graphJson || !registry || !run) return;
 
-    const graph = readGraphFromJSON(graphJson, registry);
+    let graph: Graph;
+    try {
+      graph = readGraphFromJSON(graphJson, registry);
+    } catch (e) {
+      console.error(e);
+      return;
+    }
     const engine = new Engine(graph);
 
     setEngine(engine);
@@ -85,7 +85,7 @@ const useEngine = ({
     playing: run,
     play,
     togglePlay,
-    pause
+    pause,
   };
 };
 

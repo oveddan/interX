@@ -17,7 +17,7 @@ import { NodeSpecJSON } from '@behave-graph/core';
 import 'reactflow/dist/style.css';
 import './flowEditor.css';
 import useFlowConfigFromRegistry from './hooks/useFlowConfigFromRegistry';
-import { ISceneWithQueries } from '../abstractions';
+import { ISceneWithQueries } from '@blocktopia/core';
 
 function Flow({
   nodes,
