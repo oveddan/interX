@@ -1,4 +1,4 @@
-import { Suspense, useCallback } from 'react';
+import { Suspense, useMemo } from 'react';
 import Scene from './scene/Scene';
 import '@rainbow-me/rainbowkit/styles.css';
 import './styles/resizer.css';
@@ -6,16 +6,17 @@ import Controls from './flowEditor/components/Controls';
 import Nav from './nav/Nav';
 import PublishingControls from './web3/PublishingControls';
 import useNodeSpecJson from './hooks/useNodeSpecJson';
-import useRegistry from './hooks/useRegistry';
+import useRegisterCoreProfileAndOthers from './hooks/useRegistry';
 import useSetAndLoadModelFile, { exampleModelFileUrl } from './hooks/useSetAndLoadModelFile';
 import useBehaveGraphFlow, { exampleBehaveGraphFileUrl } from './hooks/useBehaveGraphFlow';
 import useEngine from './hooks/useEngine';
-import useSceneModifier from './scene/useSceneModifier';
 import Flow from './flowEditor/FlowEditorApp';
 import SplitEditor from './SplitEditor';
 import { examplePairs } from './flowEditor/components/LoadModal';
-import { Registry } from '@behave-graph/core';
-import { useMockSmartContractActions, useRegisterChainGraphProfile } from '@blocktopia/core';
+import { registerSceneProfile, registerSceneDependency } from '@behave-graph/core';
+import { useScene } from './scene/useSceneModifier';
+import { registerChainGraphProfile } from '@blocktopia/core';
+import { useRegisterDependency } from './hooks/useRegisterDependency';
 
 const [initialModelFile, initialBehaviorGraph] = examplePairs[0];
 
@@ -23,25 +24,14 @@ const initialModelFileUrl = exampleModelFileUrl(initialModelFile);
 const initialBehaviorGraphUrl = exampleBehaveGraphFileUrl(initialBehaviorGraph);
 
 function EditorAndScene({ web3Enabled }: { web3Enabled?: boolean }) {
-  const smartContractActions = useMockSmartContractActions();
-  const registerSmartContractActions = useRegisterChainGraphProfile(smartContractActions);
-
   const { modelFile, setModelFile, gltf } = useSetAndLoadModelFile({
     initialFileUrl: initialModelFileUrl,
   });
 
-  const { scene, animations, sceneOnClickListeners, registerSceneProfile } = useSceneModifier(gltf);
+  const registerProfiles = useMemo(() => [registerChainGraphProfile, registerSceneProfile], []);
 
-  const registerProfiles = useCallback(
-    (registry: Registry) => {
-      registerSmartContractActions(registry);
-      registerSceneProfile(registry);
-    },
-    [registerSceneProfile, smartContractActions]
-  );
-
-  const { registry, lifecyleEmitter } = useRegistry({
-    registerProfiles,
+  const { registry, lifecyleEmitter } = useRegisterCoreProfileAndOthers({
+    otherRegisters: registerProfiles,
   });
 
   const specJson = useNodeSpecJson(registry);
@@ -56,6 +46,10 @@ function EditorAndScene({ web3Enabled }: { web3Enabled?: boolean }) {
     registry,
     eventEmitter: lifecyleEmitter,
   });
+
+  const { scene, animations, sceneOnClickListeners } = useScene(gltf);
+
+  useRegisterDependency(registry?.dependencies, scene, registerSceneDependency);
 
   const web3Controls = web3Enabled ? <PublishingControls graphJson={graphJson} modelFile={modelFile?.file} /> : null;
 

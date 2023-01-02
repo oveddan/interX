@@ -6,6 +6,3 @@ export * from './chain/ExternalInvoke';
 export * from './chain/onChainGraph/extractOnChainNodesFromGraph';
 export * from './chain/IChainNode';
 export * from './chain/profile';
-
-/* secene nodes */
-export * from './scene/OnSceneNodeClick';

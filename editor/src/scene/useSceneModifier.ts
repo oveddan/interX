@@ -1,11 +1,10 @@
-import { Registry, Vec3, Vec4 } from '@behave-graph/core';
+import { Vec3, Vec4 } from '@behave-graph/core';
 import { ObjectMap } from '@react-three/fiber';
 import { Dispatch, SetStateAction, useCallback, useEffect, useState } from 'react';
 import { Event, Material, MeshBasicMaterial, Object3D, Quaternion, Vector3, Vector4 } from 'three';
 import { GLTF } from 'three-stdlib';
 
 import { ISceneWithQueries, Properties, ResourceTypes } from '../../../packages/core/src/abstractions';
-import { registerSharedSceneProfiles, registerSpecificSceneProfiles } from '../hooks/profiles';
 import { GLTFJson } from './GLTFJson';
 
 function toVec3(value: Vector3): Vec3 {
@@ -315,7 +314,7 @@ const buildSceneModifier = (
 
 export type AnimationsState = { [key: string]: boolean };
 
-const useSceneModifier = (gltf: (GLTF & ObjectMap) | undefined) => {
+export const useScene = (gltf: (GLTF & ObjectMap) | undefined) => {
   const [scene, setScene] = useState<ISceneWithQueries>();
 
   const [activeAnimations, setActiveAnimations] = useState<AnimationsState>({});
@@ -345,21 +344,9 @@ const useSceneModifier = (gltf: (GLTF & ObjectMap) | undefined) => {
     }
   }, [gltf, setSceneOnClickListeners, setAnimationActive]);
 
-  const registerProfile = useCallback(
-    (registry: Registry) => {
-      if (!scene) return;
-      registerSharedSceneProfiles(registry, scene);
-      registerSpecificSceneProfiles(registry, scene);
-    },
-    [scene]
-  );
-
   return {
     scene,
     animations: activeAnimations,
     sceneOnClickListeners,
-    registerSceneProfile: registerProfile,
   };
 };
-
-export default useSceneModifier;

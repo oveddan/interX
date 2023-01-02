@@ -4,6 +4,7 @@ import { usePrepareContractWrite, useContractWrite, useContractEvent, useContrac
 import { abi } from '@blocktopia/core';
 import { SafeMintInputs, SocketIndecesByNodeType, generateOnChainNodesFromGraph } from '@blocktopia/core';
 
+/** Generates arguments to mint a world.  Converts the graph definition to on-chain nodes and edges. */
 const toMintArgs = ({
   cid,
   behaviorGraph,
@@ -20,7 +21,12 @@ const toMintArgs = ({
     socketIndecesByNodeType,
   });
 
-  const result: SafeMintInputs = [cid, nodeDefinitions, edgeDefinitions];
+  const [result, setResult] = useState<SafeMintInputs>([cid, nodeDefinitions, edgeDefinitions]);
+
+  // catch the results by storing them in a state variable.
+  useEffect(() => {
+    setResult([cid, nodeDefinitions, edgeDefinitions]);
+  }, [cid, behaviorGraph, socketIndecesByNodeType]);
 
   return result;
 };
@@ -60,23 +66,6 @@ const useMintWorld = ({
     abi,
     functionName: 'getSocketIndecesByNodeType',
   });
-
-  // console.log({ readError, socketIndecesByNodeTypeOptional, readIsLoading });
-
-  // const socketIndecesByNodeType = suspend(
-  //   (socketIndecesByNodeTypeOptional) => {
-  //     // if we have the socket indeces, we can return them
-  //     if (socketIndecesByNodeTypeOptional) {
-  //       console.log('return good');
-  //       return new Promise<SocketIndecesByNodeType>((resolve) => resolve(socketIndecesByNodeTypeOptional));
-  //     }
-
-  //     console.log('return empty promise');
-  //     // otherwise, return an empty promise that will never resolve
-  //     return new Promise<SocketIndecesByNodeType>((resolve) => {});
-  //   },
-  //   [socketIndecesByNodeTypeOptional]
-  // );
 
   const [args, setArgs] = useState(() =>
     toMintArgs({

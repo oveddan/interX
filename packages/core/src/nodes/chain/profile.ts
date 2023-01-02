@@ -1,4 +1,4 @@
-import { Registry } from '@behave-graph/core';
+import { IRegistry, Registry } from '@behave-graph/core';
 import { IChainGraph } from '../../abstractions';
 import { OnChainCounter } from './OnChainCounter';
 import { chainGraphDependencyKey, OnChainVariableGet } from './OnChainVariableGet';
@@ -9,14 +9,14 @@ import { SocketIO } from './socketGeneration';
 
 const getChainDefinitions = () => [OnChainCounter, OnChainVariableSet, ExternalInvoke];
 
-export function registerChainGraphProfile(registry: Registry, chainGraph: IChainGraph) {
-  const { nodes, dependencies } = registry;
+export function registerChainGraphProfile(registry: Pick<IRegistry, 'nodes' | 'values'>) {
+  getChainDefinitions().forEach((x) => registry.nodes.register(x));
 
-  getChainDefinitions().forEach((x) => nodes.register(x));
+  registry.nodes.register(OnChainVariableGet);
+}
 
+export function registerChainGraphDepenency(dependencies: IRegistry['dependencies'], chainGraph: IChainGraph) {
   dependencies.register(chainGraphDependencyKey, chainGraph);
-
-  nodes.register(OnChainVariableGet);
 }
 
 export type NodeSocketIO = Record<
