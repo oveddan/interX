@@ -1,4 +1,4 @@
-import { GraphJSON, Registry } from '@oveddan-behave-graph/core';
+import { GraphJSON, Registry } from '@behave-graph/core';
 import { useParams } from 'react-router-dom';
 import useLoadOnChainWorld from '../hooks/useLoadOnChainWorld';
 import Web3Login from '../web3/Web3Login';
@@ -73,7 +73,7 @@ const OnChainWorld = ({
   );
 };
 
-const OnChainWorldLoader = ({ tokenId, contractAddress }: { tokenId: number; contractAddress: string }) => {
+const OnChainWorldLoader = ({ tokenId, contractAddress }: { tokenId: number; contractAddress: `0x${string}` }) => {
   const { graphJson, sceneFileUrl } = useLoadOnChainWorld(tokenId, contractAddress);
 
   const smartContractActions = useChainGraph(contractAddress, tokenId);

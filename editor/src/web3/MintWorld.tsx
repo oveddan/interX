@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { GraphJSON } from '@oveddan-behave-graph/core';
+import { GraphJSON } from '@behave-graph/core';
 import useMintWorld, { MintWorldReturn } from '../hooks/useMintWorld';
 
 // this allows us to conditionally call useMintWorld with all required arguments passed
@@ -11,7 +11,7 @@ const MintWorld = ({
 }: {
   cid: string;
   behaviorGraph: GraphJSON;
-  contractAddress: string;
+  contractAddress: `0x${string}`;
   setMintWorld: (mintWorld: MintWorldReturn | null) => void;
 }) => {
   const { error, isError, isLoading, isSuccess, mint, mintedTokenId } = useMintWorld({

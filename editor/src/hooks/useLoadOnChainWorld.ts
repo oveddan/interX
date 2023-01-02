@@ -4,7 +4,7 @@ import { abi } from '@blocktopia/core/src/contracts/abi';
 import { BigNumber } from 'ethers';
 import { loadStoredSceneAndBehaviorGraphFromIpfs } from './ipfs/ipfsSceneLoader';
 import { ipfsUrlToCid } from './ipfs/ipfsUrlUtils';
-import { GraphJSON } from '@oveddan-behave-graph/core';
+import { GraphJSON } from '@behave-graph/core';
 
 const useLoadOnChainWorld = (tokenId: number, contractAddress: string) => {
   const tokenIdArgs = useMemo((): [BigNumber] => [BigNumber.from(tokenId)], [tokenId]);

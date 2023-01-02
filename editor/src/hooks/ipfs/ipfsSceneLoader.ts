@@ -1,4 +1,4 @@
-import { GraphJSON } from '@oveddan-behave-graph/core';
+import { GraphJSON } from '@behave-graph/core';
 import { behaviorGraphFileName, modelFileName } from './ipfsInteractiveWorldSaver';
 import { makeWeb3StorageClient } from './web3Storage';
 

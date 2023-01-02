@@ -1,5 +1,5 @@
-import { Graph, Socket, Engine, Assert } from '@oveddan-behave-graph/core';
-import { EventNode, NodeDescription } from '@oveddan-behave-graph/core';
+import { Graph, Socket, Engine, Assert } from '@behave-graph/core';
+import { EventNode, NodeDescription } from '@behave-graph/core';
 import { ISceneWithQueries } from '../../abstractions';
 
 // very 3D specific.

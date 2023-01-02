@@ -1,4 +1,4 @@
-import { NodeSpecJSON } from '@oveddan-behave-graph/core';
+import { NodeSpecJSON } from '@behave-graph/core';
 
 export const getSocketsByNodeTypeAndHandleType = (
   nodes: NodeSpecJSON[],

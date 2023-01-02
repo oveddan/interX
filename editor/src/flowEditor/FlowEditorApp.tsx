@@ -13,7 +13,7 @@ import ReactFlow, {
 import { v4 as uuidv4 } from 'uuid';
 import NodePicker from './components/NodePicker';
 import { calculateNewEdge } from './util/calculateNewEdge';
-import { NodeSpecJSON } from '@oveddan-behave-graph/core';
+import { NodeSpecJSON } from '@behave-graph/core';
 import 'reactflow/dist/style.css';
 import './flowEditor.css';
 import useFlowConfigFromRegistry from './hooks/useFlowConfigFromRegistry';

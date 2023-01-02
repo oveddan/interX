@@ -1,4 +1,4 @@
-import { makeEventNodeDefinition, NodeCategory, Variable } from '@oveddan-behave-graph/core';
+import { makeEventNodeDefinition, NodeCategory, Variable } from '@behave-graph/core';
 import { IChainGraph } from '../../abstractions';
 import { ChainNodeTypes, ChainValueType, makeChainSocketMapping } from './IChainNode';
 
@@ -14,6 +14,8 @@ type State = {
 
 const makeInitialState = (): State => ({});
 
+export const chainGraphDependencyKey = 'chainGraph';
+
 /**
  * Listens for chainges to an on-chain variable, and write the value to the output.
  * Commits the flow on each change.
@@ -21,44 +23,45 @@ const makeInitialState = (): State => ({});
  * @param smartContractActions
  * @returns
  */
-export const OnChainVariableGet = (smartContractActions: IChainGraph) =>
-  makeEventNodeDefinition({
-    typeName: smartActionInvokedTypeName,
-    category: NodeCategory.Variable,
-    label: 'Get On Chain Int Value',
-    configuration: {
-      variableId: {
-        valueType: 'number',
-      },
+export const OnChainVariableGet = makeEventNodeDefinition({
+  typeName: smartActionInvokedTypeName,
+  category: NodeCategory.Variable,
+  label: 'Get On Chain Int Value',
+  configuration: {
+    variableId: {
+      valueType: 'number',
     },
-    initialState: makeInitialState(),
-    init: ({ write, commit, configuration, graph: { variables } }) => {
-      const variable = variables[configuration.variableId] || new Variable('-1', 'undefined', 'string', '');
-      const variableId = variable.id;
+  },
+  initialState: makeInitialState(),
+  init: ({ write, commit, configuration, graph: { variables, getDependency } }) => {
+    const variable = variables[configuration.variableId] || new Variable('-1', 'undefined', 'string', '');
+    const variableId = variable.id;
 
-      const handleValueUpdated = (count: bigint) => {
-        write(valueSocketName, count);
-        commit(flowSocketName);
-      };
-      smartContractActions.registerIntVariableValueListener(variableId, handleValueUpdated);
+    const handleValueUpdated = (count: bigint) => {
+      write(valueSocketName, count);
+      commit(flowSocketName);
+    };
+    const smartContractActions = getDependency<IChainGraph>(chainGraphDependencyKey);
+    smartContractActions.registerIntVariableValueListener(variableId, handleValueUpdated);
 
-      return {
-        handleValueUpdated,
-        variableId,
-      };
-    },
-    dispose: ({ state }) => {
-      if (state.handleValueUpdated && state.variableId) {
-        smartContractActions.unRegisterIntVariableValueListener(state.variableId, state.handleValueUpdated);
-      }
+    return {
+      handleValueUpdated,
+      variableId,
+    };
+  },
+  dispose: ({ state, graph: { getDependency } }) => {
+    if (state.handleValueUpdated && state.variableId) {
+      const smartContractActions = getDependency<IChainGraph>(chainGraphDependencyKey);
+      smartContractActions.unRegisterIntVariableValueListener(state.variableId, state.handleValueUpdated);
+    }
 
-      return {};
-    },
-    in: {
-      [variableNameSocket]: 'string',
-    },
-    out: {
-      [flowSocketName]: 'flow',
-      [valueSocketName]: 'integer',
-    },
-  });
+    return {};
+  },
+  in: {
+    [variableNameSocket]: 'string',
+  },
+  out: {
+    [flowSocketName]: 'flow',
+    [valueSocketName]: 'integer',
+  },
+});

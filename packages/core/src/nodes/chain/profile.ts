@@ -1,20 +1,22 @@
-import { Registry } from '@oveddan-behave-graph/core';
+import { Registry } from '@behave-graph/core';
 import { IChainGraph } from '../../abstractions';
 import { OnChainCounter } from './OnChainCounter';
-import { OnChainVariableGet } from './OnChainVariableGet';
+import { chainGraphDependencyKey, OnChainVariableGet } from './OnChainVariableGet';
 import { OnChainVariableSet } from './OnChainVariableSet';
 import { ExternalInvoke } from './ExternalInvoke';
 import { ChainNodeTypes, ChainValueType, IHasOnChainDefinition } from './IChainNode';
 import { SocketIO } from './socketGeneration';
 
-const getChainDefinitions = (actions: IChainGraph) => [OnChainCounter, OnChainVariableSet, ExternalInvoke(actions)];
+const getChainDefinitions = () => [OnChainCounter, OnChainVariableSet, ExternalInvoke];
 
-export function registerChainGraphProfile(registry: Registry, actions: IChainGraph) {
-  const { nodes } = registry;
+export function registerChainGraphProfile(registry: Registry, chainGraph: IChainGraph) {
+  const { nodes, dependencies } = registry;
 
-  getChainDefinitions(actions).forEach((x) => nodes.register(x));
+  getChainDefinitions().forEach((x) => nodes.register(x));
 
-  nodes.register(OnChainVariableGet(actions));
+  dependencies.register(chainGraphDependencyKey, chainGraph);
+
+  nodes.register(OnChainVariableGet);
 }
 
 export type NodeSocketIO = Record<
@@ -30,10 +32,8 @@ export type NodeSocketIO = Record<
  * @param actions
  * @returns a mapping of node type to the on chain node converter.
  */
-export const makeToOnChainNodeConverterters = (
-  actions: IChainGraph
-): Record<string, IHasOnChainDefinition['chain']> => {
-  const chainDefinitions = getChainDefinitions(actions);
+export const makeToOnChainNodeConverterters = (): Record<string, IHasOnChainDefinition['chain']> => {
+  const chainDefinitions = getChainDefinitions();
 
   return chainDefinitions.reduce((acc: Record<string, IHasOnChainDefinition['chain']>, def) => {
     const chain = def.chain;

@@ -1,4 +1,4 @@
-import { GraphJSON, NodeJSON, NodeParameterJSON, NodeParameterValueJSON } from '@oveddan-behave-graph/core';
+import { GraphJSON, NodeJSON, NodeParameterJSON, NodeParameterValueJSON } from '@behave-graph/core';
 import { IChainGraph } from '../../../abstractions';
 import {
   ChainEdgeNodeDefinition,
@@ -60,13 +60,11 @@ export function chainNodeToNodeDefinitionAndEdges({
   nodeSpec,
   nodes,
   socketIndecesByNodeType,
-  chainGraph,
 }: {
   node: NodeJSON;
   nodeSpec: ToOnChainDefinitionForNode;
   nodes: NodeJSON[];
   socketIndecesByNodeType: SocketIndecesByNodeType;
-  chainGraph: IChainGraph;
 }): {
   nodeDefinition: ChainNodeDefinitionAndValues;
   edgeDefinitions: ChainEdgeNodeDefinition[];
@@ -88,7 +86,7 @@ export function chainNodeToNodeDefinitionAndEdges({
   const edgeDefinitions = getOnChainEdges({
     node,
     nodes,
-    toOnChainNodeDefinitions: makeToOnChainNodeConverterters(chainGraph),
+    toOnChainNodeDefinitions: makeToOnChainNodeConverterters(),
     socketIndeces: socketIndecesByNodeType,
   });
 
@@ -107,11 +105,9 @@ export function chainNodeToNodeDefinitionAndEdges({
 export const generateOnChainNodesFromGraph = ({
   graph,
   socketIndecesByNodeType,
-  chainGraph,
 }: {
   graph: GraphJSON;
   socketIndecesByNodeType: SocketIndecesByNodeType;
-  chainGraph: IChainGraph;
 }): {
   nodeDefinitions: ChainNodeDefinitionAndValues[];
   edgeDefinitions: ChainEdgeNodeDefinition[];
@@ -124,7 +120,7 @@ export const generateOnChainNodesFromGraph = ({
     };
 
   // using the graph, get the chain node specs for each node type
-  const chainNodeSpecs = makeToOnChainNodeConverterters(chainGraph);
+  const chainNodeSpecs = makeToOnChainNodeConverterters();
 
   // get chain node specs for each node
   const chainNodes = nodes
@@ -135,7 +131,7 @@ export const generateOnChainNodesFromGraph = ({
     }));
 
   const nodeAndEdgeDefinitions = chainNodes.map(({ node, spec }) =>
-    chainNodeToNodeDefinitionAndEdges({ node, nodeSpec: spec, nodes, socketIndecesByNodeType, chainGraph: chainGraph })
+    chainNodeToNodeDefinitionAndEdges({ node, nodeSpec: spec, nodes, socketIndecesByNodeType })
   );
 
   const nodeDefinitions = nodeAndEdgeDefinitions.map(({ nodeDefinition }) => nodeDefinition);

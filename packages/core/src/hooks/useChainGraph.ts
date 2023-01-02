@@ -32,11 +32,12 @@ const useChainGraph = (contractAddress: `0x${string}`, tokenId: number) => {
   useContractEvent({
     address: contractAddress,
     abi,
-    listener: (executerAddress, actionTokenId, nodeId, value) => {
+    eventName: 'SafeMint',
+    listener: (actionTokenId, owner, nodeId, value) => {
       if (tokenId !== actionTokenId.toNumber()) return;
 
       const handler = actionExecutedHandlers.current[nodeId];
-      if (handler) handler(BigInt(value.toNumber()));
+      if (handler) handler(BigInt(actionTokenId.toNumber()));
     },
   });
 
@@ -67,7 +68,7 @@ const useChainGraph = (contractAddress: `0x${string}`, tokenId: number) => {
     });
   }, [connectedContract, getIntVariableValue]);
 
-  const registerTriggerHandler = useCallback(
+  const registerIntVariableValueListener = useCallback(
     async (id: string, cb: (count: bigint) => void) => {
       actionExecutedHandlers.current[id] = cb;
       if (!connectedContract) return;
@@ -82,7 +83,7 @@ const useChainGraph = (contractAddress: `0x${string}`, tokenId: number) => {
     [getIntVariableValue, connectedContract]
   );
 
-  const unRegisterTriggerHandler = useCallback((id: string, cb: (count: bigint) => void) => {
+  const unRegisterIntVariableValueListener = useCallback((id: string, cb: (count: bigint) => void) => {
     delete actionExecutedHandlers.current[id];
   }, []);
 
@@ -103,12 +104,12 @@ const useChainGraph = (contractAddress: `0x${string}`, tokenId: number) => {
         if (!connectedContract) return;
         trigger(invokeId, connectedContract);
       },
-      registerIntVariableValueListener: registerTriggerHandler,
-      unRegisterIntVariableValueListener: unRegisterTriggerHandler,
+      registerIntVariableValueListener,
+      unRegisterIntVariableValueListener,
     };
 
     return result;
-  }, [trigger, registerTriggerHandler, unRegisterTriggerHandler, connectedContract]);
+  }, [trigger, registerIntVariableValueListener, unRegisterIntVariableValueListener, connectedContract]);
 
   return smartContractAction;
 };

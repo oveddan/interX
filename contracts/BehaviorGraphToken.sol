@@ -17,7 +17,7 @@ contract BehaviorGraphToken is ERC721, ERC721URIStorage, Ownable, SocketsIndexed
 
   mapping(uint256 => BehaviorGraph) private _behaviorGraphs;
 
-  event SafeMint(uint256 tokenId, address toNode, string uri, NodeDefinitionAndValues[] nodes);
+  event SafeMint(uint256 tokenId, address toNode, string uri, NodeDefinitionAndValues[] nodes, EdgeDefinition[] edges);
 
   constructor() ERC721('MyToken', 'MTK') {}
 
@@ -48,7 +48,7 @@ contract BehaviorGraphToken is ERC721, ERC721URIStorage, Ownable, SocketsIndexed
     BehaviorGraph _behaviorGraph = new BehaviorGraph(tokenId, _nodes, _edges, _socketIndecesByNodeType);
     _behaviorGraphs[tokenId] = _behaviorGraph;
 
-    emit SafeMint(tokenId, to, sceneUri, _nodes);
+    emit SafeMint(tokenId, to, sceneUri, _nodes, _edges);
 
     return tokenId;
   }

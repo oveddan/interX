@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { GraphJSON, Registry } from '@oveddan-behave-graph/core';
+import { GraphJSON, Registry } from '@behave-graph/core';
 import { useGLTF } from '@react-three/drei';
 import Scene from './Scene';
 import { dataUrlFromFile } from '../hooks/useSaveAndLoad';

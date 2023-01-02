@@ -1,4 +1,4 @@
-import { NodeJSON, SocketDefinition, SocketsDefinition } from '@oveddan-behave-graph/core';
+import { NodeJSON, SocketDefinition, SocketsDefinition } from '@behave-graph/core';
 import { SocketIndecesByNodeTypeStruct } from 'typechain-types/contracts/BehaviorGraphToken';
 import { ChainEdgeNodeDefinition, SocketMappings, ToOnChainDefinitionForNode } from '../IChainNode';
 

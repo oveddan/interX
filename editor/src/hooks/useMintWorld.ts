@@ -1,25 +1,22 @@
-import { GraphJSON } from '@oveddan-behave-graph/core';
+import { GraphJSON } from '@behave-graph/core';
 import { useEffect, useState } from 'react';
 import { usePrepareContractWrite, useContractWrite, useContractEvent, useContractRead } from 'wagmi';
 import { abi } from '@blocktopia/core';
-import { SafeMintInputs, SocketIndecesByNodeType, generateOnChainNodesFromGraph, IChainGraph } from '@blocktopia/core';
+import { SafeMintInputs, SocketIndecesByNodeType, generateOnChainNodesFromGraph } from '@blocktopia/core';
 
 const toMintArgs = ({
   cid,
   behaviorGraph,
   socketIndecesByNodeType,
-  chainGraph,
 }: {
   cid: string;
   behaviorGraph: GraphJSON;
   socketIndecesByNodeType: SocketIndecesByNodeType | undefined;
-  chainGraph: IChainGraph;
 }): SafeMintInputs => {
   // convert chain nodes to on chain node defininitions
   if (!socketIndecesByNodeType) return [cid, [], []];
   const { nodeDefinitions, edgeDefinitions } = generateOnChainNodesFromGraph({
     graph: behaviorGraph,
-    chainGraph,
     socketIndecesByNodeType,
   });
 
@@ -49,12 +46,10 @@ const useMintWorld = ({
   worldCid,
   contractAddress,
   behaviorGraph,
-  chainGraph,
 }: {
   contractAddress: string;
   worldCid: string;
   behaviorGraph: GraphJSON;
-  chainGraph: IChainGraph;
 }) => {
   const {
     data: socketIndecesByNodeType,
@@ -88,7 +83,6 @@ const useMintWorld = ({
       cid: worldCid,
       behaviorGraph,
       socketIndecesByNodeType,
-      chainGraph,
     })
   );
 
@@ -97,7 +91,6 @@ const useMintWorld = ({
       cid: worldCid,
       behaviorGraph,
       socketIndecesByNodeType,
-      chainGraph,
     });
     setArgs(args);
   }, [worldCid, behaviorGraph, socketIndecesByNodeType]);

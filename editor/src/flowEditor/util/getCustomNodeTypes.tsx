@@ -1,4 +1,4 @@
-import { NodeSpecJSON } from '@oveddan-behave-graph/core';
+import { NodeSpecJSON } from '@behave-graph/core';
 import { NodeTypes } from 'reactflow';
 import { Node } from '../components/Node';
 import { ISceneWithQueries } from '@blocktopia/core';

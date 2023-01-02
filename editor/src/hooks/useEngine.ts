@@ -1,11 +1,4 @@
-import {
-  Engine,
-  Graph,
-  GraphJSON,
-  ILifecycleEventEmitter,
-  readGraphFromJSON,
-  Registry,
-} from '@oveddan-behave-graph/core';
+import { Engine, Graph, GraphJSON, ILifecycleEventEmitter, readGraphFromJSON, Registry } from '@behave-graph/core';
 import { useCallback, useEffect, useState } from 'react';
 
 const useEngine = ({

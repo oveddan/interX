@@ -1,4 +1,4 @@
-import { GraphJSON, NodeSpecJSON } from '@oveddan-behave-graph/core';
+import { GraphJSON, NodeSpecJSON } from '@behave-graph/core';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useEdgesState, useNodesState } from 'reactflow';
 import { suspend } from 'suspend-react';

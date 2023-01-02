@@ -1,6 +1,7 @@
-import { makeFlowNodeDefinition, NodeCategory } from '@oveddan-behave-graph/core';
+import { makeFlowNodeDefinition, NodeCategory } from '@behave-graph/core';
 import { IChainGraph } from '../../abstractions';
 import { ChainNodeTypes, ChainValueType, makeChainSocketMapping } from './IChainNode';
+import { chainGraphDependencyKey } from './OnChainVariableGet';
 
 export const externalTriggerNodeTypeName = 'chain/externalTrigger';
 
@@ -9,39 +10,38 @@ export const externalTriggerNodeTypeName = 'chain/externalTrigger';
  * @param chainGraph
  * @returns
  */
-export const ExternalInvoke = (chainGraph: IChainGraph) => {
-  const local = makeFlowNodeDefinition({
-    typeName: externalTriggerNodeTypeName,
-    category: NodeCategory.Flow,
-    label: 'External Trigger',
-    configuration: {
-      invokeId: {
-        valueType: 'number',
-      },
+const local = makeFlowNodeDefinition({
+  typeName: externalTriggerNodeTypeName,
+  category: NodeCategory.Flow,
+  label: 'External Trigger',
+  configuration: {
+    invokeId: {
+      valueType: 'number',
     },
-    initialState: undefined,
-    in: {
-      flow: 'flow',
-    },
+  },
+  initialState: undefined,
+  in: {
+    flow: 'flow',
+  },
+  out: {
+    flow: 'flow',
+  },
+  triggered: ({ configuration, graph: { getDependency } }) => {
+    // todo: how do we handle needing a node id?
+    const chainGraph = getDependency<IChainGraph>(chainGraphDependencyKey);
+    chainGraph.invoke(configuration.invokeId);
+
+    return undefined;
+  },
+});
+
+export const ExternalInvoke = makeChainSocketMapping(local, {
+  nodeType: ChainNodeTypes.ExternalInvoke,
+  inputValueType: ChainValueType.NotAVariable,
+  socketIdKey: 'externalInvoke',
+  socketMappings: {
     out: {
-      flow: 'flow',
+      flow: 'outputFlowSocket',
     },
-    triggered: ({ configuration }) => {
-      // todo: how do we handle needing a node id?
-      chainGraph.invoke(configuration.invokeId);
-
-      return undefined;
-    },
-  });
-
-  return makeChainSocketMapping(local, {
-    nodeType: ChainNodeTypes.ExternalInvoke,
-    inputValueType: ChainValueType.NotAVariable,
-    socketIdKey: 'externalInvoke',
-    socketMappings: {
-      out: {
-        flow: 'outputFlowSocket',
-      },
-    },
-  });
-};
+  },
+});

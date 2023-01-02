@@ -1,4 +1,4 @@
-import { FlowsJSON, NodeJSON, SocketNames, SocketsDefinition } from '@oveddan-behave-graph/core';
+import { FlowsJSON, NodeJSON, SocketNames, SocketsDefinition } from '@behave-graph/core';
 import { expect } from 'chai';
 import { IChainGraph } from 'packages/core/src/abstractions';
 import { EdgeDefinitionStruct as EdgeDefinition } from 'typechain-types/contracts/BehaviorGraphToken';
@@ -46,7 +46,6 @@ const socketIndeces: SocketIndecesByNodeType = {
   variableSet: {
     inputFlow: 0,
     inputVal: 1,
-    variableName: 2,
   },
   externalInvoke: {
     outputFlowSocket: 1,
