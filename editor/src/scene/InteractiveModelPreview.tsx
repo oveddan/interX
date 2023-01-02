@@ -1,11 +1,14 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { GraphJSON, registerSceneProfile, Registry } from '@behave-graph/core';
+import { useEffect, useMemo, useState } from 'react';
+import { GraphJSON, registerSceneProfile, registerSceneDependency } from '@behave-graph/core';
 import { useGLTF } from '@react-three/drei';
 import Scene from './Scene';
 import { dataUrlFromFile } from '../hooks/useSaveAndLoad';
-import { registerChainGraphProfile, useMockSmartContractActions } from '@blocktopia/core';
-import { useEngine, useRegisterCoreProfileAndOthers } from '../hooks';
+import { registerChainGraphDepenency, registerChainGraphProfile, useMockSmartContractActions } from '@blocktopia/core';
 import { useScene } from './useSceneModifier';
+import { useRegisterDependency } from '../hooks/useRegisterDependency';
+import useEngine from '../hooks/useEngine';
+import { useRegisterCoreProfileAndOthers } from '../hooks/useRegistry';
+import { registerChainGraphProfiles } from '../EditorAndScene';
 
 const Inner = ({ fileDataUrl, graphJson }: { fileDataUrl: string; graphJson: GraphJSON }) => {
   const gltf = useGLTF(fileDataUrl);
@@ -13,11 +16,12 @@ const Inner = ({ fileDataUrl, graphJson }: { fileDataUrl: string; graphJson: Gra
 
   const { scene, animations, sceneOnClickListeners } = useScene(gltf);
 
-  const registerProfiles = useMemo(() => [registerChainGraphProfile, registerSceneProfile], []);
-
   const { registry, lifecyleEmitter } = useRegisterCoreProfileAndOthers({
-    otherRegistries: registerProfiles,
+    otherRegisters: registerChainGraphProfiles,
   });
+
+  useRegisterDependency(registry?.dependencies, smartContractActions, registerChainGraphDepenency);
+  useRegisterDependency(registry?.dependencies, scene, registerSceneDependency);
 
   useEngine({
     graphJson,

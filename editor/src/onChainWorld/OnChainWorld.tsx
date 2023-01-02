@@ -1,4 +1,4 @@
-import { registerSceneDependency, IRegistry } from '@behave-graph/core';
+import { registerSceneDependency, IRegistry, registerSceneProfile } from '@behave-graph/core';
 
 import { useParams } from 'react-router-dom';
 import useLoadOnChainWorld from '../hooks/useLoadOnChainWorld';

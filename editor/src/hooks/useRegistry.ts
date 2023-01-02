@@ -2,6 +2,7 @@ import {
   DefaultLogger,
   ILifecycleEventEmitter,
   ILogger,
+  IRegistry,
   ManualLifecycleEventEmitter,
   registerCoreProfile,
   registerLifecycleEventEmitter,
@@ -10,7 +11,11 @@ import {
 } from '@behave-graph/core';
 import { useEffect, useState } from 'react';
 
-const useRegisterCoreProfileAndOthers = ({ otherRegisters }: { otherRegisters: ((registry: Registry) => void)[] }) => {
+export const useRegisterCoreProfileAndOthers = ({
+  otherRegisters,
+}: {
+  otherRegisters: ((registry: Pick<IRegistry, 'nodes' | 'values'>) => void)[];
+}) => {
   const [registry, setRegistry] = useState<Registry>();
 
   const [lifecyleEmitter, setLifecycleEmitter] = useState<ILifecycleEventEmitter>(new ManualLifecycleEventEmitter());
@@ -22,7 +27,9 @@ const useRegisterCoreProfileAndOthers = ({ otherRegisters }: { otherRegisters: (
     registerCoreProfile(registry);
     registerLogger(registry.dependencies, logger);
     registerLifecycleEventEmitter(registry.dependencies, lifecyleEmitter);
-    otherRegisters.forEach((register) => register(registry));
+    otherRegisters.forEach((register) => {
+      register(registry);
+    });
 
     setRegistry(registry);
     setLifecycleEmitter(lifecyleEmitter);
@@ -30,5 +37,3 @@ const useRegisterCoreProfileAndOthers = ({ otherRegisters }: { otherRegisters: (
 
   return { registry, lifecyleEmitter, logger };
 };
-
-export default useRegisterCoreProfileAndOthers;

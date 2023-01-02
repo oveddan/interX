@@ -21,12 +21,7 @@ const toMintArgs = ({
     socketIndecesByNodeType,
   });
 
-  const [result, setResult] = useState<SafeMintInputs>([cid, nodeDefinitions, edgeDefinitions]);
-
-  // catch the results by storing them in a state variable.
-  useEffect(() => {
-    setResult([cid, nodeDefinitions, edgeDefinitions]);
-  }, [cid, behaviorGraph, socketIndecesByNodeType]);
+  const result: SafeMintInputs = [cid, nodeDefinitions, edgeDefinitions];
 
   return result;
 };
@@ -80,6 +75,13 @@ const useMintWorld = ({
       cid: worldCid,
       behaviorGraph,
       socketIndecesByNodeType,
+    });
+    console.log({
+      args: {
+        cid: args[0],
+        nodes: args[1],
+        edges: args[2],
+      },
     });
     setArgs(args);
   }, [worldCid, behaviorGraph, socketIndecesByNodeType]);

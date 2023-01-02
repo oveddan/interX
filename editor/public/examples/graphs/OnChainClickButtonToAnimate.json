@@ -8,9 +8,6 @@
         "positionY": "-575.5831426098277"
       },
       "parameters": {
-        "variableName": {
-          "value": "count"
-        },
         "value": {
           "link": {
             "nodeId": "8e7f6b70-8d0c-45be-81dd-ad0014209dbc",
@@ -130,10 +127,6 @@
       "flows": {
         "flow": {
           "nodeId": "8e7f6b70-8d0c-45be-81dd-ad0014209dbc",
-          "socket": "flow"
-        },
-        "secondFlow": {
-          "nodeId": "fcb81837-650c-42fb-a708-236f2ee64abc",
           "socket": "flow"
         }
       }

@@ -6,32 +6,35 @@ import Controls from './flowEditor/components/Controls';
 import Nav from './nav/Nav';
 import PublishingControls from './web3/PublishingControls';
 import useNodeSpecJson from './hooks/useNodeSpecJson';
-import useRegisterCoreProfileAndOthers from './hooks/useRegistry';
 import useSetAndLoadModelFile, { exampleModelFileUrl } from './hooks/useSetAndLoadModelFile';
 import useBehaveGraphFlow, { exampleBehaveGraphFileUrl } from './hooks/useBehaveGraphFlow';
 import useEngine from './hooks/useEngine';
 import Flow from './flowEditor/FlowEditorApp';
 import SplitEditor from './SplitEditor';
 import { examplePairs } from './flowEditor/components/LoadModal';
-import { registerSceneProfile, registerSceneDependency } from '@behave-graph/core';
+import { registerSceneProfile, registerSceneDependency, IRegistry } from '@behave-graph/core';
 import { useScene } from './scene/useSceneModifier';
 import { registerChainGraphProfile } from '@blocktopia/core';
 import { useRegisterDependency } from './hooks/useRegisterDependency';
+import { useRegisterCoreProfileAndOthers } from './hooks/useRegistry';
 
 const [initialModelFile, initialBehaviorGraph] = examplePairs[0];
 
 const initialModelFileUrl = exampleModelFileUrl(initialModelFile);
 const initialBehaviorGraphUrl = exampleBehaveGraphFileUrl(initialBehaviorGraph);
 
+export const registerChainGraphProfiles: ((registry: Pick<IRegistry, 'nodes' | 'values'>) => void)[] = [
+  registerChainGraphProfile,
+  registerSceneProfile,
+];
+
 function EditorAndScene({ web3Enabled }: { web3Enabled?: boolean }) {
   const { modelFile, setModelFile, gltf } = useSetAndLoadModelFile({
     initialFileUrl: initialModelFileUrl,
   });
 
-  const registerProfiles = useMemo(() => [registerChainGraphProfile, registerSceneProfile], []);
-
   const { registry, lifecyleEmitter } = useRegisterCoreProfileAndOthers({
-    otherRegisters: registerProfiles,
+    otherRegisters: registerChainGraphProfiles,
   });
 
   const specJson = useNodeSpecJson(registry);

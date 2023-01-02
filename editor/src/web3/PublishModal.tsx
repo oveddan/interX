@@ -50,6 +50,7 @@ export const PublishModal: FC<LoadModalProps> = ({ open = false, onClose, graphJ
     if (cid && mintWorld?.mint) {
       console.log('minting');
       setMintingToChain(true);
+      debugger;
       mintWorld.mint();
     }
   }, [mintWorld?.mint, cid, startMinting, mintingToChain, mintWorld?.isError]);
