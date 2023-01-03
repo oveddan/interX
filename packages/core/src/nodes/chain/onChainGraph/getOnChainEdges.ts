@@ -58,94 +58,88 @@ export function getOnChainEdges({
     throw new Error(`missing node spec for node type: ${node.type}`);
   }
 
-  Object.entries(node.flows || {}).forEach(([fromSocket, { nodeId, socket: toSocket }]) => {
-    const otherNode = nodes.find((n) => n.id === nodeId);
+  const thisNodeId = node.id;
+
+  // get edges from the output flows
+  Object.entries(node.flows || {}).forEach(([fromSocket, { nodeId: flowNodeId, socket: toSocket }]) => {
+    const otherNode = nodes.find((n) => n.id === flowNodeId);
     if (!otherNode) return;
 
-    const sourceOnChainNodeDefinition = thisOnChainNodeDefinition;
-    const sourceSocket = fromSocket;
-    const destinationNodeToOnChainNodeDefinition = toOnChainNodeDefinitions[otherNode.type];
-    const destinationSocket = toSocket;
-
-    if (!destinationNodeToOnChainNodeDefinition) {
-      console.log(otherNode.type, Object.keys(toOnChainNodeDefinitions));
-      throw new Error(`missing node spec for other node type: ${otherNode.type}`);
-    }
-
-    // get the socket index for the source node
-    const socketIndexFrom = getSocketIndecesForNodeMapping({
-      socketIdKey: sourceOnChainNodeDefinition.socketIdKey,
-      socketMappings: sourceOnChainNodeDefinition.socketMappings.out,
-      fromSocket: sourceSocket,
+    const edge = getOnChainEdge({
       socketIndeces,
+      sourceNodeId: thisNodeId,
+      sourceOnChainNodeDefinition: thisOnChainNodeDefinition,
+      sourceSocket: fromSocket,
+      destinationNodeId: flowNodeId,
+      destinationNodeToOnChainNodeDefinition: toOnChainNodeDefinitions[otherNode.type],
+      destinationSocket: toSocket,
     });
 
-    // get the socket index for the destination node
-    const socketIndexTo = getSocketIndecesForNodeMapping({
-      socketIdKey: destinationNodeToOnChainNodeDefinition.socketIdKey,
-      socketMappings: destinationNodeToOnChainNodeDefinition.socketMappings.in,
-      fromSocket: destinationSocket,
-      socketIndeces,
-    });
-
-    edges.push({
-      fromNode: node.id,
-      fromSocket: socketIndexFrom as number,
-      toNode: nodeId,
-      toSocket: socketIndexTo as number,
-    });
+    edges.push(edge);
   });
 
   // parameters links point backwards (it's wierd), so we need to make an edge in the reverse direction
+  // from the parameter
   Object.entries(node.parameters || {}).forEach(([toSocket, param]) => {
     if (isLink(param)) {
       const { nodeId: fromNodeId, socket: fromSocket } = param.link;
       const otherNode = nodes.find((n) => n.id === fromNodeId);
       if (!otherNode) return;
 
-      const sourceOnChainNodeDefinition = toOnChainNodeDefinitions[otherNode.type];
-      const sourceSocket = fromSocket;
-      const destinationNodeToOnChainNodeDefinition = thisOnChainNodeDefinition;
-      const destinationSocket = toSocket;
-
-      // get the socket index for the source node
-      const socketIndexFrom = getSocketIndecesForNodeMapping({
-        socketIdKey: sourceOnChainNodeDefinition.socketIdKey,
-        socketMappings: sourceOnChainNodeDefinition.socketMappings.out,
-        fromSocket: sourceSocket,
+      const edge = getOnChainEdge({
         socketIndeces,
+        sourceNodeId: fromNodeId,
+        sourceOnChainNodeDefinition: toOnChainNodeDefinitions[otherNode.type],
+        sourceSocket: fromSocket,
+        destinationNodeId: thisNodeId,
+        destinationNodeToOnChainNodeDefinition: thisOnChainNodeDefinition,
+        destinationSocket: toSocket,
       });
 
-      // get the socket index for the destination node
-      const socketIndexTo = getSocketIndecesForNodeMapping({
-        socketIdKey: destinationNodeToOnChainNodeDefinition.socketIdKey,
-        socketMappings: destinationNodeToOnChainNodeDefinition.socketMappings.in,
-        fromSocket: destinationSocket,
-        socketIndeces,
-      });
-
-      edges.push({
-        fromNode: fromNodeId,
-        fromSocket: socketIndexFrom as number,
-        toNode: node.id,
-        toSocket: socketIndexTo as number,
-      });
+      edges.push(edge);
     }
   });
 
   return edges;
 }
+function getOnChainEdge({
+  sourceNodeId,
+  destinationNodeId,
+  socketIndeces,
+  sourceOnChainNodeDefinition,
+  sourceSocket,
+  destinationNodeToOnChainNodeDefinition,
+  destinationSocket,
+}: {
+  sourceNodeId: string;
+  destinationNodeId: string;
+  socketIndeces: SocketIndecesByNodeTypeStruct;
+  sourceOnChainNodeDefinition: ToOnChainDefinitionForNode;
+  sourceSocket: string;
+  destinationNodeToOnChainNodeDefinition: ToOnChainDefinitionForNode;
+  destinationSocket: string;
+}) {
+  const socketIndexFrom = getSocketIndecesForNodeMapping({
+    socketIdKey: sourceOnChainNodeDefinition.socketIdKey,
+    socketMappings: sourceOnChainNodeDefinition.socketMappings.out,
+    fromSocket: sourceSocket,
+    socketIndeces,
+  });
 
-// function generateFlowsFromNode(node: NodeJSON, nodes: NodeJSON[]): FlowsJSON {
-//   const outputFlows = node.flows || {};
+  // get the socket index for the destination node
+  const socketIndexTo = getSocketIndecesForNodeMapping({
+    socketIdKey: destinationNodeToOnChainNodeDefinition.socketIdKey,
+    socketMappings: destinationNodeToOnChainNodeDefinition.socketMappings.in,
+    fromSocket: destinationSocket,
+    socketIndeces,
+  });
 
-//   const inputFlows = nodes.flatMap((node) => {
-//     const nodeFlowParams = Object.entries(node.parameters || {}).filter(
-//       ([, param]) => !!(param as NodeParameterLinkJSON).link
-//     ) as [string, NodeParameterLinkJSON][];
+  const result: ChainEdgeNodeDefinition = {
+    fromNode: sourceNodeId,
+    fromSocket: socketIndexFrom as number,
+    toNode: destinationNodeId,
+    toSocket: socketIndexTo as number,
+  };
 
-//     return {
-//       paramName: nodeFlowParams[0],
-//     };
-//   });
-// }
+  return result;
+}
