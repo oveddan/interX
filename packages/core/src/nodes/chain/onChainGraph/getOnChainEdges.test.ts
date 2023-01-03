@@ -116,6 +116,7 @@ describe('getOnChainEdges', () => {
 
     const variableSetNodeId = 'variableSetNodeId';
 
+    // this is poorly readable - maybe we can make a better function?
     const chainNodeJson: NodeJSON = {
       id: countNodeId,
       type: OnChainCounter.typeName,
@@ -134,6 +135,7 @@ describe('getOnChainEdges', () => {
       }),
     };
 
+    // this is poorly readable - maybe we can make a better function?
     const variableSetNodeJson: NodeJSON = {
       id: variableSetNodeId,
       type: OnChainVariableSet.typeName,
