@@ -1,4 +1,4 @@
-import { FlowsJSON, NodeJSON, SocketNames, SocketsDefinition } from '@behave-graph/core';
+import { FlowsJSON, NodeJSON, SocketNames, SocketsDefinition } from '@oveddan-behave-graph/core';
 import { expect } from 'chai';
 import { IChainGraph } from 'packages/core/src/abstractions';
 import { EdgeDefinitionStruct as EdgeDefinition } from 'typechain-types/contracts/BehaviorGraphToken';
@@ -7,19 +7,24 @@ import { OnChainVariableSet } from '../OnChainVariableSet';
 import { SocketIndecesByNodeType } from '../IChainNode';
 import { makeToOnChainNodeConverterters } from '../profile';
 import { getOnChainEdges } from './getOnChainEdges';
+import {
+  NodeParameterJSON,
+  NodeParameterLinkJSON,
+  NodeParametersJSON,
+} from 'packages/core/.yalc/@behave-graph/core/dist/behave-graph-core.cjs';
 
-const makeFlowsNodeJson = <TOutSockets extends SocketsDefinition, TInSockets extends SocketsDefinition>({
+const makeFlowsNodeJson = <TOut extends SocketsDefinition, TIn extends SocketsDefinition>({
   flows,
   to: { nodeId },
 }: {
-  from: TOutSockets;
+  from: TOut;
   to: {
     nodeId: string;
-    sockets: TInSockets;
+    sockets: TIn;
   };
   flows: {
-    from: SocketNames<typeof OnChainCounter.out>;
-    to: SocketNames<TInSockets>;
+    from: SocketNames<TOut>;
+    to: SocketNames<TIn>;
   }[];
 }): FlowsJSON =>
   flows.reduce((acc, { from: key, to: socket }) => {
@@ -29,6 +34,33 @@ const makeFlowsNodeJson = <TOutSockets extends SocketsDefinition, TInSockets ext
         socket,
         nodeId,
       },
+    };
+  }, {});
+
+const makeInputLinkParams = <TIn extends SocketsDefinition, TOut extends SocketsDefinition>({
+  flows,
+  to: { nodeId: toNodeId },
+}: {
+  from: TIn;
+  to: {
+    nodeId: string;
+    sockets: TOut;
+  };
+  flows: {
+    to: SocketNames<TOut>;
+    from: SocketNames<TIn>;
+  }[];
+}): NodeParametersJSON =>
+  flows.reduce((acc: NodeParametersJSON, { from: key, to: toSocketId }) => {
+    const paramJson: NodeParameterLinkJSON = {
+      link: {
+        socket: toSocketId,
+        nodeId: toNodeId,
+      },
+    };
+    return {
+      ...acc,
+      [key]: paramJson,
     };
   }, {});
 
@@ -80,9 +112,9 @@ describe('getOnChainEdges', () => {
   });
 
   it('should return an edge with node and edge ids corresponding to node ids and edge indeces based on the spec', () => {
-    const countNodeId = 'b';
+    const countNodeId = 'countNodeId';
 
-    const variableSetNodeId = 'c';
+    const variableSetNodeId = 'variableSetNodeId';
 
     const chainNodeJson: NodeJSON = {
       id: countNodeId,
@@ -98,10 +130,6 @@ describe('getOnChainEdges', () => {
             from: 'flow',
             to: 'flow',
           },
-          {
-            from: 'count',
-            to: 'value',
-          },
         ],
       }),
     };
@@ -109,14 +137,40 @@ describe('getOnChainEdges', () => {
     const variableSetNodeJson: NodeJSON = {
       id: variableSetNodeId,
       type: OnChainVariableSet.typeName,
+      parameters: makeInputLinkParams({
+        from: OnChainVariableSet.in,
+        to: {
+          nodeId: countNodeId,
+          sockets: OnChainCounter.out,
+        },
+        flows: [
+          {
+            from: 'value',
+            to: 'count',
+          },
+        ],
+      }),
     };
 
-    const edges = getOnChainEdges({
-      node: chainNodeJson,
-      nodes: [chainNodeJson, variableSetNodeJson],
+    const allNodes = [chainNodeJson, variableSetNodeJson];
+
+    const common = {
+      nodes: allNodes,
       toOnChainNodeDefinitions: chainNodeSpecs,
       socketIndeces,
+    };
+
+    const chainNodeEdges = getOnChainEdges({
+      node: chainNodeJson,
+      ...common,
     });
+
+    const variableSetNodeEdges = getOnChainEdges({
+      node: variableSetNodeJson,
+      ...common,
+    });
+
+    const edges = [...chainNodeEdges, ...variableSetNodeEdges];
 
     expect(edges).to.have.lengthOf(2);
 

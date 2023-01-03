@@ -1,11 +1,42 @@
 {
   "nodes": [
     {
+      "id": "95fbb61d-5331-4c4e-935c-3b69f7b8bc3d",
+      "type": "chain/intVariableGet",
+      "metadata": {
+        "positionX": "33.885925349863555",
+        "positionY": "-577.5140747355053"
+      },
+      "configuration": {
+        "variableId": 0
+      }
+    },
+    {
+      "id": "85c96bd9-12ab-4359-88f1-3554fffcfe91",
+      "type": "chain/trigger",
+      "metadata": {
+        "positionX": "-616.5075071386531",
+        "positionY": "-570.9137043599102"
+      },
+      "configuration": {
+        "invokeId": 0
+      },
+      "flows": {
+        "flow": {
+          "nodeId": "8e7f6b70-8d0c-45be-81dd-ad0014209dbc",
+          "socket": "flow"
+        }
+      }
+    },
+    {
       "id": "85c96bd9-12ab-4359-88f1-3554fffcfe90",
       "type": "chain/intVariableSet",
       "metadata": {
         "positionX": "-169.09793150555808",
         "positionY": "-575.5831426098277"
+      },
+      "configuration": {
+        "variableId": 0
       },
       "parameters": {
         "value": {
@@ -126,7 +157,7 @@
       },
       "flows": {
         "flow": {
-          "nodeId": "8e7f6b70-8d0c-45be-81dd-ad0014209dbc",
+          "nodeId": "85c96bd9-12ab-4359-88f1-3554fffcfe91",
           "socket": "flow"
         }
       }

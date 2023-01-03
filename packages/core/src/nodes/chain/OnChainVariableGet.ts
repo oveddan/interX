@@ -33,9 +33,9 @@ export const OnChainVariableGet = makeEventNodeDefinition({
     },
   },
   initialState: makeInitialState(),
-  init: ({ write, commit, configuration, graph: { variables, getDependency } }) => {
-    const variable = variables[configuration.variableId] || new Variable('-1', 'undefined', 'string', '');
-    const variableId = variable.id;
+  init: ({ write, commit, configuration, graph: { getDependency } }) => {
+    // const variable = variables[configuration.variableId] || new Variable('-1', 'undefined', 'string', '');
+    const variableId = configuration.variableId || 1;
 
     const handleValueUpdated = (count: bigint) => {
       write(valueSocketName, count);
@@ -57,9 +57,7 @@ export const OnChainVariableGet = makeEventNodeDefinition({
 
     return {};
   },
-  in: {
-    [variableNameSocket]: 'string',
-  },
+  in: {},
   out: {
     [flowSocketName]: 'flow',
     [valueSocketName]: 'integer',
