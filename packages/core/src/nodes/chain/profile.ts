@@ -3,11 +3,11 @@ import { IChainGraph } from '../../abstractions';
 import { OnChainCounter } from './OnChainCounter';
 import { chainGraphDependencyKey, OnChainVariableGet } from './OnChainVariableGet';
 import { OnChainVariableSet } from './OnChainVariableSet';
-import { ExternalInvoke } from './ExternalInvoke';
+import { InvokeOnChainAction } from './InvokeOnChainAction';
 import { ChainNodeTypes, ChainValueType, IHasOnChainDefinition } from './IChainNode';
 import { SocketIO } from './socketGeneration';
 
-const getChainDefinitions = () => [OnChainCounter, OnChainVariableSet, ExternalInvoke];
+const getChainDefinitions = () => [OnChainCounter, OnChainVariableSet, InvokeOnChainAction];
 
 export function registerChainGraphProfile(registry: Pick<IRegistry, 'nodes' | 'values'>) {
   getChainDefinitions().forEach((x) => registry.nodes.register(x));

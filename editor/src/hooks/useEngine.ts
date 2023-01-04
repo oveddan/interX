@@ -1,4 +1,11 @@
-import { Engine, Graph, GraphJSON, ILifecycleEventEmitter, readGraphFromJSON, Registry } from '@behave-graph/core';
+import {
+  Engine,
+  GraphInstance,
+  GraphJSON,
+  ILifecycleEventEmitter,
+  readGraphFromJSON,
+  Registry,
+} from '@behave-graph/core';
 import { useCallback, useEffect, useState } from 'react';
 
 const useEngine = ({
@@ -31,7 +38,7 @@ const useEngine = ({
   useEffect(() => {
     if (!graphJson || !registry || !run) return;
 
-    let graph: Graph;
+    let graph: GraphInstance;
     try {
       graph = readGraphFromJSON(graphJson, registry);
     } catch (e) {
