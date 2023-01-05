@@ -1,14 +1,13 @@
-import { useEffect, useMemo, useState } from 'react';
-import { GraphJSON, registerSceneProfile, registerSceneDependency } from '@oveddan-behave-graph/core';
+import { useEffect, useState } from 'react';
+import { GraphJSON, registerSceneDependency } from '@oveddan-behave-graph/core';
 import { useGLTF } from '@react-three/drei';
 import Scene from './Scene';
 import { dataUrlFromFile } from '../hooks/useSaveAndLoad';
-import { registerChainGraphDepenency, registerChainGraphProfile, useMockSmartContractActions } from '@blocktopia/core';
+import { registerChainGraphDepenency, useMockSmartContractActions } from '@blocktopia/core';
 import { useScene } from './useSceneModifier';
 import { useRegisterDependency } from '../hooks/useRegisterDependency';
-import useEngine from '../hooks/useEngine';
-import { useRegisterCoreProfileAndOthers } from '../hooks/useRegistry';
 import { registerChainGraphProfiles } from '../EditorAndScene';
+import { useGraphRunner, useRegisterCoreProfileAndOthers } from '@oveddan-behave-graph/flow';
 
 const Inner = ({ fileDataUrl, graphJson }: { fileDataUrl: string; graphJson: GraphJSON }) => {
   const gltf = useGLTF(fileDataUrl);
@@ -23,7 +22,7 @@ const Inner = ({ fileDataUrl, graphJson }: { fileDataUrl: string; graphJson: Gra
   useRegisterDependency(registry?.dependencies, smartContractActions, registerChainGraphDepenency);
   useRegisterDependency(registry?.dependencies, scene, registerSceneDependency);
 
-  useEngine({
+  useGraphRunner({
     graphJson,
     registry,
     eventEmitter: lifecyleEmitter,

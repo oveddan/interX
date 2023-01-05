@@ -1,14 +1,11 @@
-import { Suspense, useMemo } from 'react';
+import { Suspense } from 'react';
 import Scene from './scene/Scene';
 import '@rainbow-me/rainbowkit/styles.css';
 import './styles/resizer.css';
 import Controls from './flowEditor/components/Controls';
 import Nav from './nav/Nav';
 import PublishingControls from './web3/PublishingControls';
-import useNodeSpecJson from './hooks/useNodeSpecJson';
 import useSetAndLoadModelFile, { exampleModelFileUrl } from './hooks/useSetAndLoadModelFile';
-import useBehaveGraphFlow, { exampleBehaveGraphFileUrl } from './hooks/useBehaveGraphFlow';
-import useEngine from './hooks/useEngine';
 import Flow from './flowEditor/FlowEditorApp';
 import SplitEditor from './SplitEditor';
 import { examplePairs } from './flowEditor/components/LoadModal';
@@ -16,7 +13,14 @@ import { registerSceneProfile, registerSceneDependency, IRegistry } from '@ovedd
 import { useScene } from './scene/useSceneModifier';
 import { registerChainGraphProfile } from '@blocktopia/core';
 import { useRegisterDependency } from './hooks/useRegisterDependency';
-import { useRegisterCoreProfileAndOthers } from './hooks/useRegistry';
+import {
+  useRegisterCoreProfileAndOthers,
+  useBehaveGraphFlow,
+  useGraphRunner,
+  useNodeSpecJson,
+} from '@oveddan-behave-graph/flow';
+import { suspend } from 'suspend-react';
+import { exampleBehaveGraphFileUrl, fetchBehaviorGraphJson } from './hooks/useSaveAndLoad';
 
 const [initialModelFile, initialBehaviorGraph] = examplePairs[0];
 
@@ -39,12 +43,16 @@ function EditorAndScene({ web3Enabled }: { web3Enabled?: boolean }) {
 
   const specJson = useNodeSpecJson(registry);
 
+  const initialGraphJson = suspend(async () => {
+    return await fetchBehaviorGraphJson(initialBehaviorGraphUrl);
+  }, []);
+
   const { nodes, edges, onNodesChange, onEdgesChange, graphJson, setGraphJson } = useBehaveGraphFlow({
-    initialGraphJsonUrl: initialBehaviorGraphUrl,
+    initialGraphJson,
     specJson,
   });
 
-  const { togglePlay, playing } = useEngine({
+  const { togglePlay, playing } = useGraphRunner({
     graphJson,
     registry,
     eventEmitter: lifecyleEmitter,

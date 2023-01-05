@@ -8,10 +8,10 @@ import useTokenContractAddress from '../web3/useTokenContractAddress';
 import useChainGraph from '@blocktopia/core/src/hooks/useChainGraph';
 import { useGLTF } from '@react-three/drei';
 import { useMemo } from 'react';
-import { useEngine, useRegisterCoreProfileAndOthers } from '../hooks';
 import { registerChainGraphDepenency, registerChainGraphProfile } from '@blocktopia/core';
 import { useScene } from '../scene/useSceneModifier';
 import { useRegisterDependency } from '../hooks/useRegisterDependency';
+import { useGraphRunner, useRegisterCoreProfileAndOthers } from '@oveddan-behave-graph/flow';
 
 const LoadAndIntegrateOnChainWorldInner = ({
   tokenId,
@@ -97,7 +97,7 @@ const OnChainWorldLoader = ({ tokenId, contractAddress }: { tokenId: number; con
     otherRegisters: registerProfiles,
   });
 
-  useEngine({
+  useGraphRunner({
     graphJson,
     registry,
     eventEmitter: lifecyleEmitter,

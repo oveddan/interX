@@ -6,7 +6,7 @@ import { useDropzone } from 'react-dropzone';
 
 import { fetchModelFile } from '../../hooks/useSaveAndLoad';
 import ModelPreview from '../../scene/ModelPreview';
-import { exampleBehaveGraphFileUrl, fetchBehaviorGraphJson } from '../../hooks/useBehaveGraphFlow';
+import { exampleBehaveGraphFileUrl, fetchBehaviorGraphJson } from '../../hooks/useSaveAndLoad';
 import { exampleModelFileUrl } from '../../hooks/useSetAndLoadModelFile';
 
 const modelFiles = {
