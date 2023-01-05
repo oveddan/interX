@@ -1,4 +1,4 @@
-import { GraphJSON } from '@oveddan-behave-graph/core';
+import { GraphJSON } from '@behave-graph/core';
 
 function readFileContents(file: File) {
   return new Promise<string | ArrayBuffer>((resolve, reject) => {

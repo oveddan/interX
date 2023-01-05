@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { GraphJSON } from '@oveddan-behave-graph/core';
+import { GraphJSON } from '@behave-graph/core';
 import { useMintWorld, MintWorldReturn } from '@blocktopia/core';
 
 // this allows us to conditionally call useMintWorld with all required arguments passed

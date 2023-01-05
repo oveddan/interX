@@ -1,4 +1,4 @@
-import { GraphJSON } from '@oveddan-behave-graph/core';
+import { GraphJSON } from '@behave-graph/core';
 import { useCallback, useEffect, useState } from 'react';
 import { usePrepareContractWrite, useContractWrite, useContractEvent, useContractRead } from 'wagmi';
 import { abi } from '../contracts/abi';

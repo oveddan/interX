@@ -1,4 +1,4 @@
-import { registerSceneDependency, IRegistry, registerSceneProfile } from '@oveddan-behave-graph/core';
+import { registerSceneDependency, IRegistry, registerSceneProfile } from '@behave-graph/core';
 
 import { useParams } from 'react-router-dom';
 import Web3Login from '../web3/Web3Login';
@@ -10,7 +10,7 @@ import { useMemo } from 'react';
 import { registerChainGraphDepenency, registerChainGraphProfile } from '@blocktopia/core';
 import { useScene } from '../scene/useSceneModifier';
 import { useRegisterDependency } from '../hooks/useRegisterDependency';
-import { useGraphRunner, useRegisterCoreProfileAndOthers } from '@oveddan-behave-graph/flow';
+import { useGraphRunner, useRegisterCoreProfileAndOthers } from '@behave-graph/flow';
 import { useLoadOnChainWorld } from '@blocktopia/core';
 
 const LoadAndIntegrateOnChainWorldInner = ({

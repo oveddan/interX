@@ -1,4 +1,4 @@
-import { GraphJSON } from '@oveddan-behave-graph/core';
+import { GraphJSON } from '@behave-graph/core';
 
 export const exampleBehaveGraphFileUrl = (fileName: string) => publicUrl(`/examples/graphs/${fileName}`);
 export const fetchBehaviorGraphJson = async (url: string) => (await (await fetch(url)).json()) as GraphJSON;

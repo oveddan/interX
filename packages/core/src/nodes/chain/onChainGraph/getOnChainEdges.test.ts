@@ -1,4 +1,4 @@
-import { FlowsJSON, NodeJSON, SocketNames, SocketsDefinition } from '@oveddan-behave-graph/core';
+import { FlowsJSON, NodeJSON, SocketNames, SocketsDefinition } from '@behave-graph/core';
 import { expect } from 'chai';
 import { IChainGraph } from 'packages/core/src/abstractions';
 import { EdgeDefinitionStruct as EdgeDefinition } from 'typechain-types/contracts/BehaviorGraphToken';
@@ -11,7 +11,7 @@ import {
   NodeParameterJSON,
   NodeParameterLinkJSON,
   NodeParametersJSON,
-} from 'packages/core/.yalc/@oveddan-behave-graph/core/dist/behave-graph-core.cjs';
+} from 'packages/core/.yalc/@behave-graph/core/dist/behave-graph-core.cjs';
 
 const makeFlowsNodeJson = <TOut extends SocketsDefinition, TIn extends SocketsDefinition>({
   flows,

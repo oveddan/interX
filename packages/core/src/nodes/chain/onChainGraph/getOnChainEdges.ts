@@ -5,7 +5,7 @@ import {
   NodeParameterLinkJSON,
   SocketDefinition,
   SocketsDefinition,
-} from '@oveddan-behave-graph/core';
+} from '@behave-graph/core';
 import { SocketIndecesByNodeTypeStruct } from 'typechain-types/contracts/BehaviorGraphToken';
 import { ChainEdgeNodeDefinition, SocketMappings, ToOnChainDefinitionForNode } from '../IChainNode';
 

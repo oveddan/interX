@@ -1,4 +1,4 @@
-import { GraphJSON } from '@oveddan-behave-graph/core';
+import { GraphJSON } from '@behave-graph/core';
 import { useCallback, useState } from 'react';
 import { saveInteractiveWorldToIpfs } from './ipfs/ipfsInteractiveWorldSaver';
 

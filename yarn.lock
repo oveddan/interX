@@ -2044,16 +2044,16 @@
   resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.7.3.tgz#939534757a81f8d69cc854c7692805684ff3111e"
   integrity sha512-dGRS0agJzu8ybo44pCIf3xBaPQN/65AIXNgK8+4gzKd5kbvlqyxryUYVLJv7fK98Seyd2hDZzVEHSWAh0Bt1Yw==
 
-"@oveddan-behave-graph/core@^0.0.1":
+"@behave-graph/core@^0.0.1":
   version "0.0.1"
-  resolved "https://registry.yarnpkg.com/@oveddan-behave-graph/core/-/core-0.0.1.tgz#73541c220cd1892cf12742f527cf15e39c3285dd"
+  resolved "https://registry.yarnpkg.com/@behave-graph/core/-/core-0.0.1.tgz#73541c220cd1892cf12742f527cf15e39c3285dd"
   integrity sha512-CmauyoMqvX2g9t/wOam4rdvouOJZaS6IcnUvaZEkaVKmYoyPahQS/mo8zlkXU/Cr5z0cEzbZQ5h9tcB+foxdlg==
   dependencies:
     gl-matrix "^3.4.3"
 
-"@oveddan-behave-graph/flow@^1.5.0":
+"@behave-graph/flow@^1.5.0":
   version "1.5.0"
-  resolved "https://registry.yarnpkg.com/@oveddan-behave-graph/flow/-/flow-1.5.0.tgz#6b16e52b5da3885f26bc361fa3cfc3ad5b4b765d"
+  resolved "https://registry.yarnpkg.com/@behave-graph/flow/-/flow-1.5.0.tgz#6b16e52b5da3885f26bc361fa3cfc3ad5b4b765d"
   integrity sha512-DtiHkTsY42JUB2WbdfKftSSKoOp2USmJ8aEmAW5tE6OBZnu6L1lBtdaky5M67gzpPAO2AsErezkMf/LBc7dUWg==
   dependencies:
     "@fortawesome/fontawesome-svg-core" "^6.1.2"

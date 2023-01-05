@@ -1,4 +1,4 @@
-import { ExpectTrue, GraphJSON, NodeJSON } from '@oveddan-behave-graph/core';
+import { ExpectTrue, GraphJSON, NodeJSON } from '@behave-graph/core';
 import { generateOnChainNodesFromGraph } from '../onChainGraph/extractOnChainNodesFromGraph';
 import { SocketIndecesByNodeType } from '../IChainNode';
 import { expect } from 'chai';

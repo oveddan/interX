@@ -3,7 +3,7 @@ import { useContractRead } from 'wagmi';
 import { BigNumber } from 'ethers';
 import { loadStoredSceneAndBehaviorGraphFromIpfs } from './ipfs/ipfsSceneLoader';
 import { ipfsUrlToCid } from './ipfs/ipfsUrlUtils';
-import { GraphJSON } from '@oveddan-behave-graph/core';
+import { GraphJSON } from '@behave-graph/core';
 import { abi } from '../contracts/abi';
 
 export const useLoadOnChainWorld = (tokenId: number, contractAddress: `0x${string}`) => {

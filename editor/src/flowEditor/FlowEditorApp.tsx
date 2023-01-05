@@ -1,11 +1,11 @@
 import ReactFlow, { Background, BackgroundVariant, OnNodesChange, OnEdgesChange, Node, Edge } from 'reactflow';
 import NodePicker from './components/NodePicker';
-import { NodeSpecJSON } from '@oveddan-behave-graph/core';
+import { NodeSpecJSON } from '@behave-graph/core';
 import 'reactflow/dist/style.css';
 import './flowEditor.css';
 import { ISceneWithQueries } from '@blocktopia/core';
-import { useFlowHandlers } from '@oveddan-behave-graph/flow';
-import { useCustomNodeTypes, useBehaveGraphFlow } from '@oveddan-behave-graph/flow';
+import { useFlowHandlers } from '@behave-graph/flow';
+import { useCustomNodeTypes, useBehaveGraphFlow } from '@behave-graph/flow';
 
 type BehaveGraphFlow = ReturnType<typeof useBehaveGraphFlow>;
 

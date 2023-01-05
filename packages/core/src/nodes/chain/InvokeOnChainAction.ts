@@ -1,4 +1,4 @@
-import { makeFlowNodeDefinition, NodeCategory } from '@oveddan-behave-graph/core';
+import { makeFlowNodeDefinition, NodeCategory } from '@behave-graph/core';
 import { IChainGraph } from '../../abstractions';
 import { ChainNodeTypes, ChainValueType, makeChainSocketMapping } from './IChainNode';
 import { chainGraphDependencyKey } from './OnChainVariableGet';

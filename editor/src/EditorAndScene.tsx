@@ -9,7 +9,7 @@ import useSetAndLoadModelFile, { exampleModelFileUrl } from './hooks/useSetAndLo
 import Flow from './flowEditor/FlowEditorApp';
 import SplitEditor from './SplitEditor';
 import { examplePairs } from './flowEditor/components/LoadModal';
-import { registerSceneProfile, registerSceneDependency, IRegistry } from '@oveddan-behave-graph/core';
+import { registerSceneProfile, registerSceneDependency, IRegistry } from '@behave-graph/core';
 import { useScene } from './scene/useSceneModifier';
 import { registerChainGraphDepenency, registerChainGraphProfile, useMockSmartContractActions } from '@blocktopia/core';
 import { useRegisterDependency } from './hooks/useRegisterDependency';
@@ -18,7 +18,7 @@ import {
   useBehaveGraphFlow,
   useGraphRunner,
   useNodeSpecJson,
-} from '@oveddan-behave-graph/flow';
+} from '@behave-graph/flow';
 import { suspend } from 'suspend-react';
 import { exampleBehaveGraphFileUrl, fetchBehaviorGraphJson } from './hooks/useSaveAndLoad';
 import { ReactFlowProvider } from 'reactflow';
@@ -42,6 +42,9 @@ function EditorAndScene({ web3Enabled }: { web3Enabled?: boolean }) {
     otherRegisters: registerChainGraphProfiles,
   });
 
+  const { scene, animations, sceneOnClickListeners } = useScene(gltf);
+  useRegisterDependency(registry?.dependencies, scene, registerSceneDependency);
+
   const specJson = useNodeSpecJson(registry);
 
   const initialGraphJson = suspend(async () => {
@@ -59,11 +62,8 @@ function EditorAndScene({ web3Enabled }: { web3Enabled?: boolean }) {
     eventEmitter: lifecyleEmitter,
   });
 
-  const { scene, animations, sceneOnClickListeners } = useScene(gltf);
-
   const chainGraph = useMockSmartContractActions();
 
-  useRegisterDependency(registry?.dependencies, scene, registerSceneDependency);
   useRegisterDependency(registry?.dependencies, chainGraph, registerChainGraphDepenency);
 
   const web3Controls = web3Enabled ? <PublishingControls graphJson={graphJson} modelFile={modelFile?.file} /> : null;

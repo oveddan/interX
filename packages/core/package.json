@@ -17,7 +17,7 @@
     "test-watch": "yarn test --watch"
   },
   "dependencies": {
-    "@oveddan-behave-graph/core": "^0.0.1",
+    "@behave-graph/core": "^0.0.1",
     "web3.storage": "^4.4.0"
   },
   "author": "",

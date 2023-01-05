@@ -1,4 +1,4 @@
-import { makeEventNodeDefinition, NodeCategory, Variable } from '@oveddan-behave-graph/core';
+import { makeEventNodeDefinition, NodeCategory, Variable } from '@behave-graph/core';
 import { IChainGraph } from '../../abstractions';
 import { ChainNodeTypes, ChainValueType, makeChainSocketMapping } from './IChainNode';
 

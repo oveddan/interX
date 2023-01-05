@@ -1,4 +1,4 @@
-import { NodeSpecJSON, Registry, writeNodeSpecsToJSON } from '@oveddan-behave-graph/core';
+import { NodeSpecJSON, Registry, writeNodeSpecsToJSON } from '@behave-graph/core';
 
 let nodeSpecJSON: NodeSpecJSON[] | undefined = undefined;
 

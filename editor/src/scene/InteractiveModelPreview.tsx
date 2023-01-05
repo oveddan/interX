@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { GraphJSON, registerSceneDependency } from '@oveddan-behave-graph/core';
+import { GraphJSON, registerSceneDependency } from '@behave-graph/core';
 import { useGLTF } from '@react-three/drei';
 import Scene from './Scene';
 import { dataUrlFromFile } from '../hooks/useSaveAndLoad';
@@ -7,7 +7,7 @@ import { registerChainGraphDepenency, useMockSmartContractActions } from '@block
 import { useScene } from './useSceneModifier';
 import { useRegisterDependency } from '../hooks/useRegisterDependency';
 import { registerChainGraphProfiles } from '../EditorAndScene';
-import { useGraphRunner, useRegisterCoreProfileAndOthers } from '@oveddan-behave-graph/flow';
+import { useGraphRunner, useRegisterCoreProfileAndOthers } from '@behave-graph/flow';
 
 const Inner = ({ fileDataUrl, graphJson }: { fileDataUrl: string; graphJson: GraphJSON }) => {
   const gltf = useGLTF(fileDataUrl);
