@@ -14,7 +14,6 @@ export const chainVariableSet = makeFlowNodeDefinition({
   in: {
     flow: 'flow',
     value: 'integer',
-    variableId: 'number',
   },
   out: {},
   triggered: () => {
