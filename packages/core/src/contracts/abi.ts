@@ -275,6 +275,34 @@ export const abi = [
         "internalType": "struct NodeDefinitionAndValues[]",
         "name": "nodes",
         "type": "tuple[]"
+      },
+      {
+        "components": [
+          {
+            "internalType": "string",
+            "name": "fromNode",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "toNode",
+            "type": "string"
+          },
+          {
+            "internalType": "uint8",
+            "name": "fromSocket",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint8",
+            "name": "toSocket",
+            "type": "uint8"
+          }
+        ],
+        "indexed": false,
+        "internalType": "struct EdgeDefinition[]",
+        "name": "edges",
+        "type": "tuple[]"
       }
     ],
     "name": "SafeMint",
