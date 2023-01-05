@@ -1,5 +1,5 @@
 import { GraphJSON } from '@oveddan-behave-graph/core';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { usePrepareContractWrite, useContractWrite, useContractEvent, useContractRead } from 'wagmi';
 import { abi } from '../contracts/abi';
 import { generateOnChainNodesFromGraph, SafeMintInputs, SocketIndecesByNodeType } from '../nodes';
@@ -99,7 +99,7 @@ export const useMintWorld = ({
     args,
   });
 
-  const { data, isLoading, isSuccess, write } = useContractWrite({
+  const { isLoading, isSuccess, write } = useContractWrite({
     ...config,
   });
 
@@ -108,7 +108,11 @@ export const useMintWorld = ({
     cid: worldCid,
   });
 
-  return { mint: write, isSuccess, isLoading, isError, error, mintedTokenId };
+  const mint = useCallback(() => {
+    if (write) write();
+  }, [write]);
+
+  return { mint, isSuccess, isLoading, isError, error, mintedTokenId };
 };
 
 export type MintWorldReturn = ReturnType<typeof useMintWorld>;

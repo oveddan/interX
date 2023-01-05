@@ -11,7 +11,7 @@ import SplitEditor from './SplitEditor';
 import { examplePairs } from './flowEditor/components/LoadModal';
 import { registerSceneProfile, registerSceneDependency, IRegistry } from '@oveddan-behave-graph/core';
 import { useScene } from './scene/useSceneModifier';
-import { registerChainGraphProfile } from '@blocktopia/core';
+import { registerChainGraphDepenency, registerChainGraphProfile, useMockSmartContractActions } from '@blocktopia/core';
 import { useRegisterDependency } from './hooks/useRegisterDependency';
 import {
   useRegisterCoreProfileAndOthers,
@@ -61,7 +61,10 @@ function EditorAndScene({ web3Enabled }: { web3Enabled?: boolean }) {
 
   const { scene, animations, sceneOnClickListeners } = useScene(gltf);
 
+  const chainGraph = useMockSmartContractActions();
+
   useRegisterDependency(registry?.dependencies, scene, registerSceneDependency);
+  useRegisterDependency(registry?.dependencies, chainGraph, registerChainGraphDepenency);
 
   const web3Controls = web3Enabled ? <PublishingControls graphJson={graphJson} modelFile={modelFile?.file} /> : null;
 

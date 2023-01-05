@@ -2,14 +2,13 @@ import { GraphJSON } from '@oveddan-behave-graph/core';
 import { FC, useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import InteractiveModelPreview from '../scene/InteractiveModelPreview';
-import { useSaveSceneToIpfs } from '../hooks/useSaveSceneToIpfs';
+import { useSaveSceneToIpfs } from '@blocktopia/core';
 import useTokenContractAddress from './useTokenContractAddress';
 import { MintWorldReturn } from '../hooks/useMintWorld';
 import { Modal } from '../flowEditor/components/Modal';
 import MintWorld from './MintWorld';
-import { convertURIToHTTPS } from '../hooks/ipfs/ipfsUrlUtils';
+import { convertURIToHTTPS } from '@blocktopia/core/src/hooks/ipfs/ipfsUrlUtils';
 import { useNetwork } from 'wagmi';
-import { publicUrl } from '../hooks/useSaveAndLoad';
 
 export type LoadModalProps = {
   open?: boolean;
@@ -20,13 +19,6 @@ export type LoadModalProps = {
 
 export const PublishModal: FC<LoadModalProps> = ({ open = false, onClose, graphJson, modelFile }) => {
   const { cid, saveSceneToIpfs, saving: savingToIpfs } = useSaveSceneToIpfs({ modelFile, behaviorGraph: graphJson });
-
-  // const [graphJsonString, setGraphJsonString] = useState<string | null>(null);
-
-  // useEffect(() => {
-  //   if (!graphJson) return;
-  //   setGraphJsonString(JSON.stringify(graphJson, null, 2));
-  // }, [graphJson]);
 
   const [startMinting, setStartMinting] = useState(false);
 

@@ -6,7 +6,7 @@ import { ipfsUrlToCid } from './ipfs/ipfsUrlUtils';
 import { GraphJSON } from '@oveddan-behave-graph/core';
 import { abi } from '../contracts/abi';
 
-const useLoadOnChainWorld = (tokenId: number, contractAddress: `0x${string}`) => {
+export const useLoadOnChainWorld = (tokenId: number, contractAddress: `0x${string}`) => {
   const tokenIdArgs = useMemo((): [BigNumber] => [BigNumber.from(tokenId)], [tokenId]);
 
   const { data: tokenURI } = useContractRead({
@@ -39,5 +39,3 @@ const useLoadOnChainWorld = (tokenId: number, contractAddress: `0x${string}`) =>
     graphJson,
   };
 };
-
-export default useLoadOnChainWorld;

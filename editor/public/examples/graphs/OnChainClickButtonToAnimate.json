@@ -10,7 +10,7 @@
     },
     {
       "id": "85c96bd9-12ab-4359-88f1-3554fffcfe91",
-      "type": "chain/trigger",
+      "type": "chain/invokeAction",
       "metadata": {
         "positionX": "-616.5075071386531",
         "positionY": "-570.9137043599102"

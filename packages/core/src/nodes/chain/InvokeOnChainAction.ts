@@ -3,7 +3,7 @@ import { IChainGraph } from '../../abstractions';
 import { ChainNodeTypes, ChainValueType, makeChainSocketMapping } from './IChainNode';
 import { chainGraphDependencyKey } from './OnChainVariableGet';
 
-export const externalTriggerNodeTypeName = 'chain/action';
+export const externalTriggerNodeTypeName = 'chain/invokeAction';
 
 /**
  * Interface to the outside world from the on-chain graph; Allows for invoking the graph from the outside.

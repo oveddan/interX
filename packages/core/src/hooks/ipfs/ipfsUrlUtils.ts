@@ -1,6 +1,3 @@
-import { useEffect, useState } from 'react';
-import { FileLocationKindLocal, FileLocationLocal, SceneFilesLocal, FileReference, Optional } from './types';
-
 function convertURIToHTTPSInner({ url, ipfsHost = 'https://ipfs.io' }: { url: string | undefined; ipfsHost?: string }) {
   if (!url) return undefined;
   if (url.startsWith('ipfs://')) {
