@@ -21,6 +21,7 @@ import {
 } from '@oveddan-behave-graph/flow';
 import { suspend } from 'suspend-react';
 import { exampleBehaveGraphFileUrl, fetchBehaviorGraphJson } from './hooks/useSaveAndLoad';
+import { ReactFlowProvider } from 'reactflow';
 
 const [initialModelFile, initialBehaviorGraph] = examplePairs[0];
 
@@ -78,6 +79,7 @@ function EditorAndScene({ web3Enabled }: { web3Enabled?: boolean }) {
   const flowEditor = specJson && (
     <Flow
       nodes={nodes}
+      // @ts-ignore
       onNodesChange={onNodesChange}
       edges={edges}
       onEdgesChange={onEdgesChange}
@@ -104,7 +106,9 @@ function EditorAndScene({ web3Enabled }: { web3Enabled?: boolean }) {
 function EditorAndSceneWrapper(props: { web3Enabled?: boolean }) {
   return (
     <Suspense fallback={null}>
-      <EditorAndScene {...props} />
+      <ReactFlowProvider>
+        <EditorAndScene {...props} />
+      </ReactFlowProvider>
     </Suspense>
   );
 }
