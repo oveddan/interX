@@ -6,7 +6,7 @@ import {
   Socket,
   SocketNames,
   SocketsDefinition,
-} from '@behave-graph/core';
+} from '@oveddan-behave-graph/core';
 import { ExtractAbiFunction, AbiParametersToPrimitiveTypes } from 'abitype';
 import {
   CounterSocketIndecesStruct,

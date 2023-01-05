@@ -1,4 +1,4 @@
-import { IScene } from '@behave-graph/core';
+import { IScene } from '@oveddan-behave-graph/core';
 
 type IntVariableHandler = (value: bigint) => void;
 

@@ -12,7 +12,7 @@ import useEngine from './hooks/useEngine';
 import Flow from './flowEditor/FlowEditorApp';
 import SplitEditor from './SplitEditor';
 import { examplePairs } from './flowEditor/components/LoadModal';
-import { registerSceneProfile, registerSceneDependency, IRegistry } from '@behave-graph/core';
+import { registerSceneProfile, registerSceneDependency, IRegistry } from '@oveddan-behave-graph/core';
 import { useScene } from './scene/useSceneModifier';
 import { registerChainGraphProfile } from '@blocktopia/core';
 import { useRegisterDependency } from './hooks/useRegisterDependency';

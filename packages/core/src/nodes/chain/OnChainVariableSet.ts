@@ -1,4 +1,4 @@
-import { makeFlowNodeDefinition, NodeCategory } from '@behave-graph/core';
+import { makeFlowNodeDefinition, NodeCategory } from '@oveddan-behave-graph/core';
 import { ChainNodeTypes, ChainValueType, makeChainSocketMapping } from './IChainNode';
 
 export const chainVariableSet = makeFlowNodeDefinition({
@@ -14,6 +14,7 @@ export const chainVariableSet = makeFlowNodeDefinition({
   in: {
     flow: 'flow',
     value: 'integer',
+    variableId: 'number',
   },
   out: {},
   triggered: () => {

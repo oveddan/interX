@@ -30,8 +30,6 @@ export const dataUrlFromFile = async (file: File) => {
   }
 };
 
-export const publicUrl = (path: string) => new URL(path, import.meta.url).href;
-
 export const emptyGraphJson = (): GraphJSON => ({});
 
 export type ModelFile =

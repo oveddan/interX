@@ -17,7 +17,7 @@
     "test-watch": "yarn test --watch"
   },
   "dependencies": {
-    "@behave-graph/core": "^0.9.13",
+    "@oveddan-behave-graph/core": "^0.0.1",
     "ethers": "^5.7.2",
     "react": "^18.2.0",
     "wagmi": "^0.8.10"

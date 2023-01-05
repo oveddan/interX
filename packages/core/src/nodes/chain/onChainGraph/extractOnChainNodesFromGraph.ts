@@ -1,4 +1,4 @@
-import { GraphJSON, NodeJSON, NodeParameterJSON, NodeParameterValueJSON } from '@behave-graph/core';
+import { GraphJSON, NodeJSON, NodeParameterJSON, NodeParameterValueJSON } from '@oveddan-behave-graph/core';
 import { IChainGraph } from '../../../abstractions';
 import {
   ChainEdgeNodeDefinition,

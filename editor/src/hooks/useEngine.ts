@@ -5,7 +5,7 @@ import {
   ILifecycleEventEmitter,
   readGraphFromJSON,
   Registry,
-} from '@behave-graph/core';
+} from '@oveddan-behave-graph/core';
 import { useCallback, useEffect, useState } from 'react';
 
 const useEngine = ({

@@ -11,7 +11,7 @@ import {
   NodeParameterJSON,
   NodeParameterLinkJSON,
   NodeParametersJSON,
-} from 'packages/core/.yalc/@behave-graph/core/dist/behave-graph-core.cjs';
+} from 'packages/core/.yalc/@oveddan-behave-graph/core/dist/behave-graph-core.cjs';
 
 const makeFlowsNodeJson = <TOut extends SocketsDefinition, TIn extends SocketsDefinition>({
   flows,

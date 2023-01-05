@@ -1,4 +1,4 @@
-import { IRegistry } from '@behave-graph/core';
+import { IRegistry } from '@oveddan-behave-graph/core';
 import { useEffect } from 'react';
 
 export const useRegisterDependency = (

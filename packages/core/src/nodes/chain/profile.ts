@@ -1,4 +1,4 @@
-import { IRegistry, Registry } from '@behave-graph/core';
+import { IRegistry, Registry } from '@oveddan-behave-graph/core';
 import { IChainGraph } from '../../abstractions';
 import { OnChainCounter } from './OnChainCounter';
 import { chainGraphDependencyKey, OnChainVariableGet } from './OnChainVariableGet';

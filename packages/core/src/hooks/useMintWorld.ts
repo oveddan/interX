@@ -1,8 +1,8 @@
 import { GraphJSON } from '@oveddan-behave-graph/core';
 import { useEffect, useState } from 'react';
 import { usePrepareContractWrite, useContractWrite, useContractEvent, useContractRead } from 'wagmi';
-import { abi } from '@blocktopia/core';
-import { SafeMintInputs, SocketIndecesByNodeType, generateOnChainNodesFromGraph } from '@blocktopia/core';
+import { abi } from '../contracts/abi';
+import { generateOnChainNodesFromGraph, SafeMintInputs, SocketIndecesByNodeType } from '../nodes';
 
 /** Generates arguments to mint a world.  Converts the graph definition to on-chain nodes and edges. */
 const toMintArgs = ({
@@ -25,7 +25,13 @@ const toMintArgs = ({
 
   return result;
 };
-const useWaitForMintedTokenWithContentUri = ({ contractAddress, cid }: { contractAddress: string; cid: string }) => {
+const useWaitForMintedTokenWithContentUri = ({
+  contractAddress,
+  cid,
+}: {
+  contractAddress: `0x${string}`;
+  cid: string;
+}) => {
   const [mintedTokenId, setMintedTokenId] = useState<number | null>(null);
 
   useContractEvent({
@@ -43,12 +49,12 @@ const useWaitForMintedTokenWithContentUri = ({ contractAddress, cid }: { contrac
   return mintedTokenId;
 };
 
-const useMintWorld = ({
+export const useMintWorld = ({
   worldCid,
   contractAddress,
   behaviorGraph,
 }: {
-  contractAddress: string;
+  contractAddress: `0x${string}`;
   worldCid: string;
   behaviorGraph: GraphJSON;
 }) => {
@@ -106,5 +112,3 @@ const useMintWorld = ({
 };
 
 export type MintWorldReturn = ReturnType<typeof useMintWorld>;
-
-export default useMintWorld;
