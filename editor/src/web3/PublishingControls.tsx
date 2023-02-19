@@ -30,12 +30,14 @@ const PublishingControls = ({
         <ChainIcon />
       </ControlButton>
 
-      <PublishModal
-        open={publishingModalOpen}
-        onClose={() => setPublishModalOpen(false)}
-        graphJson={graphJson}
-        modelFile={modelFile}
-      />
+      {graphJson && (
+        <PublishModal
+          open={publishingModalOpen}
+          onClose={() => setPublishModalOpen(false)}
+          graphJson={graphJson}
+          modelFile={modelFile}
+        />
+      )}
     </>
   );
 };

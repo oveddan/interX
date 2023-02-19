@@ -1,7 +1,7 @@
 import { NodeSpecJSON } from '@behave-graph/core';
 import { useEffect, useState } from 'react';
 import { NodeTypes, Node, OnConnectStartParams } from 'reactflow';
-import { ISceneWithQueries } from '../../abstractions';
+import { ISceneWithQueries } from '../../../../packages/core/src/abstractions';
 import { NodePickerFilters } from '../components/NodePicker';
 import getCustomNodeTypes from '../util/getCustomNodeTypes';
 import { getNodePickerFilters } from '../util/getPickerFilters';

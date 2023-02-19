@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "target": "es6",
-    "lib": ["es2019", "dom"],
+    "target": "ESNext",
+    "lib": ["es2020", "dom"],
     "module": "commonjs",
     "moduleResolution": "node",
     "esModuleInterop": true,
@@ -10,11 +10,12 @@
     "strict": true,
     "skipLibCheck": true,
     "declaration": true,
-    "removeComments": true,
+    "removeComments": false,
     "emitDeclarationOnly": true,
     "resolveJsonModule": true,
     "noImplicitThis": false,
-    "baseUrl": "./"
+    "baseUrl": "./",
+    "types": ["mocha"]
   },
   "include": ["packages/**/*"],
   "exclude": ["node_modules", "dist"]

@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { chain } from 'wagmi';
 import { useAccount } from 'wagmi';
-import addresses from '../contracts/addresses.json';
+import { contractAddresses } from '@blocktopia/core';
 import { buildSkaleChain } from './client';
 
-const getContractAddress = (chainId: number): string => {
+const getContractAddress = (chainId: number): `0x${string}` => {
   const skaleChain = buildSkaleChain();
   const chains = [...Object.values(chain), skaleChain];
 
@@ -24,7 +24,7 @@ const getContractAddress = (chainId: number): string => {
     chainName = 'mumbai';
   }
 
-  const genericAddresses = addresses as { [address: string]: string };
+  const genericAddresses = contractAddresses as { [address: string]: `0x${string}` };
 
   if (!genericAddresses[chainName]) throw new Error(`contract not deployed for chain ${chainName}`);
 
@@ -34,7 +34,7 @@ const getContractAddress = (chainId: number): string => {
 const useTokenContractAddress = () => {
   const { connector: activeConnector, isConnected } = useAccount();
 
-  const [contractAddress, setContractAddress] = useState<string | null>(null);
+  const [contractAddress, setContractAddress] = useState<`0x${string}` | null>(null);
 
   useEffect(() => {
     (async () => {

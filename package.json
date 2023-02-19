@@ -1,5 +1,5 @@
 {
-  "name": "@behavior-graph/monorepo",
+  "name": "@blocktopia/monorepo",
   "version": "0.0.1",
   "description": "On-chain metaverse behavior graph builder",
   "private": true,
@@ -8,27 +8,28 @@
     "graph",
     "flow"
   ],
-  "homepage": "http://github.com/bhouston/behave-graph",
+  "homepage": "http://github.com/oveddan/blocktopia",
   "author": "behave-graph authors",
   "bugs": {
-    "url": "https://github.com/bhouston/behave-graph/issues"
+    "url": "https://github.com/oveddan/blocktopia/issues"
   },
   "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "https://github.com/bhouston/behave-graph"
+    "url": "https://github.com/oveddan/blocktopia"
   },
   "devDependencies": {
-    "@openzeppelin/contracts": "^4.7.3",
-    "@preconstruct/cli": "^2.2.2",
-    "@typechain/ethers-v5": "^10.1.1",
-    "@typechain/hardhat": "^6.1.4",
     "@babel/core": "^7.17.10",
     "@babel/preset-env": "^7.17.10",
     "@babel/preset-react": "^7.16.7",
     "@babel/preset-typescript": "^7.16.7",
+    "@openzeppelin/contracts": "^4.7.3",
+    "@preconstruct/cli": "^2.2.2",
+    "@typechain/ethers-v5": "^10.1.1",
+    "@typechain/hardhat": "^6.1.4",
     "dotenv": "^16.0.3",
     "prettier": "^2.7.1",
+    "prettier-plugin-solidity": "^1.0.0",
     "ts-node": ">=8.0.0",
     "typechain": "^8.1.1",
     "typescript": ">=4.5.0"
@@ -37,11 +38,17 @@
     "undici": "5.5.1"
   },
   "scripts": {
-    "build-editor": "yarn workspace @behavior-graph/editor build",
+    "build-editor": "yarn workspace @blocktopia/editor build",
     "chain": "npx hardhat node",
     "compile": "npx hardhat compile",
-    "test": "npx hardhat test",
-    "start": "yarn workspace @behavior-graph/editor dev",
+    "recompile": "rm -r cache && rm -r artifacts && rm -r typechain-types && yarn compile",
+    "test": "yarn test-core && yarn test-contract",
+    "test-core": "yarn workspace @blocktopia/core test",
+    "test-contract": "npx hardhat test",
+    "build": "preconstruct build",
+    "dev": "preconstruct dev",
+    "postinstall": "preconstruct dev",
+    "start": "yarn workspace @blocktopia/editor dev",
     "lint": "npx eslint \"src/**/*.{ts,json}\"",
     "lint:fix": "npm run lint -- --fix",
     "exec-graph": "cd framework && yarn exec-graph",
@@ -57,7 +64,7 @@
   ],
   "preconstruct": {
     "packages": [
-      "editor"
+      "packages/*"
     ]
   }
 }

@@ -1,0 +1,178 @@
+{
+  "nodes": [
+    {
+      "id": "95fbb61d-5331-4c4e-935c-3b69f7b8bc3d",
+      "type": "chain/intVariableGet",
+      "metadata": {
+        "positionX": "33.885925349863555",
+        "positionY": "-577.5140747355053"
+      }
+    },
+    {
+      "id": "85c96bd9-12ab-4359-88f1-3554fffcfe91",
+      "type": "chain/invokeAction",
+      "metadata": {
+        "positionX": "-616.5075071386531",
+        "positionY": "-570.9137043599102"
+      },
+      "flows": {
+        "flow": {
+          "nodeId": "8e7f6b70-8d0c-45be-81dd-ad0014209dbc",
+          "socket": "flow"
+        }
+      }
+    },
+    {
+      "id": "85c96bd9-12ab-4359-88f1-3554fffcfe90",
+      "type": "chain/intVariableSet",
+      "metadata": {
+        "positionX": "-163.15091375180901",
+        "positionY": "-585.4948388660762"
+      },
+      "parameters": {
+        "value": {
+          "link": {
+            "nodeId": "8e7f6b70-8d0c-45be-81dd-ad0014209dbc",
+            "socket": "count"
+          }
+        }
+      }
+    },
+    {
+      "id": "8e7f6b70-8d0c-45be-81dd-ad0014209dbc",
+      "type": "chain/counter",
+      "metadata": {
+        "positionX": "-390.5852030032349",
+        "positionY": "-583.9195282889922"
+      },
+      "flows": {
+        "flow": {
+          "nodeId": "85c96bd9-12ab-4359-88f1-3554fffcfe90",
+          "socket": "flow"
+        }
+      }
+    },
+    {
+      "id": "d71ccb9c-0fea-4ce9-bf92-a31485e9b5a6",
+      "type": "scene/set/color",
+      "metadata": {
+        "positionX": "184.79620709295074",
+        "positionY": "18.913444261875217"
+      },
+      "parameters": {
+        "jsonPath": {
+          "value": "materials/2/color"
+        },
+        "value": {
+          "link": {
+            "nodeId": "5394babc-dcc0-4735-9daf-465c73a66e80",
+            "socket": "result"
+          }
+        }
+      }
+    },
+    {
+      "id": "5394babc-dcc0-4735-9daf-465c73a66e80",
+      "type": "math/toColor/rgb",
+      "metadata": {
+        "positionX": "-145.20682021207682",
+        "positionY": "90.16020188760152"
+      },
+      "parameters": {
+        "g": {
+          "value": ".9"
+        }
+      }
+    },
+    {
+      "id": "267d676e-79d4-49e5-9be8-c7dd8b157f00",
+      "type": "math/toColor/rgb",
+      "metadata": {
+        "positionX": "-140.0557507122972",
+        "positionY": "344.03584956239894"
+      },
+      "parameters": {
+        "r": {
+          "value": ".9"
+        }
+      }
+    },
+    {
+      "id": "98da1b8b-b49e-489d-80ff-24ce601ac0c0",
+      "type": "scene/set/color",
+      "metadata": {
+        "positionX": "181.70354627203167",
+        "positionY": "272.5116315772409"
+      },
+      "parameters": {
+        "jsonPath": {
+          "value": "materials/2/color"
+        },
+        "value": {
+          "link": {
+            "nodeId": "267d676e-79d4-49e5-9be8-c7dd8b157f00",
+            "socket": "result"
+          }
+        }
+      }
+    },
+    {
+      "id": "d326d57f-198b-41e8-9d2b-182130f1398f",
+      "type": "flow/flipFlop",
+      "metadata": {
+        "positionX": "-160.18432779493156",
+        "positionY": "-340.6752730499105"
+      },
+      "flows": {
+        "on": {
+          "nodeId": "d71ccb9c-0fea-4ce9-bf92-a31485e9b5a6",
+          "socket": "flow"
+        },
+        "off": {
+          "nodeId": "98da1b8b-b49e-489d-80ff-24ce601ac0c0",
+          "socket": "flow"
+        }
+      }
+    },
+    {
+      "id": "85179702-7634-4cf5-95ca-5908224cd4f0",
+      "type": "scene/nodeClick",
+      "metadata": {
+        "positionX": "-805.9050665431862",
+        "positionY": "-239.26637596237106"
+      },
+      "parameters": {
+        "jsonPath": {
+          "value": "nodes/2"
+        }
+      },
+      "flows": {
+        "flow": {
+          "nodeId": "85c96bd9-12ab-4359-88f1-3554fffcfe91",
+          "socket": "flow"
+        }
+      }
+    },
+    {
+      "id": "fcb81837-650c-42fb-a708-236f2ee64abc",
+      "type": "scene/set/boolean",
+      "metadata": {
+        "positionX": "174.3147945277493",
+        "positionY": "-187.0779606350799"
+      },
+      "parameters": {
+        "jsonPath": {
+          "value": "animations/0/playing"
+        },
+        "value": {
+          "link": {
+            "nodeId": "d326d57f-198b-41e8-9d2b-182130f1398f",
+            "socket": "isOn"
+          }
+        }
+      }
+    }
+  ],
+  "variables": [],
+  "customEvents": []
+}

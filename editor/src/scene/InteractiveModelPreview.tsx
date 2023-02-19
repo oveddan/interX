@@ -1,26 +1,32 @@
 import { useEffect, useState } from 'react';
-import { GraphJSON } from '@behave-graph/core';
+import { GraphJSON, registerSceneDependency } from '@behave-graph/core';
 import { useGLTF } from '@react-three/drei';
-import useLoadSceneAndRegistry from '../hooks/useLoadSceneAndRegistry';
-import useMockSmartContractActions from '../onChainWorld/useMockSmartContractActions';
 import Scene from './Scene';
 import { dataUrlFromFile } from '../hooks/useSaveAndLoad';
-import { useSceneModificationEngine } from '../hooks/behaviorFlow';
+import { registerChainGraphDepenency, useMockSmartContractActions } from '@blocktopia/core';
+import { useScene } from './useSceneModifier';
+import { useRegisterDependency } from '../hooks/useRegisterDependency';
+import { registerChainGraphProfiles } from '../EditorAndScene';
+import { useGraphRunner, useRegisterCoreProfileAndOthers } from '@behave-graph/flow';
 
 const Inner = ({ fileDataUrl, graphJson }: { fileDataUrl: string; graphJson: GraphJSON }) => {
   const gltf = useGLTF(fileDataUrl);
   const smartContractActions = useMockSmartContractActions();
 
-  const { animations, sceneOnClickListeners, lifecyleEmitter, registry } = useLoadSceneAndRegistry({
-    gltf,
-    smartContractActions,
+  const { scene, animations, sceneOnClickListeners } = useScene(gltf);
+
+  const { registry, lifecyleEmitter } = useRegisterCoreProfileAndOthers({
+    otherRegisters: registerChainGraphProfiles,
   });
 
-  useSceneModificationEngine({
+  useRegisterDependency(registry?.dependencies, smartContractActions, registerChainGraphDepenency);
+  useRegisterDependency(registry?.dependencies, scene, registerSceneDependency);
+
+  useGraphRunner({
     graphJson,
     registry,
     eventEmitter: lifecyleEmitter,
-    run: true,
+    autoRun: true,
   });
 
   return <Scene gltf={gltf} onClickListeners={sceneOnClickListeners} animationsState={animations} />;

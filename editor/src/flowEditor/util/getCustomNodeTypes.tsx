@@ -1,9 +1,9 @@
 import { NodeSpecJSON } from '@behave-graph/core';
 import { NodeTypes } from 'reactflow';
-import { IScene } from '../../abstractions';
 import { Node } from '../components/Node';
+import { ISceneWithQueries } from '@blocktopia/core';
 
-const getCustomNodeTypes = (allSpecs: NodeSpecJSON[], scene: IScene) => {
+const getCustomNodeTypes = (allSpecs: NodeSpecJSON[], scene: ISceneWithQueries) => {
   return allSpecs.reduce((nodes, node) => {
     nodes[node.type] = (props) => (
       <Node spec={node} allSpecs={allSpecs} {...props} getProperties={scene.getProperties} />

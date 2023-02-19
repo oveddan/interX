@@ -1,0 +1,36 @@
+{
+  "name": "@blocktopia/core",
+  "version": "0.0.1",
+  "description": "",
+  "source": "src/index.ts",
+  "main": "dist/blocktopia-core.cjs.js",
+  "module": "dist/blocktopia-core.esm.js",
+  "types": "dist/blocktopia-core.cjs.d.ts",
+  "sideEffects": false,
+  "preconstruct": {
+    "entrypoints": [
+      "index.ts"
+    ]
+  },
+  "scripts": {
+    "test": "mocha --require ts-node/register --require tsconfig-paths/register --recursive 'src/**/*.test.ts'",
+    "test-watch": "yarn test --watch"
+  },
+  "dependencies": {
+    "@behave-graph/core": "^0.0.1",
+    "web3.storage": "^4.4.0"
+  },
+  "author": "",
+  "license": "ISC",
+  "peerDependencies": {
+    "ethers": "^5.7.2",
+    "react": "^18.2.0",
+    "wagmi": "^0.8.10"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.3.4",
+    "@types/mocha": "^10.0.1",
+    "chai": "^4.3.7",
+    "mocha": "^10.2.0"
+  }
+}

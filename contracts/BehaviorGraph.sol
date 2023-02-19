@@ -1,126 +1,236 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import '@openzeppelin/contracts/token/ERC721/ERC721.sol';
-import '@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol';
-import '@openzeppelin/contracts/access/Ownable.sol';
-import '@openzeppelin/contracts/utils/Counters.sol';
+import 'hardhat/console.sol';
+
+import './Interfaces.sol';
+import './Nodes.sol';
+import './NodeState.sol';
 
 enum NodeType {
-    Action,
-    DataSource
+  ExternalInvoke,
+  Counter,
+  Add,
+  Gate,
+  VariableSet
 }
 
-struct TokenGateRule {
-    bool active;
-    address tokenContract;
+struct NodeDefinition {
+  string id;
+  NodeType nodeType;
+  bool defined;
+  // will only be set if this is a variable
+  ValueType inputValueType;
 }
 
-
-struct Node {
-    string id;
-    NodeType nodeType;
-    TokenGateRule tokenGateRule;
+struct NodeConfig {
+  uint8 variableId;
+  uint8 invocationId;
+  bool invocationNameDefined;
+  bool variableIdDefined;
 }
 
-contract BehaviorGraph is ERC721, ERC721URIStorage, Ownable {
-    using Counters for Counters.Counter;
+struct NodeDefinitionAndValues {
+  NodeDefinition definition;
+  InitialValues initialValues;
+  NodeConfig config;
+}
 
-    mapping(uint256 => mapping(string => Node)) private _tokenNodes;
-    mapping(uint256 => mapping(string => uint256)) private _tokenNodeEmitCount;
+struct EdgeDefinition {
+  string fromNode;
+  string toNode;
+  uint8 fromSocket;
+  uint8 toSocket;
+}
 
-    Counters.Counter private _nodeCounter;
+struct EdgeToNode {
+  uint16 toNode;
+  uint8 toSocket;
+  bool set;
+}
 
-    Counters.Counter private _tokenIdCounter;
+contract BehaviorGraph is NodeState, HasVariables, IBehaviorGraph {
+  uint256 private _id;
+  mapping(string => uint16) private _nodeIndeces;
+  // edges between nodes, indexed by token id, node index, and socket index
+  mapping(uint16 => mapping(uint8 => EdgeToNode)) private _tokenEdges;
 
-    event SafeMint(uint256 tokenId, address to, string uri, Node[] nodes);
+  // node node definition, mapped by node index and token id
+  mapping(uint16 => NodeType) private _nodeTypes;
+  mapping(uint16 => ValueType) private _inputValueTypes;
+  mapping(uint16 => uint8) private _nodeVariableIds;
+  mapping(uint8 => uint16) private _invocationNodes;
 
-    error InvalidActionId(string nodeId);
-    error MissingTokens(string nodeId, address tokenAddress);
+  error InvalidActionId(uint16 nodeId);
+  error CannotTriggerExternally(uint16 nodeId);
 
-    event ActionExecuted(address executor, uint256 tokenId, string actionId, uint256 count);
+  SocketIndecesByNodeType private _socketIndecesByNodeType;
 
-    constructor() ERC721("MyToken", "MTK") {}
+  constructor(
+    uint256 id,
+    NodeDefinitionAndValues[] memory _nodes,
+    EdgeDefinition[] memory _edges,
+    SocketIndecesByNodeType memory socketIndecesByNodeType
+  ) {
+    _socketIndecesByNodeType = socketIndecesByNodeType;
+    _id = id;
 
-    function _baseURI() internal pure override returns (string memory) {
-        return "ipfs://";
+    // for each node definition and values, create a node and set the initial values
+    for (uint16 nodeIndex = 0; nodeIndex < _nodes.length; nodeIndex++) {
+      NodeDefinitionAndValues memory nodeAndValues = _nodes[nodeIndex];
+      NodeDefinition memory node = nodeAndValues.definition;
+      NodeType nodeType = node.nodeType;
+      NodeConfig memory nodeConfig = nodeAndValues.config;
+
+      _nodeIndeces[node.id] = nodeIndex;
+      _nodeTypes[nodeIndex] = nodeType;
+      _inputValueTypes[nodeIndex] = node.inputValueType;
+      if (nodeConfig.variableIdDefined) _nodeVariableIds[nodeIndex] = nodeConfig.variableId;
+      if (nodeConfig.invocationNameDefined) _invocationNodes[nodeConfig.invocationId] = nodeIndex;
+
+      _setInitialValues(nodeIndex, nodeAndValues.initialValues);
+
+      // store the indeces for the sockets, so that they can be mapped by int later.
+      // _setInputOutputNodeSocketIndeces(nodeType, node.inputSockets, node.outputSockets);
+    }
+    for (uint16 i = 0; i < _edges.length; i++) {
+      EdgeDefinition memory edge = _edges[i];
+
+      uint16 fromNode = _getNodeIndex(edge.fromNode);
+      uint16 toNode = _getNodeIndex(edge.toNode);
+      uint8 fromSocket = edge.fromSocket;
+
+      // get the to node type
+      uint8 toSocket = edge.toSocket;
+
+      _tokenEdges[fromNode][fromSocket] = EdgeToNode(toNode, toSocket, true);
+    }
+  }
+
+  function _getNodeIndex(string memory nodeId) private view returns (uint16) {
+    return _nodeIndeces[nodeId];
+  }
+
+  function _getNodeType(uint16 nodeIndex) private view returns (NodeType) {
+    return _nodeTypes[nodeIndex];
+  }
+
+  function getNodeStateVal(uint16 _nodeId, string memory _stateVar) external view returns (int256) {
+    return _getNodeStateVal(_nodeId, _stateVar);
+  }
+
+  function setNodeIntStateVal(uint16 _nodeId, string memory _stateVar, int256 val) external {
+    _setNodeIntStateVal(_nodeId, _stateVar, val);
+  }
+
+  function writeToOutput(uint16 _nodeId, uint8 _socketId, int256 val) external {
+    _writeToIntOutput(_nodeId, _socketId, val);
+  }
+
+  function getBoolInputVal(uint16 _nodeId, uint8 _socketName) external view returns (bool) {
+    return _getBoolInputVal(_nodeId, _socketName);
+  }
+
+  function getInputValueType(uint16 _nodeId) external view returns (ValueType) {
+    return _inputValueTypes[_nodeId];
+  }
+
+  function getStringInputVal(uint16 _nodeId, uint8 _socketName) external view returns (string memory) {
+    return _getStringInputVal(_nodeId, _socketName);
+  }
+
+  function getIntInputVal(uint16 _nodeId, uint8 _socketName) external view returns (int256) {
+    return _getIntInputVal(_nodeId, _socketName);
+  }
+
+  function setVariable(uint8 variableId, int256 val) external {
+    _setVariable(variableId, val);
+  }
+
+  function setVariable(uint8 variableId, bool val) external {
+    _setVariable(variableId, val);
+  }
+
+  // function getSocketNames() public pure returns(SocketNames memory) {
+  //     return SocketNames(IN_OUT_SOCKET_A, IN_OUT_SOCKET_B, IN_OUT_SOCKET_RESULT, FLOW_SOCKET_NAME, GATE_TRUE_SOCKET_NAME, GATE_FALSE_SOCKET_NAME, VARIABLE_NAME_SOCKET);
+  // }
+
+  function _getEdge(uint16 _nodeId, uint8 _socketIndex) private view returns (EdgeToNode memory) {
+    EdgeToNode memory edge = _tokenEdges[_nodeId][_socketIndex];
+    return edge;
+  }
+
+  function triggerEdge(uint16 _nodeId, uint8 _socketIndex) external override returns (GraphUpdate[] memory) {
+    return _triggerEdge(_nodeId, _socketIndex);
+  }
+
+  function _triggerEdge(uint16 _nodeId, uint8 _socketIndex) private returns (GraphUpdate[] memory) {
+    EdgeToNode memory edge = _getEdge(_nodeId, _socketIndex);
+    // console.log("triggering edge to node: %i %i %b", edge.toNode, edge.toSocket, edge.set);
+    if (edge.set) {
+      return _triggerNode(edge.toNode, edge.toSocket);
     }
 
-    function safeMint(string memory sceneUri, Node[] calldata _nodes) public returns(uint256) {
-        uint256 tokenId = _tokenIdCounter.current();
-        _tokenIdCounter.increment();
-        address to = msg.sender;
-        _safeMint(to, tokenId);
-        _setTokenURI(tokenId, sceneUri);
-        _createNodes(tokenId, _nodes);
-        emit SafeMint(tokenId, to, sceneUri, _nodes);
-    
-        return tokenId;
+    return new GraphUpdate[](0);
+  }
+
+  function _writeToIntOutput(uint16 _nodeId, uint8 _socketId, int256 val) private {
+    // get the edge to the next node
+    EdgeToNode memory edge = _getEdge(_nodeId, _socketId);
+
+    // if the edge exists
+    if (edge.set) {
+      // write the node value to the input socket
+      _setInputVal(edge.toNode, edge.toSocket, val);
+
+      // if is an immediate node, exec it
+      _exec(edge.toNode);
+    }
+  }
+
+  function _exec(uint16 _nodeId) private {
+    NodeType nodeType = _getNodeType(_nodeId);
+    if (nodeType == NodeType.Add) {
+      // get the value from input a and input b
+      (new Add(_socketIndecesByNodeType.add)).execute(this, _nodeId);
+    }
+  }
+
+  function _isImmediateNode(uint16 _nodeId) private view returns (bool) {
+    NodeType nodeType = _getNodeType(_nodeId);
+    return nodeType == NodeType.Add;
+  }
+
+  function _triggerNode(uint16 _nodeId, uint8 _triggeringSocketIndex) internal returns (GraphUpdate[] memory) {
+    // get the node type
+    NodeType nodeType = _getNodeType(_nodeId);
+
+    ITriggerNode triggerNode;
+
+    if (nodeType == NodeType.Counter) {
+      triggerNode = new Counter(_socketIndecesByNodeType.counter);
+    } else if (nodeType == NodeType.Gate) {
+      triggerNode = new Gate(_socketIndecesByNodeType.gate);
+    } else if (nodeType == NodeType.VariableSet) {
+      uint8 variableId = _nodeVariableIds[_nodeId];
+      triggerNode = new VariableSet(_socketIndecesByNodeType.variableSet, variableId);
+    } else {
+      revert InvalidActionId(_nodeId);
     }
 
-    // The following functions are overrides required by Solidity.
-    function _burn(uint256 tokenId) internal override(ERC721, ERC721URIStorage) {
-        super._burn(tokenId);
+    return triggerNode.trigger(this, _nodeId, _triggeringSocketIndex);
+  }
+
+  function invoke(uint8 _invocationId) public returns (GraphUpdate[] memory) {
+    uint16 _nodeIndex = _invocationNodes[_invocationId];
+    NodeType _nodeType = _getNodeType(_nodeIndex);
+
+    // console.log("node id %s %i %i ",_nodeId, _nodeIndex, uint8(_nodeType));
+    if (_nodeType != NodeType.ExternalInvoke) {
+      revert CannotTriggerExternally(_nodeIndex);
     }
 
-    function tokenURI(uint256 tokenId)
-        public
-        view
-        override(ERC721, ERC721URIStorage)
-        returns (string memory)
-    {
-        return super.tokenURI(tokenId);
-    } 
-
-     function _createNodes(uint256 tokenId, Node[] calldata _nodes) private {
-        for(uint256 i = 0; i < _nodes.length; i++) {
-          Node calldata node = _nodes[i];
-          _tokenNodes[tokenId][node.id] = node;
-        }
-    }
-
-    function getNode(uint256 tokenId, string memory _nodeId) public view returns(Node memory) {
-        return _tokenNodes[tokenId][_nodeId];
-    }
-
-    function executeAction(uint256 tokenId, string calldata _nodeId) public {
-       Node memory node = getNode(tokenId, _nodeId);
-
-       _assertCanExecuteAction(node);
-    
-        uint256 actionCount = ++_tokenNodeEmitCount[tokenId][_nodeId];
-    
-        emit ActionExecuted(msg.sender, tokenId, _nodeId, actionCount);
-    }
-
-    function getActionCount(uint256 tokenId, string calldata _nodeId) public view returns(uint256) {
-        // uint256 numberElems = _nodeIds.length;
-        return _tokenNodeEmitCount[tokenId][_nodeId];
-    }
-
-    function getActionCounts(uint256 tokenId, string[] calldata _nodeIds) public view returns(uint256[] memory) {
-        // uint256 numberElems = _nodeIds.length;
-        uint256[] memory result = new uint256[](_nodeIds.length);
-        
-        for(uint256 i = 0; i < _nodeIds.length; i++) {
-            string memory _nodeId = _nodeIds[i];
-            uint256 count = _tokenNodeEmitCount[tokenId][_nodeId];
-            result[i] = count;
-        }
-        return result;
-    }
-
-    function _assertCanExecuteAction(Node memory node) private view {
-        if (!node.tokenGateRule.active) {
-            return;
-        }
-
-        ERC721 erc721Contract = ERC721(node.tokenGateRule.tokenContract);
-
-        uint256 balance = erc721Contract.balanceOf(msg.sender);
-
-        if (balance <= 0) {
-            revert MissingTokens(node.id, msg.sender);
-        }
-    }
+    // todo: rethink
+    return (new ExternalInvoke(_socketIndecesByNodeType.externalInvoke)).trigger(this, _nodeIndex, 0);
+  }
 }

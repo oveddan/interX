@@ -5,7 +5,7 @@ import { infuraProvider } from 'wagmi/providers/infura';
 import { publicProvider } from 'wagmi/providers/public';
 
 import { getDefaultWallets } from '@rainbow-me/rainbowkit';
-import contractAddresses from '../contracts/addresses.json';
+import { contractAddresses } from '@blocktopia/core';
 
 type ChainIds = keyof typeof contractAddresses;
 
@@ -29,7 +29,7 @@ const getAllowedChains = () =>
   (Object.keys(contractAddresses) as ChainIds[]).map((chainName) => {
     if (chainName === 'localhost') return chain.hardhat;
 
-    if (chainName === 'skale') return buildSkaleChain();
+    // if (chainName === 'skale') return buildSkaleChain();
 
     if (chainName === 'mumbai') return chain.polygonMumbai;
 

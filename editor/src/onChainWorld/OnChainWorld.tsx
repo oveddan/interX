@@ -1,38 +1,67 @@
-import { GraphJSON } from '@behave-graph/core';
+import { registerSceneDependency, IRegistry, registerSceneProfile } from '@behave-graph/core';
+
 import { useParams } from 'react-router-dom';
-import { useSceneModificationEngine } from '../hooks/behaviorFlow';
-import useLoadOnChainWorld from '../hooks/useLoadOnChainWorld';
-import useLoadSceneAndRegistry from '../hooks/useLoadSceneAndRegistry';
 import Web3Login from '../web3/Web3Login';
 import Scene from '../scene/Scene';
 import useTokenContractAddress from '../web3/useTokenContractAddress';
-import useSmartContractActions from './useSmartContractActions';
-import { ISmartContractActions } from '../abstractions';
+import useChainGraph from '@blocktopia/core/src/hooks/useChainGraph';
 import { useGLTF } from '@react-three/drei';
+import { useMemo } from 'react';
+import { registerChainGraphDepenency, registerChainGraphProfile } from '@blocktopia/core';
+import { useScene } from '../scene/useSceneModifier';
+import { useRegisterDependency } from '../hooks/useRegisterDependency';
+import { useGraphRunner, useRegisterCoreProfileAndOthers } from '@behave-graph/flow';
+import { useLoadOnChainWorld } from '@blocktopia/core';
+
+const LoadAndIntegrateOnChainWorldInner = ({
+  tokenId,
+  dependencies,
+  contractAddress,
+}: {
+  tokenId: number;
+  dependencies: IRegistry['dependencies'];
+  contractAddress: `0x${string}`;
+}) => {
+  const smartContractActions = useChainGraph(contractAddress, tokenId);
+
+  useRegisterDependency(dependencies, smartContractActions, registerChainGraphDepenency);
+
+  return null;
+};
+
+const LoadAndIntegrateOnChainWorld = ({
+  tokenId,
+  dependencies,
+}: {
+  tokenId: number;
+  dependencies: IRegistry['dependencies'] | undefined;
+}) => {
+  const contractAddress = useTokenContractAddress();
+
+  if (!contractAddress || !dependencies) return null;
+  return (
+    <LoadAndIntegrateOnChainWorldInner
+      tokenId={tokenId}
+      dependencies={dependencies}
+      contractAddress={contractAddress}
+    />
+  );
+};
 
 const OnChainWorld = ({
-  graphJson,
+  dependencies,
   sceneFileUrl,
-  smartContractActions,
   tokenId,
 }: {
-  graphJson: GraphJSON;
+  dependencies: IRegistry['dependencies'] | undefined;
   sceneFileUrl: string;
-  smartContractActions: ISmartContractActions;
   tokenId: number;
 }) => {
   const gltf = useGLTF(sceneFileUrl);
-  const { sceneOnClickListeners, registry, lifecyleEmitter, animations } = useLoadSceneAndRegistry({
-    smartContractActions,
-    gltf,
-  });
 
-  useSceneModificationEngine({
-    graphJson,
-    eventEmitter: lifecyleEmitter,
-    registry,
-    run: true,
-  });
+  const { scene, animations, sceneOnClickListeners } = useScene(gltf);
+
+  useRegisterDependency(dependencies, scene, registerSceneDependency);
 
   return (
     <>
@@ -59,28 +88,38 @@ const OnChainWorld = ({
   );
 };
 
-const OnChainWorldLoader = ({ tokenId, contractAddress }: { tokenId: number; contractAddress: string }) => {
+const OnChainWorldLoader = ({ tokenId, contractAddress }: { tokenId: number; contractAddress: `0x${string}` }) => {
   const { graphJson, sceneFileUrl } = useLoadOnChainWorld(tokenId, contractAddress);
 
-  const smartContractActions = useSmartContractActions(contractAddress, tokenId);
+  const registerProfiles = useMemo(() => [registerChainGraphProfile, registerSceneProfile], []);
 
-  if (!sceneFileUrl || !graphJson || !smartContractActions) return null;
+  const { registry, lifecyleEmitter } = useRegisterCoreProfileAndOthers({
+    otherRegisters: registerProfiles,
+  });
+
+  useGraphRunner({
+    graphJson,
+    registry,
+    eventEmitter: lifecyleEmitter,
+    autoRun: true,
+  });
+
+  if (!sceneFileUrl || !graphJson) return null;
+
+  const dependencies = registry?.dependencies;
 
   return (
-    <OnChainWorld
-      graphJson={graphJson}
-      sceneFileUrl={sceneFileUrl}
-      smartContractActions={smartContractActions}
-      tokenId={tokenId}
-    />
+    <>
+      <LoadAndIntegrateOnChainWorld tokenId={tokenId} dependencies={dependencies} />
+      <OnChainWorld sceneFileUrl={sceneFileUrl} tokenId={tokenId} dependencies={dependencies} />
+    </>
   );
 };
 const OnChainWorldWrapper = () => {
   const { tokenId } = useParams<{ tokenId: string }>();
-
   const contractAddress = useTokenContractAddress();
 
-  if (!contractAddress || !tokenId) return null;
+  if (!tokenId || !contractAddress) return null;
   return <OnChainWorldLoader tokenId={+tokenId} contractAddress={contractAddress} />;
 };
 

@@ -7,7 +7,10 @@ node-spec.json
 node-spec.csv
 yarn-error.log
 # hardhat things
+typechain-types
 cache
 artifacts
-typechain-types
 .env
+
+**/*/.yalc
+**/*/yalc.lock

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { parseJsonPath, Path, toJsonPathString } from '../../scene/useSceneModifier';
-import { ISceneWithQueries, ResourceTypes } from '../../abstractions';
+import { ISceneWithQueries, ResourceTypes } from '@blocktopia/core';
 
 const PathSelect = ({
   value,

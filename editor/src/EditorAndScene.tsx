@@ -1,62 +1,70 @@
-import { Suspense, useCallback } from 'react';
+import { Suspense } from 'react';
 import Scene from './scene/Scene';
 import '@rainbow-me/rainbowkit/styles.css';
-import useMockSmartContractActions from './onChainWorld/useMockSmartContractActions';
 import './styles/resizer.css';
 import Controls from './flowEditor/components/Controls';
 import Nav from './nav/Nav';
 import PublishingControls from './web3/PublishingControls';
-import useNodeSpecJson from './hooks/useNodeSpecJson';
-import useRegistry from './hooks/useRegistry';
 import useSetAndLoadModelFile, { exampleModelFileUrl } from './hooks/useSetAndLoadModelFile';
-import useBehaveGraphFlow, { exampleBehaveGraphFileUrl } from './hooks/useBehaveGraphFlow';
-import useEngine from './hooks/useEngine';
-import useSceneModifier from './scene/useSceneModifier';
 import Flow from './flowEditor/FlowEditorApp';
 import SplitEditor from './SplitEditor';
 import { examplePairs } from './flowEditor/components/LoadModal';
-import { Registry } from '@behave-graph/core';
-import useRegisterSmartContractActions from './onChainWorld/useRegisterSmartContractActions';
+import { registerSceneProfile, registerSceneDependency, IRegistry } from '@behave-graph/core';
+import { useScene } from './scene/useSceneModifier';
+import { registerChainGraphDepenency, registerChainGraphProfile, useMockSmartContractActions } from '@blocktopia/core';
+import { useRegisterDependency } from './hooks/useRegisterDependency';
+import {
+  useRegisterCoreProfileAndOthers,
+  useBehaveGraphFlow,
+  useGraphRunner,
+  useNodeSpecJson,
+} from '@behave-graph/flow';
+import { suspend } from 'suspend-react';
+import { exampleBehaveGraphFileUrl, fetchBehaviorGraphJson } from './hooks/useSaveAndLoad';
+import { ReactFlowProvider } from 'reactflow';
 
 const [initialModelFile, initialBehaviorGraph] = examplePairs[0];
 
 const initialModelFileUrl = exampleModelFileUrl(initialModelFile);
 const initialBehaviorGraphUrl = exampleBehaveGraphFileUrl(initialBehaviorGraph);
 
-function EditorAndScene({ web3Enabled }: { web3Enabled?: boolean }) {
-  const smartContractActions = useMockSmartContractActions();
-  const registerSmartContractActions = useRegisterSmartContractActions(smartContractActions);
+export const registerChainGraphProfiles: ((registry: Pick<IRegistry, 'nodes' | 'values'>) => void)[] = [
+  registerChainGraphProfile,
+  registerSceneProfile,
+];
 
+function EditorAndScene({ web3Enabled }: { web3Enabled?: boolean }) {
   const { modelFile, setModelFile, gltf } = useSetAndLoadModelFile({
     initialFileUrl: initialModelFileUrl,
   });
 
-  const { scene, animations, sceneOnClickListeners, registerSceneProfile } = useSceneModifier(gltf);
-
-  const registerProfiles = useCallback(
-    (registry: Registry) => {
-      registerSmartContractActions(registry);
-      registerSceneProfile(registry);
-    },
-    [registerSceneProfile, smartContractActions]
-  );
-
-  const { registry, lifecyleEmitter } = useRegistry({
-    registerProfiles,
+  const { registry, lifecyleEmitter } = useRegisterCoreProfileAndOthers({
+    otherRegisters: registerChainGraphProfiles,
   });
+
+  const { scene, animations, sceneOnClickListeners } = useScene(gltf);
+  useRegisterDependency(registry?.dependencies, scene, registerSceneDependency);
 
   const specJson = useNodeSpecJson(registry);
 
+  const initialGraphJson = suspend(async () => {
+    return await fetchBehaviorGraphJson(initialBehaviorGraphUrl);
+  }, []);
+
   const { nodes, edges, onNodesChange, onEdgesChange, graphJson, setGraphJson } = useBehaveGraphFlow({
-    initialGraphJsonUrl: initialBehaviorGraphUrl,
+    initialGraphJson,
     specJson,
   });
 
-  const { togglePlay, playing } = useEngine({
+  const { togglePlay, playing } = useGraphRunner({
     graphJson,
     registry,
     eventEmitter: lifecyleEmitter,
   });
+
+  const chainGraph = useMockSmartContractActions();
+
+  useRegisterDependency(registry?.dependencies, chainGraph, registerChainGraphDepenency);
 
   const web3Controls = web3Enabled ? <PublishingControls graphJson={graphJson} modelFile={modelFile?.file} /> : null;
 
@@ -74,6 +82,7 @@ function EditorAndScene({ web3Enabled }: { web3Enabled?: boolean }) {
   const flowEditor = specJson && (
     <Flow
       nodes={nodes}
+      // @ts-ignore
       onNodesChange={onNodesChange}
       edges={edges}
       onEdgesChange={onEdgesChange}
@@ -100,7 +109,9 @@ function EditorAndScene({ web3Enabled }: { web3Enabled?: boolean }) {
 function EditorAndSceneWrapper(props: { web3Enabled?: boolean }) {
   return (
     <Suspense fallback={null}>
-      <EditorAndScene {...props} />
+      <ReactFlowProvider>
+        <EditorAndScene {...props} />
+      </ReactFlowProvider>
     </Suspense>
   );
 }
